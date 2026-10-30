@@ -1,8 +1,8 @@
 {
-  "name": "hostkurd/flocms",
-  "description": "FloCMS is a light weight PHP Framework Developed by HostKurd",
+  "name": "hostkurd/fectumhellas",
+  "description": "FECTUM Hellas real estate website, built on FloCMS",
   "type": "project",
-  "license": "MIT",
+  "license": "proprietary",
 
   "autoload": {
     "psr-4": {

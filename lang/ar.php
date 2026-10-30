@@ -1,19 +1,22 @@
 <?php
 
 return array(
-    // Language Directives    
+    // Language Directives
     'lng.dir'=>'rtl',
-    'lng.ku'=>'الکردیة',
-    'lng.ar'=>'العربیة',
-    'lng.en'=>'انجلیزی',
+    'lng.en'=>'الإنجليزية',
+    'lng.ar'=>'العربية',
+    'lng.el'=>'اليونانية',
 
-    'website.title' => 'برنامج فلو',
-    'website.desc' => 'فلو هو إطار عمل PHP خفيف الوزن',
+    'website.title' => 'FECTUM Hellas',
+    'website.desc' => 'تطوير عقاري واستثمار في اليونان.',
     // 404 Page String
-    'page.notfound' => 'الصفحة غير موجودة',
-    'page.notfound.short' => 'الصفحة التي تحاول الوصول إليها غير موجودة',
+    'page.notfound' => '404 - الصفحة غير موجودة',
+    'page.notfound.short' => 'الصفحة التي تحاول الوصول إليها غير موجودة.',
     // 403 Page String
-    'page.forbidden' => 'تم رفض الوصول',
-    'page.forbidden.short' => 'ليس لديك صلاحية للوصول إلى هذه الصفحة.'
+    'page.forbidden' => '403 - تم رفض الوصول',
+    'page.forbidden.short' => 'ليس لديك صلاحية للوصول إلى هذه الصفحة.',
+    // Admin login
+    'auth.session_ended' => 'انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.',
+    'auth.throttled' => 'محاولات تسجيل دخول كثيرة جدًا. يرجى المحاولة مرة أخرى بعد :minutes دقيقة.',
     // Put Your Translation Phraces
 );

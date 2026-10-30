@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "82ea6e4ddecefb1025b0dca80f4d6d61",
+    "content-hash": "c9a1a1d297a88e92414870cc473a8376",
     "packages": [
         {
             "name": "hostkurd/flocms-admin",
