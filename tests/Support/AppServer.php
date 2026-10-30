@@ -1,0 +1,302 @@
+<?php
+declare(strict_types=1);
+
+namespace HostKurd\Flocms\Tests\Support;
+
+use RuntimeException;
+
+/**
+ * Runs a throw-away copy of the skeleton under PHP's built-in web server.
+ *
+ * The copy gets a fresh .env made from .env.example (like
+ * `composer create-project` does), so tests see what a new install sees.
+ * Environment variables passed to start() override .env values.
+ */
+final class AppServer
+{
+    private string $root;
+    /** @var resource|null */
+    private $process = null;
+    private int $port;
+    private string $cookieJar;
+
+    private function __construct()
+    {
+        $this->root = sys_get_temp_dir() . '/flocms-test-' . bin2hex(random_bytes(6));
+        $this->cookieJar = $this->root . '.cookies';
+    }
+
+    /** @param array<string, string> $env */
+    public static function start(array $env = [], ?callable $prepare = null): self
+    {
+        $server = new self();
+        $server->copySkeleton();
+
+        if ($prepare !== null) {
+            $prepare($server->root);
+        }
+
+        $server->launch($env);
+
+        return $server;
+    }
+
+    /**
+     * A copy with the API added as `php flo setup` adds it (`php flo api:install`).
+     * Skips the test when flocms-api isn't installed: since 2.0 the skeleton
+     * doesn't require it (CI's "API setup" job adds it).
+     *
+     * @param array<string, string> $env
+     */
+    public static function startWithApi(array $env = []): self
+    {
+        self::requireApi();
+
+        return self::start($env, static function (string $root): void {
+            $process = proc_open([PHP_BINARY, $root . '/flo', 'api:install', '--no-ansi'], [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, $root, self::baseEnvironment());
+            fclose($pipes[0]);
+            $output = stream_get_contents($pipes[1]) . stream_get_contents($pipes[2]);
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            if (proc_close($process) !== 0 || !is_file($root . '/public/api.php')) {
+                throw new RuntimeException('php flo api:install failed: ' . $output);
+            }
+        });
+    }
+
+    /** Skips the test unless flocms-api is installed. */
+    public static function requireApi(): void
+    {
+        if (!class_exists(\FloCMS\Api\Kernel::class)) {
+            \PHPUnit\Framework\Assert::markTestSkipped('flocms-api is not installed (composer require hostkurd/flocms-api).');
+        }
+    }
+
+    public function root(): string
+    {
+        return $this->root;
+    }
+
+    /**
+     * @param array<string, string>|string $data form fields (POST), or a raw body for any method
+     * @param array<string, string> $headers
+     * @return array{status: int, headers: array<string, string>, body: string}
+     */
+    public function request(string $method, string $path, array|string $data = [], array $headers = []): array
+    {
+        $ch = curl_init('http://127.0.0.1:' . $this->port . $path);
+        $headerLines = ['Host: localhost'];
+        foreach ($headers as $name => $value) {
+            $headerLines[] = $name . ': ' . $value;
+        }
+
+        curl_setopt_array($ch, [
+            CURLOPT_CUSTOMREQUEST => $method,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => true,
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_COOKIEJAR => $this->cookieJar,
+            CURLOPT_COOKIEFILE => $this->cookieJar,
+            CURLOPT_HTTPHEADER => $headerLines,
+            CURLOPT_TIMEOUT => 20,
+            CURLOPT_PROXY => '',
+            CURLOPT_NOPROXY => '*',
+        ]);
+
+        if (is_string($data)) {
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        } elseif ($method === 'POST') {
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+        }
+
+        $raw = curl_exec($ch);
+        if ($raw === false) {
+            throw new RuntimeException('Request failed: ' . curl_error($ch));
+        }
+
+        $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        $headerSize = (int) curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        curl_close($ch);
+
+        $parsed = [];
+        foreach (explode("\r\n", substr($raw, 0, $headerSize)) as $line) {
+            if (str_contains($line, ':')) {
+                [$name, $value] = explode(':', $line, 2);
+                $parsed[strtolower(trim($name))] = trim($value);
+            }
+        }
+
+        return ['status' => $status, 'headers' => $parsed, 'body' => substr($raw, $headerSize)];
+    }
+
+    /** @return array{status: int, headers: array<string, string>, body: string} */
+    public function get(string $path): array
+    {
+        return $this->request('GET', $path);
+    }
+
+    /**
+     * Send a JSON body.
+     *
+     * @param array<string, mixed> $data
+     * @param array<string, string> $headers
+     * @return array{status: int, headers: array<string, string>, body: string}
+     */
+    public function json(string $method, string $path, array $data, array $headers = []): array
+    {
+        return $this->request($method, $path, (string) json_encode($data), $headers + ['Content-Type' => 'application/json']);
+    }
+
+    /**
+     * Run `php flo ...` in this copy of the skeleton.
+     *
+     * @param list<string> $arguments
+     * @param array<string, string> $env
+     * @param string $stdin text written to the command's STDIN
+     * @return array{exit: int, output: string}
+     */
+    public function flo(array $arguments, array $env = [], string $stdin = ''): array
+    {
+        $process = proc_open(
+            [PHP_BINARY, $this->root . '/flo', ...$arguments],
+            [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
+            $pipes,
+            $this->root,
+            array_merge(self::baseEnvironment(), $env)
+        );
+        fwrite($pipes[0], $stdin);
+        fclose($pipes[0]);
+        $output = stream_get_contents($pipes[1]) . stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+
+        return ['exit' => proc_close($process), 'output' => (string) $output];
+    }
+
+    public function forgetCookies(): void
+    {
+        @unlink($this->cookieJar);
+    }
+
+    public function stop(): void
+    {
+        if (is_resource($this->process)) {
+            proc_terminate($this->process);
+            proc_close($this->process);
+        }
+        $this->process = null;
+
+        self::removeDirectory($this->root);
+        @unlink($this->cookieJar);
+    }
+
+    public function __destruct()
+    {
+        $this->stop();
+    }
+
+    private function copySkeleton(): void
+    {
+        $source = dirname(__DIR__, 2);
+        mkdir($this->root, 0777, true);
+
+        foreach (scandir($source) ?: [] as $entry) {
+            if (in_array($entry, ['.', '..', '.git', '.env', 'tests', '.phpunit.cache'], true)) {
+                continue;
+            }
+
+            if ($entry === 'vendor') {
+                symlink($source . '/vendor', $this->root . '/vendor');
+                continue;
+            }
+
+            self::copy($source . '/' . $entry, $this->root . '/' . $entry);
+        }
+
+        copy($source . '/.env.example', $this->root . '/.env');
+        @mkdir($this->root . '/storage/logs', 0777, true);
+    }
+
+    /** @param array<string, string> $env */
+    private function launch(array $env): void
+    {
+        $socket = stream_socket_server('tcp://127.0.0.1:0');
+        $name = stream_socket_get_name($socket, false);
+        fclose($socket);
+        $this->port = (int) substr((string) $name, strrpos((string) $name, ':') + 1);
+
+        $command = [
+            PHP_BINARY, '-S', '127.0.0.1:' . $this->port,
+            '-t', $this->root . '/public',
+            __DIR__ . '/router.php',
+        ];
+
+        $this->process = proc_open(
+            $command,
+            [0 => ['pipe', 'r'], 1 => ['file', '/dev/null', 'a'], 2 => ['file', '/dev/null', 'a']],
+            $pipes,
+            $this->root,
+            array_merge(self::baseEnvironment(), $env)
+        );
+
+        for ($i = 0; $i < 100; $i++) {
+            $connection = @fsockopen('127.0.0.1', $this->port);
+            if ($connection !== false) {
+                fclose($connection);
+                return;
+            }
+            usleep(50_000);
+        }
+
+        throw new RuntimeException('The PHP built-in server did not start.');
+    }
+
+    /** @return array<string, string> */
+    private static function baseEnvironment(): array
+    {
+        $env = [];
+        foreach (['PATH', 'HOME', 'TMPDIR', 'PHPRC', 'PHP_INI_SCAN_DIR', 'LD_LIBRARY_PATH'] as $key) {
+            $value = getenv($key);
+            if ($value !== false) {
+                $env[$key] = $value;
+            }
+        }
+
+        return $env;
+    }
+
+    private static function copy(string $from, string $to): void
+    {
+        if (is_dir($from) && !is_link($from)) {
+            mkdir($to, 0777, true);
+            foreach (scandir($from) ?: [] as $entry) {
+                if ($entry !== '.' && $entry !== '..') {
+                    self::copy($from . '/' . $entry, $to . '/' . $entry);
+                }
+            }
+            return;
+        }
+
+        copy($from, $to);
+    }
+
+    private static function removeDirectory(string $path): void
+    {
+        if (is_link($path) || is_file($path)) {
+            @unlink($path);
+            return;
+        }
+
+        if (!is_dir($path)) {
+            return;
+        }
+
+        foreach (scandir($path) ?: [] as $entry) {
+            if ($entry !== '.' && $entry !== '..') {
+                self::removeDirectory($path . '/' . $entry);
+            }
+        }
+
+        @rmdir($path);
+    }
+}

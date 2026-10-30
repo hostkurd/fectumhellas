@@ -1,0 +1,1 @@
+var site_url = 'https://marjanenergy.com';

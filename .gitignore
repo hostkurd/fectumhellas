@@ -1,0 +1,14 @@
+/vendor/
+/.env
+/storage/cache/*
+/storage/framework/*
+!/storage/framework/.gitignore
+/views/cache/*
+!/views/cache/.gitignore
+/storage/logs/*
+!/storage/logs/.gitignore
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+/.phpunit.cache/
