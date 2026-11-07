@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "66e56b749cd85838277c1b5a920da4e2",
+    "content-hash": "05f092edc230d29dd242869693c8a62b",
     "packages": [
         {
             "name": "hostkurd/flocms-admin",
-            "version": "v0.39.5",
+            "version": "v0.39.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hostkurd/flocms-admin.git",
-                "reference": "d3e6ef19b4a0b346be6396106fa61a4682019ee4"
+                "reference": "e460fc93995cfbda7f5505942fc1bf9996bf5834"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hostkurd/flocms-admin/zipball/d3e6ef19b4a0b346be6396106fa61a4682019ee4",
-                "reference": "d3e6ef19b4a0b346be6396106fa61a4682019ee4",
+                "url": "https://api.github.com/repos/hostkurd/flocms-admin/zipball/e460fc93995cfbda7f5505942fc1bf9996bf5834",
+                "reference": "e460fc93995cfbda7f5505942fc1bf9996bf5834",
                 "shasum": ""
             },
             "require": {
