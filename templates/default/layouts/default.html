@@ -23,8 +23,6 @@ $fhHome = Site::isHome();
 <?php } ?>
 <meta name="theme-color" content="#2B4285">
 <script>document.documentElement.classList.add('fh-js')</script>
-<?php // Instant navigation: the browser prepares a page while the pointer rests on its link (Chrome, Edge). Never the admin, form posts or update endpoints. ?>
-<script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"<?= preg_replace('~[^A-Za-z0-9/_-]~', '', rtrim((string) parse_url(Site::base(), PHP_URL_PATH), '/')) ?>/*"},{"not":{"href_matches":["/*/admin","/*/admin/*","/*/forms/*","/*/flo-reactive/*"]}},{"not":{"selector_matches":"[target],[download],[rel~=nofollow],[data-fh-no-preload]"}}]},"eagerness":"moderate"}]}</script>
 <link rel="icon" href="<?= Site::asset('images/brand/logo-mark-blue.svg') ?>" type="image/svg+xml">
 <?php if ($fhRtl) { ?>
 <link rel="preload" href="<?= Site::base() . '/themes/fectum/fonts/ibm-plex-sans-arabic-arabic-400-normal.woff2' ?>" as="font" type="font/woff2" crossorigin>
