@@ -42,7 +42,24 @@ return [
 
     // The site's own blocks for Builder fields (0.29): php flo make:admin-block LatestProjects.
     'blocks' => [
-        // App\Admin\Blocks\LatestProjects::class,
+        // The site's own blocks (Stage 3a): admin/Blocks/*.php with views/blocks/<type>.html
+        \App\Admin\Blocks\PageHeader::class,
+        \App\Admin\Blocks\QuickSearch::class,
+        \App\Admin\Blocks\Intro::class,
+        \App\Admin\Blocks\FeaturedProperties::class,
+        \App\Admin\Blocks\DevelopmentsBand::class,
+        \App\Admin\Blocks\ServiceTiles::class,
+        \App\Admin\Blocks\BuyersGuide::class,
+        \App\Admin\Blocks\LatestInsights::class,
+        \App\Admin\Blocks\TeamMembers::class,
+        \App\Admin\Blocks\CompanyDetails::class,
+        \App\Admin\Blocks\ClosingCta::class,
+        \App\Admin\Blocks\Story::class,
+        \App\Admin\Blocks\NumberedColumns::class,
+        \App\Admin\Blocks\FeatureBand::class,
+        \App\Admin\Blocks\OfficeMap::class,
+        \App\Admin\Blocks\ContactPanel::class,
+        \App\Admin\Blocks\LinkStrip::class,
     ],
     'blocks_path' => 'admin/Blocks',
     'blocks_namespace' => 'App\\Admin\\Blocks',

@@ -1,0 +1,24 @@
+@php /* Latest insights (site block): the newest published articles. */ use FloCMS\Support\Site; @endphp
+@if($posts)
+<section class="fh-section fh-posts-section">
+    <div class="fh-wrap fh-stack">
+        <div class="fh-section-head">
+            <div class="fh-section-title">
+                @if($eyebrow !== '')<p class="fh-eyebrow">{{ $eyebrow }}</p>@endif
+                <h2 class="fh-h2">{{ $heading }}</h2>
+            </div>
+            <a class="fh-link" href="{{ Site::url('insights') }}">{{ $link_text !== '' ? $link_text : __('fh.all_articles') }}<svg aria-hidden="true" class="fh-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="fh-posts">
+            @foreach($posts as $b)
+            <a class="fh-post" href="{{ $b['url'] }}">
+                <span class="fh-post-media">@if($b['cover']){!! $b['cover']->img(['sizes' => '(max-width: 900px) 100vw, 33vw', 'alt' => '']) !!}@endif</span>
+                <span class="fh-post-meta"><time datetime="{{ $b['datetime'] }}">{{ $b['date'] }}</time></span>
+                <span class="fh-post-title">{{ $b['title'] }}</span>
+                @if($b['excerpt'] !== '')<span class="fh-post-excerpt">{{ $b['excerpt'] }}</span>@endif
+            </a>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif

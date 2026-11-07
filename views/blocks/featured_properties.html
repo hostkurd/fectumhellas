@@ -1,0 +1,22 @@
+@php /* Featured properties (site block): property cards, from Content → Properties (featured first). */ use FloCMS\Support\Site; @endphp
+<section class="fh-section fh-featured">
+    <div class="fh-wrap fh-stack">
+        <div class="fh-section-head">
+            <div class="fh-section-title">
+                @if($eyebrow !== '')<p class="fh-eyebrow">{{ $eyebrow }}</p>@endif
+                <h2 class="fh-h2">{{ $heading }}</h2>
+                @if($text !== '')<p class="fh-lead">{{ $text }}</p>@endif
+            </div>
+        </div>
+        @if($items)
+        <div class="fh-cards">
+            @foreach($items as $p)
+            @php include template_partial('property-card'); @endphp
+            @endforeach
+        </div>
+        @else
+        <p class="fh-empty">{{ __('fh.no_properties_yet') }}</p>
+        @endif
+        <a class="fh-btn fh-btn-line fh-center" href="{{ Site::url('properties') }}">{{ $link_text !== '' ? $link_text : __('fh.view_all_properties') }}<svg aria-hidden="true" class="fh-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+</section>

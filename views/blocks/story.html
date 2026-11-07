@@ -1,0 +1,12 @@
+@php /* Story (site block): heading beside paragraphs; a blank line starts a new paragraph. */ $paras = array_values(array_filter(array_map('trim', preg_split('/\R\s*\R/u', (string) $text) ?: []), static fn ($p) => $p !== '')); @endphp
+<section class="fh-section fh-story">
+    <div class="fh-wrap fh-story-grid">
+        <div class="fh-section-title">
+            @if($eyebrow !== '')<p class="fh-eyebrow">{{ $eyebrow }}</p>@endif
+            <h2 class="fh-h2">{{ $heading }}</h2>
+        </div>
+        <div class="fh-story-text">
+            @foreach($paras as $p)<p>{!! nl2br(e($p), false) !!}</p>@endforeach
+        </div>
+    </div>
+</section>

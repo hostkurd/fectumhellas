@@ -1,0 +1,7 @@
+@php /* Link strip (site block): one sentence and a link on white. */ use FloCMS\Support\Site; $href = Site::link($link); @endphp
+<section class="fh-strip">
+    <div class="fh-wrap fh-strip-inner">
+        <p class="fh-strip-text">{{ $text }}</p>
+        @if($href !== '' && $link_text !== '')<a class="fh-link" href="{{ $href }}">{{ $link_text }}<svg aria-hidden="true" class="fh-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>@endif
+    </div>
+</section>

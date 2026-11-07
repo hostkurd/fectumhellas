@@ -1,0 +1,13 @@
+@php /* Office (site block): address, phone, email and a button beside the map. */ use FloCMS\Support\Site; $href = Site::link($link); $fhMap = ['height' => 'is-tall', 'label' => 'FECTUM Hellas']; @endphp
+<section class="fh-section fh-office">
+    <div class="fh-wrap fh-office-grid">
+        <div class="fh-office-text">
+            @if($eyebrow !== '')<p class="fh-eyebrow">{{ $eyebrow }}</p>@endif
+            <h2 class="fh-h2">{{ $heading }}</h2>
+            @if($address !== '')<p class="fh-office-address">{!! nl2br(e($address), false) !!}</p>@endif
+            <p class="fh-office-links">@if($phone !== '')<a class="fh-ltr" href="tel:{{ Site::tel($phone) }}">{{ $phone }}</a>@endif @if($email !== '')<a href="mailto:{{ $email }}">{{ $email }}</a>@endif</p>
+            @if($href !== '' && $button !== '')<a class="fh-btn fh-btn-solid" href="{{ $href }}">{{ $button }}</a>@endif
+        </div>
+        <div class="fh-office-map">@php include template_partial('map'); @endphp</div>
+    </div>
+</section>
