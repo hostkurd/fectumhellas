@@ -121,7 +121,7 @@ final class ListingResource extends Resource
     {
         return $table
             ->columns([
-                MediaColumn::make('cover_id')->label('fh.f.cover')->toggleable(),
+                MediaColumn::make('cover_id')->label('fh.f.cover')->size('md')->toggleable(),
                 TextColumn::make('title')->label('fh.f.title')->searchable()->sortable()->limit(60),
                 TextColumn::make('reference')->label('fh.f.reference')->searchable()->sortable(),
                 RelationColumn::make('city_id')->label('fh.f.city')->resource(CityResource::class)->toggleable(),
