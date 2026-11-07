@@ -5,6 +5,7 @@ namespace FloCMS\Support;
 
 use FloCMS\Admin\Mail\Mailer;
 use FloCMS\Admin\Mail\Message;
+use FloCMS\Admin\Translation\Translations;
 use FloCMS\Core\App;
 use FloCMS\Core\RateLimit\FileRateLimiter;
 
@@ -97,12 +98,30 @@ final class Inquiries
      */
     public static function saveContact(array $clean, string $lang, string $pageUrl, string $ip, string $userAgent): string
     {
+        return self::save('contact', $clean['topic'], $clean, $lang, $pageUrl, $ip, $userAgent);
+    }
+
+    /**
+     * Saves a question or viewing request about a property ($mode: question / viewing)
+     * and emails the team. A preferred viewing date goes at the top of the message.
+     */
+    public static function saveListing(int $listingId, string $mode, string $date, array $clean, string $lang, string $pageUrl, string $ip, string $userAgent): string
+    {
+        if ($mode === 'viewing' && $date !== '') {
+            $clean['message'] = self::english('fh.preferred_date') . ': ' . $date . "\n\n" . $clean['message'];
+        }
+        return self::save('listing', $mode === 'viewing' ? 'viewing' : 'question', $clean, $lang, $pageUrl, $ip, $userAgent, ['listing_id' => $listingId]);
+    }
+
+    /** Saves first, then emails; returns the reference. */
+    private static function save(string $type, string $service, array $clean, string $lang, string $pageUrl, string $ip, string $userAgent, array $extra = []): string
+    {
         $db = App::db();
         $now = date('Y-m-d H:i:s');
-        $id = (int) $db->table('inquiries')->insert([
+        $id = (int) $db->table('inquiries')->insert($extra + [
             'reference' => 'TMP-' . bin2hex(random_bytes(6)),
-            'type' => 'contact',
-            'service' => $clean['topic'],
+            'type' => $type,
+            'service' => $service,
             'name' => $clean['name'],
             'email' => $clean['email'],
             'phone' => $clean['phone'] !== '' ? $clean['phone'] : null,
@@ -121,25 +140,35 @@ final class Inquiries
         $reference = sprintf('FH-%s-%04d', date('Y'), $id);
         $db->table('inquiries')->where('id', '=', $id)->update(['reference' => $reference]);
 
-        if (self::email($reference, $clean, $lang, $pageUrl)) {
+        $about = '';
+        if (isset($extra['listing_id'])) {
+            $rows = $db->table('listings')->select(['reference', 'title'])->where('id', '=', (int) $extra['listing_id'])->limit(1)->get();
+            if (isset($rows[0])) {
+                $about = (string) $rows[0]->reference . ' · ' . Translations::get($rows[0]->title ?? '', 'en');
+            }
+        }
+        if (self::email($reference, $type, $service, $clean, $lang, $pageUrl, $about)) {
             $db->table('inquiries')->where('id', '=', $id)->update(['email_sent' => 1]);
         }
         return $reference;
     }
 
     /** Emails the team (in English, the admin language); true when sent. */
-    private static function email(string $reference, array $clean, string $lang, string $pageUrl): bool
+    private static function email(string $reference, string $type, string $service, array $clean, string $lang, string $pageUrl, string $about = ''): bool
     {
         $to = Site::setting('notifications.inquiry_email');
         if ($to === '' || filter_var($to, FILTER_VALIDATE_EMAIL) === false) {
             return false;
         }
-        $topic = self::english(self::TOPICS[$clean['topic']][0] ?? 'fh.topic.other');
+        $topic = $type === 'listing'
+            ? self::english($service === 'viewing' ? 'fh.viewing_request' : 'fh.property_question')
+            : self::english(self::TOPICS[$service][0] ?? 'fh.topic.other');
         $method = self::english(self::METHODS[$clean['preferred_contact']] ?? 'fh.contact.email');
         $lines = [
             'New inquiry from the website: ' . $reference,
             '',
             'Topic: ' . $topic,
+            ...($about !== '' ? ['Property: ' . $about] : []),
             'Name: ' . $clean['name'],
             'Email: ' . $clean['email'],
             'Phone: ' . ($clean['phone'] !== '' ? $clean['phone'] : '-'),
@@ -154,7 +183,7 @@ final class Inquiries
         try {
             Mailer::send(new Message(
                 to: $to,
-                subject: $reference . ' · ' . $topic . ' · ' . $clean['name'],
+                subject: $reference . ' · ' . $topic . ($about !== '' ? ' · ' . strtok($about, ' ') : '') . ' · ' . $clean['name'],
                 text: implode("\n", $lines),
                 headers: ['Reply-To' => $clean['email']],
             ));

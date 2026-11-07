@@ -2,7 +2,7 @@
 /*
  * FECTUM Hellas website layout (Stage 3a, approved Design C).
  * Pages from the admin print their own <title>/meta with page_meta(); site
- * controllers pass $data['meta'] (title, description...) in later stages.
+ * controllers set theirs with Site::meta([...]) and the layout prints Site::head().
  */
 use FloCMS\Support\Site;
 $fhLang = Site::lang();
@@ -16,10 +16,7 @@ $fhHome = Site::isHome();
 <?php if (function_exists('current_page') && current_page() !== null) { ?>
 <?= page_meta() ?>
 <?php } else { ?>
-<title><?= Site::e(trim((string) ($data['meta']['title'] ?? '')) !== '' ? $data['meta']['title'] . ' · FECTUM Hellas' : 'FECTUM Hellas') ?></title>
-<?php if (trim((string) ($data['meta']['description'] ?? Site::setting('seo.description'))) !== '') { ?>
-<meta name="description" content="<?= Site::e($data['meta']['description'] ?? Site::setting('seo.description')) ?>">
-<?php } ?>
+<?= Site::head() ?>
 <?php } ?>
 <meta name="theme-color" content="#2B4285">
 <script>document.documentElement.classList.add('fh-js')</script>

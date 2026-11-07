@@ -14,7 +14,7 @@
   var doc = document;
   var root = doc.documentElement;
   root.classList.add('fh-js');
-  var KEYS = { saved: 'fh-saved', compare: 'fh-compare' };
+  var KEYS = { saved: 'fh-saved', compare: 'fh-compare', items: 'fh-compare-items' };
   var MAX_COMPARE = 3;
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -44,6 +44,58 @@
       var on = compare.indexOf(Number(el.getAttribute('data-fh-compare'))) > -1;
       el.setAttribute('aria-pressed', on ? 'true' : 'false');
       el.setAttribute('aria-disabled', !on && compare.length >= MAX_COMPARE ? 'true' : 'false');
+      var card = el.closest('.fh-card');
+      if (card) { card.classList.toggle('is-compared', on); }
+    });
+    renderCompareBar(compare);
+  }
+
+  // What the compare bar shows of each property (title, price, photo, address)
+  function items() {
+    try { var v = JSON.parse(localStorage.getItem(KEYS.items) || '{}'); return v && typeof v === 'object' ? v : {}; } catch (e) { return {}; }
+  }
+  function remember(el) {
+    var holder = el.closest('[data-fh-card]');
+    if (!holder) { return; }
+    try {
+      var data = JSON.parse(holder.getAttribute('data-fh-card'));
+      var all = items();
+      all[String(data.id)] = { title: String(data.title || ''), price: String(data.price || ''), url: String(data.url || ''), img: String(data.img || '') };
+      try { localStorage.setItem(KEYS.items, JSON.stringify(all)); } catch (e) { /* ignore */ }
+    } catch (e) { /* ignore */ }
+  }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  // Only addresses on this site (stored values could have been edited by hand)
+  function safeUrl(u) {
+    try { var url = new URL(u, location.href); return url.origin === location.origin ? url.href : '#'; } catch (e) { return '#'; }
+  }
+  function words() {
+    try { return JSON.parse((doc.querySelector('[data-fh-t]') || {}).textContent || '{}'); } catch (e) { return {}; }
+  }
+  function renderCompareBar(compare) {
+    doc.querySelectorAll('[data-fh-compare-bar]').forEach(function (bar) {
+      if (!compare.length) { bar.hidden = true; bar.innerHTML = ''; return; }
+      var t = words();
+      var all = items();
+      var slots = '';
+      for (var i = 0; i < MAX_COMPARE; i++) {
+        var id = compare[i];
+        var it = id ? all[String(id)] : null;
+        if (id) {
+          slots += '<div class="fh-cbar-slot">' + (it && it.img ? '<img src="' + esc(safeUrl(it.img)) + '" alt="">' : '<span class="fh-cbar-noimg"></span>')
+            + '<a href="' + esc(it ? safeUrl(it.url) : '#') + '"><b>' + esc(it ? it.title : '#' + id) + '</b><span>' + esc(it ? it.price : '') + '</span></a>'
+            + '<button type="button" data-fh-compare="' + id + '" aria-pressed="true" aria-label="' + esc((t.remove || 'Remove') + ' ' + (it ? it.title : '')) + '"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>';
+        } else {
+          slots += '<div class="fh-cbar-empty"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>' + esc(t.add || '') + '</div>';
+        }
+      }
+      var go = compare.length >= 2
+        ? '<a class="fh-btn fh-btn-solid" href="' + esc(safeUrl((t.compareUrl || '') + '?ids=' + compare.join(','))) + '">' + esc((t.compareN || 'Compare (:n)').replace(':n', compare.length)) + '</a>'
+        : '<span class="fh-cbar-wait">' + esc(t.oneMore || '') + '</span>';
+      bar.innerHTML = '<div class="fh-cbar" role="region" aria-label="' + esc(t.region || 'Compare') + '"><div class="fh-cbar-head"><small>' + esc(t.title || 'Compare') + '</small><span role="status">'
+        + esc((t.selected || ':n / 3').replace(':n', compare.length)) + '</span></div><div class="fh-cbar-slots">' + slots + '</div><div class="fh-cbar-go"><button type="button" class="fh-text-btn" data-fh-compare-clear>'
+        + esc(t.clear || 'Clear') + '</button>' + go + '</div></div>';
+      bar.hidden = false;
     });
   }
   function flip(key, id, max) {
@@ -116,7 +168,8 @@
         var lng = parseFloat(el.getAttribute('data-lng'));
         if (isNaN(lat) || isNaN(lng) || !el.isConnected || el.classList.contains('is-live')) { return; }
         el.classList.add('is-live');
-        var map = window.L.map(el, { scrollWheelZoom: false, attributionControl: true }).setView([lat, lng], 16);
+        var map = window.L.map(el, { scrollWheelZoom: false, attributionControl: true }).setView([lat, lng], parseInt(el.getAttribute('data-zoom'), 10) || 16);
+        leafletMaps.push(map);
         window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 19,
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap</a>'
@@ -135,11 +188,171 @@
 
   /* ---------- Everything a page needs once its HTML is in place ---------- */
   function initPage() {
+    leafletMaps = leafletMaps.filter(function (m) { if (!m.getContainer().isConnected) { m.remove(); return false; } return true; });
     onScroll();
     doc.querySelectorAll('[data-fh-card-actions]').forEach(function (el) { el.hidden = false; });
     refresh();
     initMaps();
+    initResultsMaps();
   }
+
+  var leafletMaps = [];
+
+  /* ---------- Search results map (price pins) ---------- */
+  function initResultsMaps() {
+    var boxes = doc.querySelectorAll('[data-fh-results-map]:not(.is-live)');
+    if (!boxes.length) { return; }
+    loadLeaflet(boxes[0]).then(function () {
+      if (!window.L) { return; }
+      boxes.forEach(function (el) {
+        var points;
+        try { points = JSON.parse(el.getAttribute('data-points') || '[]'); } catch (e) { points = []; }
+        if (!points.length || !el.isConnected || el.classList.contains('is-live')) { return; }
+        el.classList.add('is-live');
+        var map = window.L.map(el, { scrollWheelZoom: false });
+        leafletMaps.push(map);
+        window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap</a>' }).addTo(map);
+        var bounds = [];
+        points.forEach(function (pt) {
+          var icon = window.L.divIcon({ className: 'fh-price-pin', html: '<a href="' + esc(safeUrl(pt.url)) + '">' + esc(pt.label) + '</a>', iconSize: [0, 0] });
+          window.L.marker([pt.lat, pt.lng], { icon: icon, keyboard: false }).addTo(map);
+          bounds.push([pt.lat, pt.lng]);
+        });
+        if (bounds.length === 1) { map.setView(bounds[0], 15); } else { map.fitBounds(bounds, { padding: [48, 48], maxZoom: 15 }); }
+      });
+    }).catch(function () {});
+  }
+
+  /* ---------- Gallery lightbox ---------- */
+  var lb = { i: 0, list: [], opener: null };
+  function openLightbox(index) {
+    var tpl = doc.querySelector('template[data-fh-photos]');
+    var dialog = doc.querySelector('[data-fh-lightbox]');
+    if (!tpl || !dialog || !dialog.showModal) { return; }
+    lb.list = Array.prototype.map.call(tpl.content.querySelectorAll('a'), function (a) { return { src: a.getAttribute('href'), alt: a.getAttribute('data-alt') || '' }; });
+    lb.opener = doc.activeElement;
+    showPhoto(index);
+    dialog.showModal();
+  }
+  function showPhoto(index) {
+    var dialog = doc.querySelector('[data-fh-lightbox]');
+    if (!dialog || !lb.list.length) { return; }
+    lb.i = (index + lb.list.length) % lb.list.length;
+    var img = dialog.querySelector('[data-fh-lb-img]');
+    img.src = lb.list[lb.i].src;
+    img.alt = lb.list[lb.i].alt;
+    dialog.querySelector('[data-fh-lb-count]').textContent = (lb.i + 1) + ' / ' + lb.list.length;
+  }
+  doc.addEventListener('click', function (e) {
+    var dialog = e.target.closest && e.target.closest('[data-fh-lightbox]');
+    if (!dialog) { return; }
+    if (e.target.closest('[data-fh-lb-next]')) { showPhoto(lb.i + 1); }
+    else if (e.target.closest('[data-fh-lb-prev]')) { showPhoto(lb.i - 1); }
+    else if (e.target.closest('[data-fh-lb-close]') || e.target === dialog) { dialog.close(); }
+  });
+  doc.addEventListener('keydown', function (e) {
+    if (!doc.querySelector('[data-fh-lightbox][open]')) { return; }
+    var rtl = root.dir === 'rtl';
+    if (e.key === 'ArrowRight') { showPhoto(lb.i + (rtl ? -1 : 1)); }
+    if (e.key === 'ArrowLeft') { showPhoto(lb.i + (rtl ? 1 : -1)); }
+  });
+  doc.addEventListener('close', function (e) {
+    if (e.target.matches && e.target.matches('[data-fh-lightbox]') && lb.opener && lb.opener.focus) { lb.opener.focus(); }
+  }, true);
+  var touchX = null;
+  doc.addEventListener('touchstart', function (e) { if (e.target.closest && e.target.closest('[data-fh-lightbox]')) { touchX = e.touches[0].clientX; } }, { passive: true });
+  doc.addEventListener('touchend', function (e) {
+    if (touchX === null) { return; }
+    var dx = e.changedTouches[0].clientX - touchX;
+    touchX = null;
+    if (Math.abs(dx) > 50) { showPhoto(lb.i + ((dx < 0) !== (root.dir === 'rtl') ? 1 : -1)); }
+  }, { passive: true });
+
+  /* ---------- Video: YouTube/Vimeo loads only when the visitor presses play ---------- */
+  function playVideo(btn) {
+    var src = btn.getAttribute('data-fh-video');
+    if (!/^https:\/\/(www\.youtube-nocookie\.com|player\.vimeo\.com)\//.test(src)) { return; }
+    var frame = doc.createElement('iframe');
+    frame.src = src;
+    frame.title = btn.getAttribute('aria-label') || '';
+    frame.allow = 'autoplay; fullscreen; picture-in-picture';
+    frame.allowFullscreen = true;
+    var box = doc.createElement('div');
+    box.className = 'fh-video';
+    box.appendChild(frame);
+    btn.replaceWith(box);
+    frame.focus();
+  }
+
+  /* ---------- Share ---------- */
+  function sharePage(btn) {
+    var data = { title: btn.getAttribute('data-title') || doc.title, url: location.href.split('#')[0] };
+    if (navigator.share) { navigator.share(data).catch(function () {}); return; }
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(data.url).then(function () { announce(btn.getAttribute('data-fh-copied') || ''); }, function () {});
+    }
+  }
+
+  /* ---------- Cost of buying calculator (the server prints the asking price's figures) ---------- */
+  function format(n, lang, plain) {
+    var s = String(Math.abs(Math.round(n))).replace(/\B(?=(\d{3})+(?!\d))/g, lang === 'el' && !plain ? '.' : ',');
+    if (plain) { return s; }
+    return lang === 'en' ? '€' + s : s + ' €';
+  }
+  function recalc(calc) {
+    var lang = calc.getAttribute('data-lang') || 'en';
+    var input = calc.querySelector('[data-fh-calc-input]');
+    var price = Number(String(input.value).replace(/[^0-9]/g, '')) || 0;
+    var sum = 0;
+    calc.querySelectorAll('[data-rate]').forEach(function (row) {
+      var amount = price * Number(row.getAttribute('data-rate')) / 100;
+      sum += amount;
+      row.querySelector('[data-fh-calc-amount]').textContent = format(amount, lang);
+    });
+    calc.querySelector('[data-fh-calc-sum]').textContent = format(sum, lang);
+    calc.querySelector('[data-fh-calc-grand]').textContent = format(price + sum, lang);
+  }
+  doc.addEventListener('input', function (e) {
+    if (!e.target.matches || !e.target.matches('[data-fh-calc-input]')) { return; }
+    var input = e.target;
+    // Keep the caret after the same digit when the separators are re-added
+    var before = String(input.value).slice(0, input.selectionStart || 0).replace(/[^0-9]/g, '').length;
+    var digits = String(input.value).replace(/[^0-9]/g, '').slice(0, 12);
+    input.value = digits ? format(Number(digits), 'en', true) : '';
+    var pos = 0;
+    for (var seen = 0; pos < input.value.length && seen < before; pos++) { if (/[0-9]/.test(input.value[pos])) { seen++; } }
+    try { input.setSelectionRange(pos, pos); } catch (err) { /* not focused */ }
+    recalc(input.closest('[data-fh-calc]'));
+  });
+
+  /* ---------- After flocms-reactive updates a component (search results) ---------- */
+  var scrollResults = 0;
+  var lastAction = null; // the control a visitor used, to give focus back after the update
+  doc.addEventListener('click', function (e) {
+    var el = e.target.closest && e.target.closest('[data-rx-component] [data-rx-action]');
+    lastAction = el ? { action: el.getAttribute('data-rx-action'), value: el.getAttribute('data-rx-value') } : lastAction;
+  }, true);
+  doc.addEventListener('flo-reactive:updated', function (e) {
+    doc.querySelectorAll('[data-fh-card-actions]').forEach(function (el) { el.hidden = false; });
+    // Checkboxes that run an action (features): show what the server says
+    (e.target.querySelectorAll ? e.target : doc).querySelectorAll('input[type=checkbox][data-rx-action]').forEach(function (box) { box.checked = box.hasAttribute('checked'); });
+    if (lastAction && (doc.activeElement === doc.body || !doc.activeElement)) {
+      var sel = '[data-rx-action="' + lastAction.action + '"]' + (lastAction.value !== null ? '[data-rx-value="' + String(lastAction.value).replace(/"/g, '') + '"]' : '');
+      var again = doc.querySelector(sel);
+      if (again && again.focus) { again.focus({ preventScroll: true }); }
+    }
+    lastAction = null;
+    // Maps whose container was replaced: free them
+    leafletMaps = leafletMaps.filter(function (m) { if (!m.getContainer().isConnected) { m.remove(); return false; } return true; });
+    refresh();
+    initResultsMaps();
+    if (scrollResults && Date.now() - scrollResults < 5000) {
+      scrollResults = 0;
+      var target = doc.getElementById('fh-results');
+      if (target) { window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 160, behavior: reduced ? 'auto' : 'smooth' }); }
+    }
+  });
+
 
   /* ---------- Clicks (delegated, so they work on swapped pages too) ---------- */
   doc.addEventListener('click', function (e) {
@@ -157,8 +370,25 @@
     if (cmp) {
       e.preventDefault();
       if (cmp.getAttribute('aria-disabled') === 'true') { announce(cmp.getAttribute('data-fh-full') || ''); return; }
+      var inBar = !!cmp.closest('[data-fh-compare-bar]');
+      remember(cmp);
       flip(KEYS.compare, Number(cmp.getAttribute('data-fh-compare')), MAX_COMPARE);
+      if (inBar) {
+        var nextFocus = doc.querySelector('[data-fh-compare-bar] .fh-cbar-slot button, [data-fh-compare-bar] [data-fh-compare-clear]') || doc.getElementById('fh-results') || doc.getElementById('main');
+        if (nextFocus) { if (!nextFocus.matches('button, a')) { nextFocus.setAttribute('tabindex', '-1'); } nextFocus.focus({ preventScroll: true }); }
+      }
+      return;
     }
+    if (e.target.closest('[data-fh-compare-clear]')) { write(KEYS.compare, []); refresh(); return; }
+    var share = e.target.closest('[data-fh-share]');
+    if (share) { sharePage(share); return; }
+    var video = e.target.closest('[data-fh-video]');
+    if (video) { playVideo(video); return; }
+    var open = e.target.closest('[data-fh-open]');
+    if (open) { openLightbox(Number(open.getAttribute('data-fh-open'))); return; }
+    var reset = e.target.closest('[data-fh-calc-reset]');
+    if (reset) { var calc = reset.closest('[data-fh-calc]'); var input = calc.querySelector('[data-fh-calc-input]'); input.value = format(Number(calc.getAttribute('data-price')), 'en', true); recalc(calc); return; }
+    if (e.target.closest('[data-fh-to-results]')) { scrollResults = Date.now(); }
   });
   window.addEventListener('storage', refresh);
 
@@ -352,6 +582,8 @@
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) { return; }
       var a = e.target.closest('a[href]');
       if (!a || a.target || a.hasAttribute('download') || a.hasAttribute('data-fh-no-swap')) { return; }
+      // Links that drive a live component (search tabs, pages): flocms-reactive handles them
+      if (a.hasAttribute('data-rx-action') && a.closest('[data-rx-component]')) { return; }
       var url;
       try { url = new URL(a.href, location.href); } catch (err) { return; }
       if (!swappable(url)) { return; }
@@ -379,15 +611,23 @@
     // reloads the page) and stops it: the page for that address is fetched instead.
     var lastPlain = plain(new URL(location.href));
     window.addEventListener('popstate', function (e) {
-      var now = plain(new URL(location.href));
-      if (now === lastPlain) { return; } // only the #part changed
+      // Never let flocms-reactive's handler reload the page (it would for a video frame's step too)
       e.stopImmediatePropagation();
+      var now = plain(new URL(location.href));
+      if (now === lastPlain) { return; } // only the #part changed, or a frame inside the page went back
       lastPlain = now;
       navigate(location.href, false, e.state && typeof e.state.y === 'number' ? e.state.y : 0);
     });
     var push = history.pushState;
-    history.pushState = function () { var r = push.apply(history, arguments); lastPlain = plain(new URL(location.href)); return r; };
     var replace = history.replaceState;
+    // flocms-reactive pushes a history entry on every action, even when the address doesn't
+    // change (opening More filters, sending a form): those would make Back look dead.
+    history.pushState = function (state, title, url) {
+      var target = url ? plain(new URL(url, location.href)) : lastPlain;
+      var r = target === plain(new URL(location.href)) && url !== undefined && !(state && state.fh) ? replace.apply(history, arguments) : push.apply(history, arguments);
+      lastPlain = plain(new URL(location.href));
+      return r;
+    };
     history.replaceState = function () { var r = replace.apply(history, arguments); lastPlain = plain(new URL(location.href)); return r; };
   }
 

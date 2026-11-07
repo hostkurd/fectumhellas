@@ -1,0 +1,135 @@
+@php /* Property search (flocms-reactive component App\Components\PropertySearch, approved Properties mockup). Works as a GET form without JavaScript. */
+use FloCMS\Support\Site;
+$arrow = '<svg aria-hidden="true" class="fh-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+$count = (int) $result['total'];
+$countLabel = $count === 1 ? __('fh.count_one') : __('fh.count_many', ['count' => Site::number($count)]);
+@endphp
+<div class="fh-wrap">
+    <div class="fh-tabs" role="group" aria-label="{{ __('fh.listing_type') }}">
+        @foreach($tabs as $key => $label)
+        <a class="fh-tab" href="{{ $tabUrl($key) }}" data-rx-action="go" data-rx-set="status" data-rx-value="{{ $key }}"@if($s->status === $key) aria-current="page"@endif>{{ __($label) }}</a>
+        @endforeach
+    </div>
+</div>
+
+<form class="fh-filters" id="fh-filters" method="get" action="{{ $action }}" data-rx-submit="go" aria-label="{{ __('fh.filters') }}">
+    <input type="hidden" name="search_status" value="{{ $s->status }}">
+    <div class="fh-wrap">
+        <div class="fh-filter-box">
+            <div class="fh-filter-row">
+                <label class="fh-filter"><span>{{ __('fh.filter.location') }}</span>
+                    <select name="search_city" data-rx-bind="city" data-rx-model="lazy"><option value="0">{{ __('fh.filter.all_locations') }}</option>@foreach($cities as $id => $name)<option value="{{ $id }}"@if($s->city === $id) selected@endif>{{ $name }}</option>@endforeach</select>
+                </label>
+                <label class="fh-filter"><span>{{ __('fh.filter.type') }}</span>
+                    <select name="search_type" data-rx-bind="type" data-rx-model="lazy"><option value="0">{{ __('fh.filter.all_types') }}</option>@foreach($types as $id => $name)<option value="{{ $id }}"@if($s->type === $id) selected@endif>{{ $name }}</option>@endforeach</select>
+                </label>
+                <label class="fh-filter"><span>{{ $s->status === 'for_rent' ? __('fh.filter.rent') : __('fh.filter.budget') }}</span>
+                    <select name="search_max" data-rx-bind="max" data-rx-model="lazy"><option value="0">{{ __('fh.filter.any_budget') }}</option>@foreach($budgets as $n)<option value="{{ $n }}"@if($s->max === $n) selected@endif>{{ __('fh.filter.up_to', ['price' => Site::price($n)]) }}</option>@endforeach</select>
+                </label>
+                <label class="fh-filter is-narrow"><span>{{ __('fh.filter.bedrooms') }}</span>
+                    <select name="search_beds" data-rx-bind="beds" data-rx-model="lazy"><option value="0">{{ __('fh.filter.any') }}</option>@foreach([1, 2, 3, 4, 5] as $n)<option value="{{ $n }}"@if($s->beds === $n) selected@endif>{{ $n }}+</option>@endforeach</select>
+                </label>
+                <button type="button" class="fh-more-toggle" data-rx-action="toggleMore" aria-expanded="{{ $s->more ? 'true' : 'false' }}" aria-controls="fh-more"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>{{ __('fh.more_filters') }}@if($moreCount > 0) ({{ $moreCount }})@endif</button>
+                <button type="submit" class="fh-btn fh-btn-solid fh-nojs-only">{{ __('fh.search') }}</button>
+            </div>
+            <div class="fh-more{{ $s->more ? ' is-open' : '' }}" id="fh-more">
+                <div class="fh-more-grid">
+                    <label class="fh-input"><span>{{ __('fh.filter.min_area') }}</span>
+                        <select name="search_area" data-rx-bind="area" data-rx-model="lazy"><option value="0">{{ __('fh.filter.any_size') }}</option>@foreach($areas as $n)<option value="{{ $n }}"@if($s->area === $n) selected@endif>{{ __('fh.area_min', ['area' => (string) $n]) }}</option>@endforeach</select>
+                    </label>
+                    <label class="fh-input"><span>{{ __('fh.filter.construction') }}</span>
+                        <select name="search_build" data-rx-bind="build" data-rx-model="lazy"><option value="">{{ __('fh.filter.any') }}</option>@foreach(['new', 'construction', 'resale'] as $b)<option value="{{ $b }}"@if($s->build === $b) selected@endif>{{ __('fh.build.' . $b) }}</option>@endforeach</select>
+                    </label>
+                    @if($amenities)
+                    <fieldset class="fh-features">
+                        <legend>{{ __('fh.filter.features') }}</legend>
+                        <div class="fh-features-grid">
+                            @foreach($amenities as $id => $name)
+                            <label class="fh-check"><input type="checkbox" name="search_feature[]" value="{{ $id }}" data-rx-action="feature" data-rx-set="pick" data-rx-value="{{ $id }}"@if(in_array($id, $features, true)) checked@endif><span>{{ $name }}</span></label>
+                            @endforeach
+                        </div>
+                    </fieldset>
+                    @endif
+                </div>
+                <div class="fh-more-foot">
+                    <label class="fh-check"><input type="checkbox" name="search_closed" value="1" data-rx-bind="closed"@if($s->closed) checked@endif><span>{{ __('fh.incl_closed_long') }}</span></label>
+                    <div class="fh-actions">
+                        <button type="button" class="fh-text-btn" data-rx-action="reset">{{ __('fh.clear_all') }}</button>
+                        <button type="button" class="fh-btn fh-btn-solid" data-rx-action="toggleMore">{{ __('fh.show_count', ['count' => $countLabel]) }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<section class="fh-results" id="fh-results" aria-label="{{ __('fh.results') }}">
+    <div class="fh-wrap fh-results-inner">
+        <div class="fh-results-bar">
+            <div class="fh-results-count">
+                <p role="status"><strong>{{ $countLabel }}</strong></p>
+                @foreach($chips as $chip)
+                <button type="button" class="fh-chip-x" data-rx-action="clear" data-rx-set="pick" data-rx-value="{{ $chip['name'] }}" aria-label="{{ __('fh.remove_filter', ['filter' => $chip['label']]) }}">{{ $chip['label'] }}<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+                @endforeach
+                @if(count($chips) > 1)<button type="button" class="fh-text-btn" data-rx-action="reset">{{ __('fh.clear_all') }}</button>@endif
+            </div>
+            <div class="fh-results-tools">
+                <label class="fh-sort">{{ __('fh.sort_by') }}
+                    <select name="search_sort" form="fh-filters" data-rx-bind="sort" data-rx-model="lazy">@foreach(['new' => 'fh.sort.new', 'price_asc' => 'fh.sort.price_asc', 'price_desc' => 'fh.sort.price_desc'] as $key => $label)<option value="{{ $key }}"@if($s->sort === $key) selected@endif>{{ __($label) }}</option>@endforeach</select>
+                </label>
+                <div class="fh-views" role="group" aria-label="{{ __('fh.view') }}">
+                    <button type="button" data-rx-action="go" data-rx-set="view" data-rx-value="grid" aria-pressed="{{ $s->view === 'grid' ? 'true' : 'false' }}"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7"/></svg>{{ __('fh.view_grid') }}</button>
+                    <button type="button" data-rx-action="go" data-rx-set="view" data-rx-value="map" aria-pressed="{{ $s->view === 'map' ? 'true' : 'false' }}"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14M15 6v14"/></svg>{{ __('fh.view_map') }}</button>
+                </div>
+            </div>
+        </div>
+
+        @if($count === 0)
+        <div class="fh-noresults">
+            <h2 class="fh-h2">{{ __('fh.no_results') }}</h2>
+            <p>{{ __('fh.no_results_text') }}</p>
+            <div class="fh-actions">
+                <button type="button" class="fh-btn fh-btn-line" data-rx-action="reset">{{ __('fh.clear_filters') }}</button>
+                <a class="fh-btn fh-btn-solid" href="{{ Site::pageUrl('contact') }}">{{ __('fh.talk_team') }}</a>
+            </div>
+        </div>
+        @elseif($s->view === 'map')
+        <div class="fh-mapview">
+            <div class="fh-maplist">
+                @foreach($result['cards'] as $p)
+                <a class="fh-mapcard" href="{{ $p['url'] }}">
+                    <span class="fh-mapcard-media">@if($p['cover']){!! $p['cover']->img(['sizes' => '200px', 'alt' => $p['title']]) !!}@else<span class="fh-placeholder"></span>@endif</span>
+                    <span class="fh-mapcard-body">
+                        <span class="fh-mapcard-meta">{{ $p['status'] }} · {{ $p['location'] }}</span>
+                        <span class="fh-mapcard-title">{{ $p['title'] }}</span>
+                        <span class="fh-mapcard-facts">{{ implode(' · ', array_filter([$p['beds'] === null ? '' : ((int) $p['beds'] === 1 ? __('fh.beds_one') : __('fh.beds_count', ['count' => (string) $p['beds']])), $p['area'], $p['type']])) }}</span>
+                        <span class="fh-mapcard-price">{{ $p['price'] }}</span>
+                    </span>
+                </a>
+                @endforeach
+            </div>
+            @php $pointsJson = json_encode($mapPoints, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); @endphp
+            <div class="fh-resultsmap" data-fh-results-map data-points="{{ $pointsJson }}" data-rx-ignore="{{ substr(md5((string) $pointsJson), 0, 12) }}"
+                 data-css="{{ Site::asset('themes/fectum/lib/leaflet/leaflet.css') }}" data-js="{{ Site::asset('themes/fectum/lib/leaflet/leaflet.js') }}" role="region" aria-label="{{ __('fh.view_map') }}">
+                @if(!$mapPoints)<p class="fh-map-empty">{{ __('fh.map_none') }}</p>@endif
+            </div>
+        </div>
+        @else
+        <div class="fh-cards">
+            @foreach($result['cards'] as $p)
+            @php include template_partial('property-card'); @endphp
+            @endforeach
+        </div>
+        @endif
+
+        @if($count > 0 && $result['pages'] > 1)
+        <nav class="fh-pager" aria-label="{{ __('fh.pages') }}">
+            @if($result['page'] > 1)<a class="fh-pager-step" href="{{ $pageUrl($result['page'] - 1) }}" data-rx-action="go" data-rx-set="page" data-rx-value="{{ $result['page'] - 1 }}" data-fh-to-results><svg aria-hidden="true" class="fh-arrow fh-flip" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>{{ __('fh.previous') }}</a>@endif
+            @for($i = max(1, $result['page'] - 2); $i <= min($result['pages'], $result['page'] + 2); $i++)
+            <a class="fh-pager-num" href="{{ $pageUrl($i) }}" data-rx-action="go" data-rx-set="page" data-rx-value="{{ $i }}" data-fh-to-results @if($i === $result['page'])aria-current="page"@endif>{{ $i }}</a>
+            @endfor
+            @if($result['page'] < $result['pages'])<a class="fh-pager-step" href="{{ $pageUrl($result['page'] + 1) }}" data-rx-action="go" data-rx-set="page" data-rx-value="{{ $result['page'] + 1 }}" data-fh-to-results>{{ __('fh.next') }}{!! $arrow !!}</a>@endif
+        </nav>
+        @endif
+    </div>
+</section>
