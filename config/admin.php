@@ -69,7 +69,7 @@ return [
     'primary_color' => '#2B4285',
 
     // Logo image URL for the sidebar (square works best); null shows the brand's first letter
-    'logo' => '/images/brand/logo-mark.svg',
+    'logo' => '/images/brand/logo-mark-blue.svg',
 
     // Sidebar style: 'light' or 'dark'
     'sidebar' => 'light',
@@ -120,9 +120,8 @@ return [
     // permissions so they get a row: 'permissions' => ['reports.export' => 'Export reports'].
     'roles' => ['permissions' => []],
 
-    // Name at the top of the sidebar
-    // Set here, not from SITE_NAME_ADMIN: flocms-admin 0.39.3 reads this file before .env is loaded.
-    'brand' => 'FECTUM Hellas',
+    // Name at the top of the sidebar (SITE_NAME_ADMIN in .env; read again since flocms-admin 0.39.4)
+    'brand' => \FloCMS\Core\Env::get('SITE_NAME_ADMIN', 'FECTUM Hellas'),
 
     // Rows per list page (a resource can set its own with ->perPage())
     'per_page' => 25,
