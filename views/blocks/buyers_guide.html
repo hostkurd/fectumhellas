@@ -1,0 +1,20 @@
+@php /* Buyers guide (site block): photo band with questions linking to the guide. */ use FloCMS\Support\Site; $img = media($image); $href = Site::link($link); $qs = repeater_items($questions); @endphp
+<section class="fh-guide">
+    @if($img)<div class="fh-guide-media">{!! $img->img(['sizes' => '100vw', 'alt' => '']) !!}</div>@endif
+    <div class="fh-wrap fh-guide-grid">
+        <div class="fh-guide-text">
+            @if($eyebrow !== '')<p class="fh-eyebrow is-light">{{ $eyebrow }}</p>@endif
+            <h2 class="fh-h2 is-light">{{ $heading }}</h2>
+            @if($text !== '')<p class="fh-lead is-light">{{ $text }}</p>@endif
+        </div>
+        @if($qs || $href !== '')
+        <div class="fh-guide-card">
+            @foreach($qs as $q)
+            @php $qHref = Site::link($q['link'] ?? '') ?: $href; @endphp
+            @if($qHref !== '')<a class="fh-guide-q" href="{{ $qHref }}">{{ $q['question'] }}<svg aria-hidden="true" class="fh-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>@else<p class="fh-guide-q">{{ $q['question'] }}</p>@endif
+            @endforeach
+            @if($href !== '' && $link_text !== '')<a class="fh-link is-plain" href="{{ $href }}">{{ $link_text }}<svg aria-hidden="true" class="fh-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>@endif
+        </div>
+        @endif
+    </div>
+</section>

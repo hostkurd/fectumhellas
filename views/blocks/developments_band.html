@@ -1,0 +1,17 @@
+@php /* Developments band (site block): photo beside the published developments. */ use FloCMS\Support\Site; $img = media($image); @endphp
+<section class="fh-band">
+    <div class="fh-band-media">@if($img){!! $img->img(['sizes' => '(max-width: 900px) 100vw, 50vw']) !!}@else<div class="fh-placeholder" aria-hidden="true"></div>@endif</div>
+    <div class="fh-band-text">
+        @if($eyebrow !== '')<p class="fh-eyebrow is-light">{{ $eyebrow }}</p>@endif
+        <h2 class="fh-h2 is-light">{{ $heading }}</h2>
+        @if($text !== '')<p class="fh-lead is-light">{{ $text }}</p>@endif
+        @if($projects)
+        <ul class="fh-band-list">
+            @foreach($projects as $d)
+            <li><a href="{{ $d['url'] }}"><span class="fh-band-name"><b>{{ $d['title'] }}</b><span>{{ $d['location'] }}@if($d['residences'] > 0) · {{ $d['residences'] === 1 ? __('fh.residences_one') : __('fh.residences_count', ['count' => (string) $d['residences']]) }}@endif</span></span>@if($d['progress'] !== '')<span class="fh-tag is-light">{{ $d['progress'] }}</span>@endif</a></li>
+            @endforeach
+        </ul>
+        @endif
+        <a class="fh-btn fh-btn-line is-light" href="{{ Site::url('developments') }}">{{ $link_text !== '' ? $link_text : __('fh.explore_developments') }}<svg aria-hidden="true" class="fh-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+</section>

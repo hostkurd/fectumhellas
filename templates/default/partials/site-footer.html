@@ -1,0 +1,61 @@
+<?php
+/* Site footer (Design C): brand and tagline, links, contacts and company details from Settings. */
+use FloCMS\Support\Site;
+$fhAddress = Site::setting('contact.address');
+$fhPhone = Site::setting('contact.phone');
+$fhEmail = Site::setting('contact.email');
+$fhWhatsapp = Site::setting('contact.whatsapp');
+$fhCompany = array_values(array_filter([
+    Site::setting('company.legal_name'),
+    Site::setting('company.gemi') !== '' ? __('fh.footer.gemi') . ' ' . Site::setting('company.gemi') : '',
+    Site::setting('company.licence') !== '' ? __('fh.footer.licence') . ' ' . Site::setting('company.licence') : '',
+    Site::setting('company.vat') !== '' ? __('fh.footer.vat') . ' ' . Site::setting('company.vat') : '',
+]));
+$fhSocial = array_filter(array_map([Site::class, 'link'], [
+    'Facebook' => Site::setting('social.facebook'),
+    'Instagram' => Site::setting('social.instagram'),
+    'LinkedIn' => Site::setting('social.linkedin'),
+    'YouTube' => Site::setting('social.youtube'),
+]));
+?>
+<footer class="fh-footer">
+<div class="fh-wrap fh-footer-inner">
+<div class="fh-footer-grid">
+<div class="fh-footer-brand">
+<img src="<?= Site::asset('images/brand/logo-line-white.svg') ?>" alt="FECTUM Hellas" width="212" height="36" loading="lazy">
+<p class="fh-footer-tagline"><?= Site::e(Site::setting('company.tagline')) ?></p>
+<?php if ($fhSocial !== []) { ?>
+<p class="fh-footer-social"><?php foreach ($fhSocial as $name => $url) { ?><a href="<?= Site::e($url) ?>" rel="noopener"><?= Site::e($name) ?></a><?php } ?></p>
+<?php } ?>
+</div>
+<nav class="fh-footer-col" aria-label="<?= Site::e(__('fh.footer.explore')) ?>">
+<span class="fh-footer-title"><?= Site::e(__('fh.footer.explore')) ?></span>
+<a href="<?= Site::e(Site::url('properties')) ?>"><?= Site::e(__('fh.nav.properties')) ?></a>
+<a href="<?= Site::e(Site::url('developments')) ?>"><?= Site::e(__('fh.nav.developments')) ?></a>
+<a href="<?= Site::e(Site::pageUrl('services')) ?>"><?= Site::e(__('fh.nav.services')) ?></a>
+<a href="<?= Site::e(Site::url('insights')) ?>"><?= Site::e(__('fh.footer.insights')) ?></a>
+</nav>
+<nav class="fh-footer-col" aria-label="<?= Site::e(__('fh.footer.company')) ?>">
+<span class="fh-footer-title"><?= Site::e(__('fh.footer.company')) ?></span>
+<a href="<?= Site::e(Site::pageUrl('about')) ?>"><?= Site::e(__('fh.nav.about')) ?></a>
+<a href="<?= Site::e(Site::pageUrl('international-buyers')) ?>"><?= Site::e(__('fh.footer.buyers')) ?></a>
+<a href="<?= Site::e(Site::pageUrl('contact')) ?>"><?= Site::e(__('fh.nav.contact')) ?></a>
+</nav>
+<div class="fh-footer-col">
+<span class="fh-footer-title"><?= Site::e(__('fh.footer.contact')) ?></span>
+<?php if ($fhAddress !== '') { ?><span><?= nl2br(Site::e($fhAddress), false) ?></span><?php } ?>
+<?php if ($fhPhone !== '') { ?><a href="tel:<?= Site::e(Site::tel($fhPhone)) ?>" class="fh-ltr"><?= Site::e($fhPhone) ?></a><?php } ?>
+<?php if ($fhWhatsapp !== '') { ?><a href="<?= Site::e(Site::whatsapp($fhWhatsapp)) ?>" rel="noopener">WhatsApp</a><?php } ?>
+<?php if ($fhEmail !== '') { ?><a href="mailto:<?= Site::e($fhEmail) ?>" class="fh-ltr"><?= Site::e($fhEmail) ?></a><?php } ?>
+</div>
+</div>
+<div class="fh-footer-bottom">
+<span class="fh-footer-legal"><span>© <?= date('Y') ?> FECTUM Hellas. <?= Site::e(__('fh.footer.rights')) ?></span><?php if ($fhCompany !== []) { ?><span class="fh-footer-company"><?= Site::e(implode(' · ', $fhCompany)) ?></span><?php } ?></span>
+<nav class="fh-footer-lang" aria-label="<?= Site::e(__('fh.language')) ?>">
+<?php foreach (Site::LANGUAGES as $code => $info) { ?>
+<a href="<?= Site::e(Site::switchUrl($code)) ?>" lang="<?= $code ?>" hreflang="<?= $code ?>"<?= $code === Site::lang() ? ' aria-current="true"' : '' ?>><?= Site::e($info['name']) ?></a>
+<?php } ?>
+</nav>
+</div>
+</div>
+</footer>

@@ -1,0 +1,14 @@
+@php /* Closing call to action (site block): blue band with two buttons. */ use FloCMS\Support\Site; $h1 = Site::link($link); $h2 = Site::link($link2); @endphp
+<section class="fh-cta">
+    <img class="fh-cta-mark" src="{{ Site::asset('images/brand/logo-mark-white.svg') }}" alt="" aria-hidden="true" loading="lazy">
+    <div class="fh-wrap fh-cta-inner">
+        <div class="fh-cta-text">
+            <h2 class="fh-h2 is-large is-light">{{ $heading }}</h2>
+            @if($text !== '')<p class="fh-lead is-light">{{ $text }}</p>@endif
+        </div>
+        <div class="fh-actions">
+            @if($button !== '' && $h1 !== '')<a class="fh-btn fh-btn-white" href="{{ $h1 }}">{{ $button }}</a>@endif
+            @if($button2 !== '' && $h2 !== '')<a class="fh-btn fh-btn-line is-light" href="{{ $h2 }}">{{ $button2 }}</a>@endif
+        </div>
+    </div>
+</section>

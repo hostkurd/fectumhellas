@@ -10,7 +10,8 @@
       "FloCMS\\Models\\": "models/",
       "FloCMS\\Support\\": "support/",
       "App\\Api\\": "api/",
-      "App\\Commands\\": "commands/"
+      "App\\Commands\\": "commands/",
+      "App\\Admin\\Blocks\\": "admin/Blocks/"
     }
   },
 

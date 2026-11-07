@@ -1,0 +1,17 @@
+@php /* Company details (site block): from Settings → Company details and Contact details. */ @endphp
+@if($details)
+<section class="fh-section fh-company">
+    <div class="fh-wrap fh-company-grid">
+        <div class="fh-section-title">
+            @if($eyebrow !== '')<p class="fh-eyebrow">{{ $eyebrow }}</p>@endif
+            @if($heading !== '')<h2 class="fh-h2">{{ $heading }}</h2>@endif
+            @if($text !== '')<p class="fh-lead">{{ $text }}</p>@endif
+        </div>
+        <dl class="fh-details">
+            @foreach($details as $label => $value)
+            <div><dt>{{ __($label) }}</dt><dd>{!! nl2br(e($value), false) !!}</dd></div>
+            @endforeach
+        </dl>
+    </div>
+</section>
+@endif

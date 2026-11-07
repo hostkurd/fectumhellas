@@ -1,0 +1,27 @@
+@php /* Team (site block): Content → Team, in its order. */ use FloCMS\Support\Site; @endphp
+@if($people)
+<section class="fh-section fh-team">
+    <div class="fh-wrap fh-stack">
+        @if($heading !== '' || $eyebrow !== '' || $text !== '')
+        <div class="fh-section-title">
+            @if($eyebrow !== '')<p class="fh-eyebrow">{{ $eyebrow }}</p>@endif
+            @if($heading !== '')<h2 class="fh-h2">{{ $heading }}</h2>@endif
+            @if($text !== '')<p class="fh-lead">{{ $text }}</p>@endif
+        </div>
+        @endif
+        <ul class="fh-people">
+            @foreach($people as $person)
+            <li class="fh-person">
+                <span class="fh-person-photo">@if($person['photo']){!! $person['photo']->img(['sizes' => '320px', 'alt' => $person['name']]) !!}@else<span class="fh-initials" aria-hidden="true">{{ mb_substr($person['name'], 0, 1) }}</span>@endif</span>
+                <span class="fh-person-name">{{ $person['name'] }}</span>
+                @if($person['role'] !== '')<span class="fh-person-role">{{ $person['role'] }}</span>@endif
+                @if($person['bio'] !== '')<span class="fh-person-bio">{{ $person['bio'] }}</span>@endif
+                @if($person['email'] !== '' || $person['linkedin'] !== '')
+                <span class="fh-person-links">@if($person['email'] !== '')<a class="fh-ltr" href="mailto:{{ $person['email'] }}">{{ $person['email'] }}</a>@endif @if(Site::link($person['linkedin']) !== '')<a href="{{ Site::link($person['linkedin']) }}" rel="noopener">LinkedIn</a>@endif</span>
+                @endif
+            </li>
+            @endforeach
+        </ul>
+    </div>
+</section>
+@endif

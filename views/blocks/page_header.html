@@ -1,0 +1,9 @@
+@php /* Page header (site block): the top of an inner page with its H1. */ $img = media($image); @endphp
+<header class="fh-page-header{{ $img ? ' has-image' : '' }}">
+    @if($img)<div class="fh-page-header-media">{!! $img->img(['loading' => 'eager', 'fetchpriority' => 'high', 'sizes' => '100vw', 'alt' => '']) !!}</div>@endif
+    <div class="fh-wrap fh-page-header-text">
+        @if($eyebrow !== '')<p class="fh-eyebrow">{{ $eyebrow }}</p>@endif
+        <h1 class="fh-h1">{{ $heading }}</h1>
+        @if($text !== '')<p class="fh-lead">{{ $text }}</p>@endif
+    </div>
+</header>

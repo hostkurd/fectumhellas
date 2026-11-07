@@ -1,0 +1,29 @@
+@php /* Service tiles (site block): full-photo tiles with text over a dark shading. */ use FloCMS\Support\Site; $href = Site::link($link); $tiles = repeater_items($items); @endphp
+<section class="fh-section fh-services">
+    <div class="fh-wrap fh-stack">
+        @if($heading !== '' || $eyebrow !== '')
+        <div class="fh-section-head">
+            <div class="fh-section-title">
+                @if($eyebrow !== '')<p class="fh-eyebrow">{{ $eyebrow }}</p>@endif
+                @if($heading !== '')<h2 class="fh-h2">{{ $heading }}</h2>@endif
+            </div>
+            @if($href !== '' && $link_text !== '')<a class="fh-link" href="{{ $href }}">{{ $link_text }}<svg aria-hidden="true" class="fh-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>@endif
+        </div>
+        @endif
+        <div class="fh-tiles">
+            @foreach($tiles as $i => $t)
+            @php $tileImg = media($t['image'] ?? null); $tileHref = Site::link($t['link'] ?? ''); $tag = $tileHref !== '' ? 'a' : 'div'; @endphp
+            <{{ $tag }} class="fh-tile"{!! $tileHref !== '' ? ' href="' . e($tileHref) . '"' : '' !!}>
+                @if($tileImg){!! $tileImg->img(['sizes' => '(max-width: 900px) 100vw, 33vw', 'alt' => '']) !!}@endif
+                <span class="fh-tile-shade" aria-hidden="true"></span>
+                <span class="fh-tile-text">
+                    <span class="fh-tile-num fh-ltr">{{ str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) }}</span>
+                    <span class="fh-tile-title">{{ $t['title'] }}</span>
+                    @if(($t['text'] ?? '') !== '')<span class="fh-tile-copy">{{ $t['text'] }}</span>@endif
+                    @if($tileHref !== '' && ($t['link_text'] ?? '') !== '')<span class="fh-tile-link">{{ $t['link_text'] }}<svg aria-hidden="true" class="fh-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>@endif
+                </span>
+            </{{ $tag }}>
+            @endforeach
+        </div>
+    </div>
+</section>

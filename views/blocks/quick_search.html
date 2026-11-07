@@ -1,0 +1,19 @@
+@php /* Quick search (site block): a plain GET form to the Properties page; the same names as its filters (search_*). */ use FloCMS\Support\Site; @endphp
+<section class="fh-quick-search" aria-label="{{ $heading !== '' ? $heading : __('fh.find_property') }}">
+    <form class="fh-wrap fh-quick-form" method="get" action="{{ Site::url('properties') }}">
+        <p class="fh-quick-title">{{ $heading !== '' ? $heading : __('fh.find_property') }}</p>
+        <label class="fh-field"><span>{{ __('fh.filter.location') }}</span>
+            <select name="search_city"><option value="">{{ __('fh.filter.all_locations') }}</option>@foreach($cities as $id => $name)<option value="{{ $id }}">{{ $name }}</option>@endforeach</select>
+        </label>
+        <label class="fh-field"><span>{{ __('fh.filter.type') }}</span>
+            <select name="search_type"><option value="">{{ __('fh.filter.all_types') }}</option>@foreach($types as $id => $name)<option value="{{ $id }}">{{ $name }}</option>@endforeach</select>
+        </label>
+        <label class="fh-field"><span>{{ __('fh.filter.bedrooms') }}</span>
+            <select name="search_beds"><option value="">{{ __('fh.filter.any') }}</option>@foreach([1, 2, 3, 4] as $n)<option value="{{ $n }}">{{ $n }}+</option>@endforeach</select>
+        </label>
+        <label class="fh-field"><span>{{ __('fh.filter.budget') }}</span>
+            <select name="search_max"><option value="">{{ __('fh.filter.any_budget') }}</option>@foreach([500000, 1000000, 2000000] as $n)<option value="{{ $n }}">{{ __('fh.filter.up_to', ['price' => Site::price($n)]) }}</option>@endforeach</select>
+        </label>
+        <button type="submit" class="fh-btn fh-btn-solid"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>{{ __('fh.search') }}</button>
+    </form>
+</section>

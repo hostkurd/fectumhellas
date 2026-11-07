@@ -1,0 +1,30 @@
+<?php
+/*
+ * One property card (Design C): photo with status, location, title, beds,
+ * area, type, price and Property ID. $p comes from Listings::card().
+ * Save and Compare need JavaScript, so they start hidden (site.js shows them).
+ */
+use FloCMS\Support\Site;
+?>
+<article class="fh-card">
+<a class="fh-card-link" href="<?= Site::e($p['url']) ?>">
+<span class="fh-card-media">
+<?php if ($p['cover']) { ?><?= $p['cover']->img(['sizes' => '(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 420px', 'alt' => $p['cover']->alt() !== '' ? $p['cover']->alt() : $p['title']]) ?><?php } else { ?><span class="fh-placeholder" aria-hidden="true"></span><?php } ?>
+<?php if ($p['status'] !== '') { ?><span class="fh-card-status is-<?= Site::e($p['status_key']) ?>"><?= Site::e($p['status']) ?></span><?php } ?>
+</span>
+<span class="fh-card-body">
+<?php if ($p['location'] !== '') { ?><span class="fh-card-location"><?= Site::e($p['location']) ?></span><?php } ?>
+<span class="fh-card-title"><?= Site::e($p['title']) ?></span>
+<span class="fh-card-facts">
+<?php if ($p['beds'] !== null) { ?><span><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 19V6M3 14h18v5M21 14v-2a3 3 0 0 0-3-3h-8v5"/><circle cx="6.5" cy="11" r="1.5"/></svg><?= Site::e((int) $p['beds'] === 1 ? __('fh.beds_one') : __('fh.beds_count', ['count' => (string) $p['beds']])) ?></span><?php } ?>
+<?php if ($p['area'] !== '') { ?><span><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M4 10h6V4"/></svg><span class="fh-ltr"><?= Site::e($p['area']) ?></span></span><?php } ?>
+<?php if ($p['type'] !== '') { ?><span><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M4 21V9l8-5 8 5v12M9 21v-6h6v6"/></svg><?= Site::e($p['type']) ?></span><?php } ?>
+</span>
+</span>
+<span class="fh-card-foot"><span class="fh-card-price"><?= Site::e($p['price']) ?></span><span class="fh-card-ref fh-ltr"><?= Site::e($p['reference']) ?></span></span>
+</a>
+<span class="fh-card-actions" hidden data-fh-card-actions>
+<button type="button" class="fh-card-action" data-fh-save="<?= (int) $p['id'] ?>" aria-pressed="false"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 7.3 4.2 4.2 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></svg><span><?= Site::e(__('fh.save')) ?></span></button>
+<button type="button" class="fh-card-action" data-fh-compare="<?= (int) $p['id'] ?>" data-fh-full="<?= Site::e(__('fh.compare_full')) ?>" aria-pressed="false"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 4v16M16 4v16M4 8h8M12 16h8"/></svg><span><?= Site::e(__('fh.compare')) ?></span></button>
+</span>
+</article>
