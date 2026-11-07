@@ -5,7 +5,6 @@ namespace App\Admin\Resources;
 
 use FloCMS\Admin\Form\Fields\BelongsTo;
 use FloCMS\Admin\Form\Fields\FileUpload;
-use FloCMS\Admin\Form\Fields\KeyValue;
 use FloCMS\Admin\Form\Fields\MediaPicker;
 use FloCMS\Admin\Form\Fields\Repeater;
 use FloCMS\Admin\Form\Fields\RichEditor;
@@ -53,8 +52,11 @@ final class ProjectResource extends Resource
                 Slug::make('slug')->label('fh.f.slug')->from('title')->unique()->rules('required|max:190')->help('fh.h.slug'),
                 Textarea::make('summary')->label('fh.f.summary')->translatable()->rows(3)->rules('max:300')->help('fh.h.summary'),
                 RichEditor::make('description')->label('fh.f.description')->translatable(),
-                KeyValue::make('key_facts')->label('fh.f.key_facts')->keyLabel('fh.f.fact')->valueLabel('fh.f.fact_value')
-                    ->translatableValues()->help('fh.h.key_facts')->columnSpan('full'),
+                Repeater::make('key_facts')->label('fh.f.key_facts')->schema([
+                    TextInput::make('label')->label('fh.f.fact')->translatable()->required()->rules('max:60'),
+                    TextInput::make('value')->label('fh.f.fact_value')->translatable()->required()->rules('max:80'),
+                ])->itemLabel('label')->addLabel('fh.f.add_fact')->columns(2)->maxItems(12)->table()
+                    ->help('fh.h.key_facts')->columnSpan('full'),
             ]),
             Section::make('construction')->label('fh.s.construction')->columns(3)->schema([
                 Select::make('progress')->label('fh.f.progress')->options(Catalog::projectProgress())->default('planned')->required(),

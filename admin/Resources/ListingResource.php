@@ -201,7 +201,7 @@ final class ListingResource extends Resource
     /** The default-language text of a translatable value, tags removed. */
     public static function englishText(mixed $value): string
     {
-        $default = (string) (\FloCMS\Core\Config::get('default_language') ?: 'en');
+        $default = \FloCMS\Admin\Translation\Languages::default();
         $text = is_array($value) ? (string) ($value[$default] ?? '') : (string) $value;
         return trim(html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
     }

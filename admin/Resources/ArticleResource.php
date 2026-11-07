@@ -78,10 +78,10 @@ final class ArticleResource extends Resource
             ->defaultSort('published_at', 'desc');
     }
 
-    /** A published article gets today's date when none is set, and needs its English body. */
+    /** A published article without a date gets the current time, and needs its English body. */
     public function beforeSave(array $data, ?object $record): array
     {
-        if (($data['publish_status'] ?? '') === 'published' && empty($data['published_at']) && empty($record->published_at ?? null)) {
+        if (($data['publish_status'] ?? '') === 'published' && empty($data['published_at'])) {
             $data['published_at'] = date('Y-m-d H:i:s');
         }
         return $data;

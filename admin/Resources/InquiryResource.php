@@ -57,9 +57,9 @@ final class InquiryResource extends Resource
                 Placeholder::make('_preferred')->label('fh.f.preferred_contact')
                     ->content(static fn (?object $r): string => AdminLang::label(Catalog::contactMethods()[$r->preferred_contact ?? ''] ?? '—')),
                 Placeholder::make('_message')->label('fh.f.message')->columnSpan('full')
-                    ->content(static fn (?object $r): string => (string) ($r->message ?? '')),
+                    ->html(static fn (?object $r): string => self::block('fh.f.message', (string) ($r->message ?? ''))),
                 Placeholder::make('_about')->label('fh.f.about')->columnSpan('full')
-                    ->content(static fn (?object $r): string => $r === null ? '' : self::aboutText($r)),
+                    ->html(static fn (?object $r): string => $r === null ? '' : self::block('fh.f.about', self::aboutText($r))),
                 Placeholder::make('_received')->label('fh.f.received')
                     ->content(static fn (?object $r): string => (string) ($r->created_at ?? '')),
                 Placeholder::make('_email_sent')->label('fh.f.email_sent')
@@ -97,6 +97,35 @@ final class InquiryResource extends Resource
                 DateRangeFilter::make('created_at')->label('fh.f.received'),
             ])
             ->defaultSort('created_at', 'desc');
+    }
+
+    /**
+     * The CSV export: what the visitor sent plus the follow-up. Anyone with
+     * content.inquiries.export (Editors too) can download this personal data.
+     */
+    public function export(\FloCMS\Admin\ImportExport\Export $export): \FloCMS\Admin\ImportExport\Export
+    {
+        $label = static fn (string $key): string => AdminLang::label($key);
+        foreach (['reference' => 'fh.f.inquiry_reference', 'name' => 'fh.f.person_name', 'email' => 'fh.f.email',
+                  'phone' => 'fh.f.phone', 'message' => 'fh.f.message', 'lang' => 'fh.f.lang', 'page_url' => 'fh.f.page_url',
+                  'created_at' => 'fh.f.received'] as $column => $key) {
+            $export->column($column, static fn (object $r): string => (string) ($r->{$column} ?? ''), $label($key));
+        }
+        $export->column('type', static fn (object $r): string => AdminLang::label(Catalog::inquiryTypes()[$r->type ?? ''] ?? (string) ($r->type ?? '')), $label('fh.f.inquiry_type'));
+        $export->column('preferred_contact', static fn (object $r): string => AdminLang::label(Catalog::contactMethods()[$r->preferred_contact ?? ''] ?? ''), $label('fh.f.preferred_contact'));
+        $export->column('about', static fn (object $r): string => self::aboutText($r), $label('fh.f.about'));
+        return $export;
+    }
+
+    /**
+     * A read-only block that keeps line breaks: a label and escaped text in
+     * the panel's own markup (an html() placeholder has no label of its own).
+     */
+    private static function block(string $label, string $text): string
+    {
+        $e = static fn (string $v): string => \FloCMS\Admin\Support\Str::e($v);
+        return '<span class="fa-label">' . $e(AdminLang::label($label)) . '</span>'
+            . '<div class="fa-static">' . ($text === '' ? '—' : nl2br($e($text), false)) . '</div>';
     }
 
     /** A read-only line for a column the visitor sent. */

@@ -7,8 +7,10 @@ use FloCMS\Core\Database;
 /**
  * Inquiries from the website (D10). The website saves the row first, then
  * emails the team; email_sent stays 0 when that fails. Staff change only
- * status, owner and note. Deleting a listing, development or user keeps the
- * inquiry (SET NULL).
+ * status, owner and note. listing_id, project_id and owner_id have no
+ * foreign keys on purpose: a listing deleted to the trash and restored keeps
+ * its inquiries (a SET NULL key would lose the link for good); a missing
+ * record shows as "#12 (missing)".
  */
 return new class extends Migration
 {
@@ -40,9 +42,9 @@ return new class extends Migration
             `updated_at` DATETIME NULL,
             UNIQUE (`reference`),
             INDEX `inquiries_status` (`status`, `created_at`),
-            FOREIGN KEY (`listing_id`) REFERENCES `listings` (`id`) ON DELETE SET NULL,
-            FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE SET NULL,
-            FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+            INDEX `inquiries_listing` (`listing_id`),
+            INDEX `inquiries_project` (`project_id`),
+            INDEX `inquiries_owner` (`owner_id`)
         )' . $this->tableOptions($db));
     }
 

@@ -14,15 +14,16 @@ use FloCMS\Core\Database;
  *     php flo db:seed --class=DemoSeeder
  *
  * Never run it on the live site: every record says SAMPLE in its Property ID
- * or text and must be replaced by real content. Runs only on an empty
- * listings table. Photos come from the media library later.
+ * or text and must be replaced by real content. Runs only when there are no
+ * listings and no Residence One yet. Listings and the development are drafts:
+ * add a cover photo, then publish (the publish checks need one).
  */
 final class DemoSeeder extends Seeder
 {
     public function run(Database $db): void
     {
         $this->call(LookupsSeeder::class);
-        if ($db->table('listings')->count() > 0) {
+        if ($db->table('listings')->count() > 0 || $db->table('projects')->where('slug', '=', 'residence-one')->count() > 0) {
             return;
         }
         $now = date('Y-m-d H:i:s');
@@ -57,11 +58,11 @@ final class DemoSeeder extends Seeder
                 ['_key' => 'kstage0005', 'name' => ['en' => 'Handover', 'ar' => 'التسليم', 'el' => 'Παράδοση'], 'status' => 'upcoming', 'date' => ['en' => 'Q4 2027', 'ar' => 'الربع الرابع 2027', 'el' => 'Δ΄ τρίμ. 2027']],
             ],
             'key_facts' => [
-                ['key' => 'Floors', 'value' => ['en' => '6', 'ar' => '6', 'el' => '6']],
-                ['key' => 'Residences', 'value' => ['en' => '12', 'ar' => '12', 'el' => '12']],
-                ['key' => 'Energy class', 'value' => ['en' => 'A+', 'ar' => 'A+', 'el' => 'Α+']],
+                ['_key' => 'kfact00001', 'label' => ['en' => 'Floors', 'ar' => 'الطوابق', 'el' => 'Όροφοι'], 'value' => ['en' => '6', 'ar' => '6', 'el' => '6']],
+                ['_key' => 'kfact00002', 'label' => ['en' => 'Residences', 'ar' => 'الوحدات السكنية', 'el' => 'Κατοικίες'], 'value' => ['en' => '12', 'ar' => '12', 'el' => '12']],
+                ['_key' => 'kfact00003', 'label' => ['en' => 'Energy class', 'ar' => 'فئة الطاقة', 'el' => 'Ενεργειακή κλάση'], 'value' => ['en' => 'A+', 'ar' => 'A+', 'el' => 'Α+']],
             ],
-            'publish_status' => 'published',
+            'publish_status' => 'draft',
             'featured' => 1,
             'sort' => 1,
             'created_at' => $now,
@@ -127,7 +128,7 @@ final class DemoSeeder extends Seeder
                     'el' => '<p>Δείγμα περιγραφής. Φυσικό φως, ποιοτικά υλικά και πρακτική διαρρύθμιση κοντά σε καταστήματα και συγκοινωνίες.</p>',
                 ],
                 'featured' => $featured,
-                'publish_status' => 'published',
+                'publish_status' => 'draft',
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);
