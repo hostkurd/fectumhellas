@@ -132,7 +132,7 @@ final class ListingResource extends Resource
                 BadgeColumn::make('publish_status')->label('fh.f.publish_status')->labels(Catalog::publishStatuses())->colors(Catalog::publishColors()),
                 BooleanColumn::make('featured')->label('fh.f.featured')->toggleable(hiddenByDefault: true),
                 RelationColumn::make('project_id')->label('fh.f.project')->resource(ProjectResource::class)->toggleable(hiddenByDefault: true),
-                TranslationsColumn::make('translations')->fields(['title', 'description', 'summary']),
+                TranslationsColumn::make('translations')->fields(['title', 'description', 'summary'])->toggleable(hiddenByDefault: true),
                 DateColumn::make('updated_at')->label('fh.f.updated_at')->sortable()->toggleable(hiddenByDefault: true),
             ])
             ->tabs(TabsFilter::make('status')->label('fh.f.status')->options(Catalog::listingStatuses()))
