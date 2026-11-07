@@ -1,0 +1,20 @@
+<?php
+/*
+ * The office map (Contact, About): Leaflet from the site, OpenStreetMap tiles.
+ * Set $fhMap = ['height' => 'is-tall'|'' , 'label' => 'FECTUM Hellas'] before
+ * including; the pin comes from Settings › Contact details (latitude/longitude).
+ * Without JavaScript: a link to the place on openstreetmap.org.
+ */
+use FloCMS\Support\Site;
+
+$fhLat = (float) Site::setting('contact.latitude', '38.0010');
+$fhLng = (float) Site::setting('contact.longitude', '23.7745');
+$fhPin = trim((string) ($fhMap['label'] ?? '')) !== '' ? (string) $fhMap['label'] : 'FECTUM Hellas';
+$fhOsm = 'https://www.openstreetmap.org/?mlat=' . $fhLat . '&mlon=' . $fhLng . '#map=17/' . $fhLat . '/' . $fhLng;
+?>
+<div class="fh-map <?= Site::e((string) ($fhMap['height'] ?? '')) ?>" data-fh-map
+     data-lat="<?= Site::e((string) $fhLat) ?>" data-lng="<?= Site::e((string) $fhLng) ?>" data-label="<?= Site::e($fhPin) ?>"
+     data-css="<?= Site::e(Site::asset('themes/fectum/vendor/leaflet/leaflet.css')) ?>" data-js="<?= Site::e(Site::asset('themes/fectum/vendor/leaflet/leaflet.js')) ?>"
+     role="region" aria-label="<?= Site::e(__('fh.map_label')) ?>">
+    <a class="fh-map-fallback" href="<?= Site::e($fhOsm) ?>" rel="noopener"><?= Site::e(__('fh.map_open')) ?></a>
+</div>

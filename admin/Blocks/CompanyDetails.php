@@ -30,14 +30,20 @@ final class CompanyDetails extends Block
 
     public function data(array $fields): array
     {
+        return ['details' => self::details()];
+    }
+
+    /** @return array<string, string> label key => value, from the settings (empty values left out) */
+    public static function details(): array
+    {
         $s = static fn (string $key): string => \FloCMS\Support\Site::setting($key);
-        return ['details' => array_filter([
+        return array_filter([
             'fh.set.legal_name' => $s('company.legal_name'),
             'fh.set.gemi' => $s('company.gemi'),
             'fh.set.licence' => $s('company.licence'),
             'fh.set.vat' => $s('company.vat'),
             'fh.set.registered_office' => $s('company.registered_office'),
             'fh.set.office' => $s('contact.address'),
-        ], static fn (string $v): bool => $v !== '')];
+        ], static fn (string $v): bool => $v !== '');
     }
 }

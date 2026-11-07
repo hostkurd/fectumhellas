@@ -1,0 +1,13 @@
+@php /* Feature band (site block): blue text side with points beside a photo. */ $img = media($image); $points = repeater_items($points); @endphp
+<section class="fh-band fh-feature">
+    <div class="fh-band-text fh-feature-text">
+        <div class="fh-section-title">
+            @if($eyebrow !== '')<p class="fh-eyebrow is-light">{{ $eyebrow }}</p>@endif
+            <h2 class="fh-h2 is-light">{{ $heading }}</h2>
+        </div>
+        @foreach($points as $point)
+        <div class="fh-feature-point"><h3>{{ $point['title'] }}</h3>@if(($point['text'] ?? '') !== '')<p>{{ $point['text'] }}</p>@endif</div>
+        @endforeach
+    </div>
+    <div class="fh-band-media">@if($img){!! $img->img(['sizes' => '(max-width: 1100px) 100vw, 50vw', 'alt' => '']) !!}@else<span class="fh-placeholder"></span>@endif</div>
+</section>

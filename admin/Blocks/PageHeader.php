@@ -29,4 +29,14 @@ final class PageHeader extends Block
             MediaPicker::make('image')->label('fh.bf.image')->folder('Pages'),
         ];
     }
+
+    /** The breadcrumb (Home / this page), shown when the small label is empty. */
+    public function data(array $fields): array
+    {
+        $page = function_exists('current_page') ? current_page() : null;
+        return [
+            'home_url' => \FloCMS\Support\Site::url(''),
+            'page_title' => $page !== null && !$page->isHome() ? (string) $page->title() : '',
+        ];
+    }
 }

@@ -104,6 +104,41 @@
     }
   });
 
+  // Office maps: Leaflet (served by the site) with OpenStreetMap tiles, loaded once.
+  var maps = doc.querySelectorAll('[data-fh-map]');
+  if (maps.length) {
+    var first = maps[0];
+    var css = doc.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = first.getAttribute('data-css');
+    doc.head.appendChild(css);
+    var js = doc.createElement('script');
+    js.src = first.getAttribute('data-js');
+    js.onload = function () {
+      if (!window.L) { return; }
+      maps.forEach(function (el) {
+        var lat = parseFloat(el.getAttribute('data-lat'));
+        var lng = parseFloat(el.getAttribute('data-lng'));
+        if (isNaN(lat) || isNaN(lng)) { return; }
+        el.classList.add('is-live');
+        var map = window.L.map(el, { scrollWheelZoom: false, attributionControl: true }).setView([lat, lng], 16);
+        window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap</a>'
+        }).addTo(map);
+        var icon = window.L.divIcon({
+          className: 'fh-pin',
+          html: '<span class="fh-pin-label"></span><svg width="36" height="44" viewBox="0 0 24 28" aria-hidden="true"><path d="M12 27s-9-8-9-15a9 9 0 0 1 18 0c0 7-9 15-9 15z" fill="#2B4285"/><circle cx="12" cy="12" r="3.5" fill="#fff"/></svg>',
+          iconSize: [36, 44], iconAnchor: [18, 44]
+        });
+        var marker = window.L.marker([lat, lng], { icon: icon, title: el.getAttribute('data-label') || '', keyboard: false }).addTo(map);
+        var label = marker.getElement() && marker.getElement().querySelector('.fh-pin-label');
+        if (label) { label.textContent = el.getAttribute('data-label') || ''; }
+      });
+    };
+    doc.head.appendChild(js);
+  }
+
   window.addEventListener('storage', refresh);
   doc.querySelectorAll('[data-fh-card-actions]').forEach(function (el) { el.hidden = false; });
   refresh();

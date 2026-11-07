@@ -1,0 +1,41 @@
+@php /* Contact form (flocms-reactive component App\Components\ContactForm). Works as a plain POST form without JavaScript. */
+$err = static fn (string $f): string => (string) ($errors[$f] ?? '');
+$described = static fn (string $f): string => isset($errors[$f]) ? ' aria-invalid="true" aria-describedby="fh-e-' . $f . '"' : '';
+@endphp
+@if($sent !== '')
+<div class="fh-sent" role="status">
+    <span class="fh-sent-icon"><svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+    <h2 class="fh-h2">{{ __('fh.sent_title') }}</h2>
+    <p class="fh-lead">{!! __('fh.sent_text', ['reference' => '<strong class="fh-ltr">' . e($sent) . '</strong>']) !!}</p>
+    <button type="button" class="fh-link" data-rx-action="again">{{ __('fh.send_another') }}</button>
+</div>
+@else
+<form class="fh-form" method="post" action="{{ $action }}" data-rx-submit="send" data-fh-inquiry novalidate>
+    <input type="hidden" name="_token" value="{{ \FloCMS\Core\Csrf::token() }}">
+    <input type="hidden" name="page" value="{{ $page }}">
+    <input type="hidden" name="topic" value="{{ $topic }}">
+    <div class="fh-hp" aria-hidden="true"><label>Website<input type="text" name="website" data-rx-bind="website" data-rx-model="defer" tabindex="-1" autocomplete="off"></label></div>
+    @if($notice !== '')<p class="fh-form-alert" role="alert">{{ $notice }}</p>
+    @elseif($errors)<p class="fh-form-alert" role="alert">{{ __('fh.e.check') }}</p>@endif
+    <fieldset class="fh-topics">
+        <legend class="fh-form-title">{{ $heading }}</legend>
+        <div class="fh-chips">
+            @foreach($topics as $key => $t)
+            <button type="button" class="fh-chip" data-rx-action="pick" data-rx-set="topic" data-rx-value="{{ $key }}" aria-pressed="{{ $key === $topic ? 'true' : 'false' }}">{{ __($t[0]) }}</button>
+            @endforeach
+        </div>
+    </fieldset>
+    <div class="fh-form-grid">
+        <label class="fh-input{{ $err('name') !== '' ? ' has-error' : '' }}"><span>{{ __('fh.f_name') }}</span><input type="text" name="name" value="{{ $name }}" data-rx-bind="name" data-rx-model="lazy" autocomplete="name" required maxlength="190"{!! $described('name') !!}>@if($err('name') !== '')<small id="fh-e-name">{{ $err('name') }}</small>@endif</label>
+        <label class="fh-input{{ $err('email') !== '' ? ' has-error' : '' }}"><span>{{ __('fh.f_email') }}</span><input type="email" name="email" value="{{ $email }}" data-rx-bind="email" data-rx-model="lazy" autocomplete="email" required maxlength="190" dir="ltr"{!! $described('email') !!}>@if($err('email') !== '')<small id="fh-e-email">{{ $err('email') }}</small>@endif</label>
+        <label class="fh-input{{ $err('phone') !== '' ? ' has-error' : '' }}"><span>{{ __('fh.f_phone') }} <em>{{ __('fh.optional') }}</em></span><input type="tel" name="phone" value="{{ $phone }}" data-rx-bind="phone" data-rx-model="lazy" autocomplete="tel" maxlength="40" dir="ltr"{!! $described('phone') !!}>@if($err('phone') !== '')<small id="fh-e-phone">{{ $err('phone') }}</small>@endif</label>
+        <label class="fh-input"><span>{{ __('fh.f_preferred') }}</span><select name="preferred_contact" data-rx-bind="preferred" data-rx-model="lazy">@foreach($methods as $key => $labelKey)<option value="{{ $key }}"@if($preferred === $key) selected@endif>{{ __($labelKey) }}</option>@endforeach</select></label>
+    </div>
+    <label class="fh-input{{ $err('message') !== '' ? ' has-error' : '' }}"><span>{{ __($topics[$topic][1] ?? 'fh.prompt.other') }}</span><textarea name="message" rows="5" data-rx-bind="message" data-rx-model="defer" required maxlength="5000"{!! $described('message') !!}>{{ $message }}</textarea>@if($err('message') !== '')<small id="fh-e-message">{{ $err('message') }}</small>@endif</label>
+    <label class="fh-consent{{ $err('consent') !== '' ? ' has-error' : '' }}"><input type="checkbox" name="consent" value="1" data-rx-bind="consent" data-rx-model="lazy"@if($consent) checked@endif required{!! $described('consent') !!}><span>@if($privacy !== ''){!! __('fh.consent_link', ['link' => '<a href="' . e($privacy) . '">' . e(__('fh.privacy_policy')) . '</a>']) !!}@else{{ __('fh.consent') }}@endif @if($err('consent') !== '')<small id="fh-e-consent">{{ $err('consent') }}</small>@endif</span></label>
+    <div class="fh-form-foot">
+        @if($replyNote !== '')<span class="fh-form-note">{{ $replyNote }}</span>@else<span></span>@endif
+        <button type="submit" class="fh-btn fh-btn-solid">{{ __('fh.send_message') }}<span class="fh-spinner" data-rx-loading aria-hidden="true"></span></button>
+    </div>
+</form>
+@endif

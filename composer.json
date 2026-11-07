@@ -11,7 +11,8 @@
       "FloCMS\\Support\\": "support/",
       "App\\Api\\": "api/",
       "App\\Commands\\": "commands/",
-      "App\\Admin\\Blocks\\": "admin/Blocks/"
+      "App\\Admin\\Blocks\\": "admin/Blocks/",
+            "App\\Components\\": "components/"
     }
   },
 

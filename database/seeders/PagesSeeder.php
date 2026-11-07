@@ -13,9 +13,10 @@ use FloCMS\Core\Database;
  *
  *     php flo db:seed --class=PagesSeeder
  *
- * Safe to run again: a page whose English slug already exists is skipped,
- * and so is Home when a home page is already set (a page whose English slug
- * an editor has since changed would be added again: run it once, at setup). The sample photos
+ * Safe to run again: a page whose English slug already exists keeps what
+ * editors made of it; one nobody has saved in the admin since it was seeded
+ * gets the newest starting content. Home is skipped when another home page
+ * is set. (A page whose English slug an editor changed would be added again.) The sample photos
  * (database/seeders/samples) are copied into the media library once, with
  * "SAMPLE" in their title: replace them with the company's own photos.
  * Texts about buying, tax and residency are starting copy for the legal
@@ -39,12 +40,23 @@ final class PagesSeeder extends Seeder
         $sort = 0;
         foreach ($this->pages() as $slug => $page) {
             $sort++;
-            if (in_array($slug, $existing, true) || ($slug === 'home' && $hasHome)) {
-                continue;
-            }
             $blocks = [];
             foreach (self::LANGS as $lang) {
                 $blocks[$lang] = $page['blocks']($lang);
+            }
+            $row = $existing[$slug] ?? null;
+            if ($row !== null) {
+                // Never saved in the admin since it was seeded: bring it up to the newest starting content.
+                if ((string) $row->created_at === (string) $row->updated_at) {
+                    $db->table('admin_pages')->where('id', '=', (int) $row->id)->update([
+                        'blocks' => json_encode($blocks, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                        'meta_description' => json_encode($page['meta_description'], JSON_UNESCAPED_UNICODE),
+                    ]);
+                }
+                continue;
+            }
+            if ($slug === 'home' && $hasHome) {
+                continue;
             }
             $db->table('admin_pages')->insert([
                 'title' => json_encode($page['title'], JSON_UNESCAPED_UNICODE),
@@ -244,33 +256,51 @@ final class PagesSeeder extends Seeder
         return [
             $this->block('page_header', [
                 'eyebrow' => $t(['en' => 'About', 'ar' => 'من نحن', 'el' => 'Η εταιρεία']),
-                'heading' => $t(['en' => 'Building value across Greece', 'ar' => 'نبني القيمة في أنحاء اليونان', 'el' => 'Χτίζουμε αξία σε όλη την Ελλάδα']),
-                'text' => $t(['en' => 'A real estate development and investment company in Greece.', 'ar' => 'شركة تطوير واستثمار عقاري في اليونان.', 'el' => 'Εταιρεία ανάπτυξης και επένδυσης ακινήτων στην Ελλάδα.']),
+                'heading' => $t(['en' => 'Property, built around your future', 'ar' => 'عقارات مصمّمة حول مستقبلك', 'el' => 'Ακίνητα, γύρω από το μέλλον σας']),
+                'text' => $t(['en' => 'A real estate development and investment company in Greece, developing residential properties and assisting local and international clients with sales, acquisitions and investment.',
+                    'ar' => 'شركة تطوير واستثمار عقاري في اليونان، تطوّر العقارات السكنية وتساعد العملاء المحليين والدوليين في البيع والشراء والاستثمار.',
+                    'el' => 'Εταιρεία ανάπτυξης και επένδυσης ακινήτων στην Ελλάδα, που αναπτύσσει κατοικίες και υποστηρίζει πελάτες από την Ελλάδα και το εξωτερικό σε πωλήσεις, αγορές και επενδύσεις.']),
                 'image' => $this->photo('town'),
             ]),
-            $this->block('intro', [
+            $this->block('story', [
                 'eyebrow' => $t(['en' => 'Who we are', 'ar' => 'من نحن', 'el' => 'Ποιοι είμαστε']),
-                'heading' => $t(['en' => 'Property in Greece, built around your future.', 'ar' => 'عقارات في اليونان، مصمّمة حول مستقبلك.', 'el' => 'Ακίνητα στην Ελλάδα, γύρω από το μέλλον σας.']),
-                'text' => $t(['en' => 'FECTUM Hellas develops residential properties and assists local and international clients with property sales, acquisitions and real estate investment opportunities.',
-                    'ar' => 'تطوّر فيكتوم هيلاس العقارات السكنية وتساعد العملاء المحليين والدوليين في بيع العقارات وشرائها وفي فرص الاستثمار العقاري.',
-                    'el' => 'Η FECTUM Hellas αναπτύσσει κατοικίες και υποστηρίζει πελάτες από την Ελλάδα και το εξωτερικό σε πωλήσεις, αγορές και επενδυτικές ευκαιρίες.']),
-                'image' => $this->photo('roofs'),
+                'heading' => $t(['en' => 'Property, from the ground up.', 'ar' => 'العقار من أساسه.', 'el' => 'Το ακίνητο, από τα θεμέλια.']),
+                'text' => $t([
+                    'en' => "We develop and construct private homes and residential buildings, and we help clients buy, sell and invest in residential property across Greece. Because we build, we evaluate every property the way a developer does: location, quality and long-term value.\n\nFor international buyers we coordinate each acquisition with qualified legal and professional partners, so clients can buy with confidence even from abroad.",
+                    'ar' => "نطوّر ونبني المنازل الخاصة والمباني السكنية، ونساعد العملاء في شراء العقارات السكنية وبيعها والاستثمار فيها في أنحاء اليونان. ولأننا نبني، نقيّم كل عقار كما يفعل المطوّر: الموقع والجودة والقيمة على المدى البعيد.\n\nوللمشترين الدوليين ننسّق كل عملية شراء مع شركاء قانونيين ومهنيين مؤهلين، ليشتري العملاء بثقة حتى من الخارج.",
+                    'el' => "Αναπτύσσουμε και κατασκευάζουμε κατοικίες και πολυκατοικίες, και βοηθάμε πελάτες να αγοράσουν, να πουλήσουν και να επενδύσουν σε κατοικίες σε όλη την Ελλάδα. Επειδή χτίζουμε, αξιολογούμε κάθε ακίνητο όπως ένας κατασκευαστής: τοποθεσία, ποιότητα και μακροπρόθεσμη αξία.\n\nΓια διεθνείς αγοραστές συντονίζουμε κάθε αγορά με εξειδικευμένους νομικούς και επαγγελματίες συνεργάτες, ώστε να αγοράζουν με σιγουριά ακόμη και από το εξωτερικό.",
+                ]),
+            ]),
+            $this->block('numbered_columns', [
+                'eyebrow' => $t(['en' => 'What we do', 'ar' => 'ما نقدّمه', 'el' => 'Τι κάνουμε']),
+                'heading' => $t(['en' => 'Development, sales and investment, in one team.', 'ar' => 'التطوير والبيع والاستثمار في فريق واحد.', 'el' => 'Ανάπτυξη, πωλήσεις και επενδύσεις, σε μία ομάδα.']),
+                'items' => [
+                    $this->item(['title' => $t(['en' => 'Property development & construction', 'ar' => 'تطوير العقارات وبناؤها', 'el' => 'Ανάπτυξη & κατασκευή ακινήτων']), 'text' => $t(['en' => 'Private homes and residential buildings with contemporary architecture and quality materials.', 'ar' => 'منازل خاصة ومبانٍ سكنية بعمارة معاصرة ومواد عالية الجودة.', 'el' => 'Κατοικίες και πολυκατοικίες με σύγχρονη αρχιτεκτονική και ποιοτικά υλικά.']), 'link' => 'services']),
+                    $this->item(['title' => $t(['en' => 'Property sales & acquisition', 'ar' => 'بيع العقارات وشراؤها', 'el' => 'Πωλήσεις & αγορές ακινήτων']), 'text' => $t(['en' => 'From property selection and negotiation through to acquisition and completion.', 'ar' => 'من اختيار العقار والتفاوض حتى الشراء وإتمام الصفقة.', 'el' => 'Από την επιλογή και τη διαπραγμάτευση έως την αγορά και την ολοκλήρωση.']), 'link' => 'services']),
+                    $this->item(['title' => $t(['en' => 'Investment & residency support', 'ar' => 'دعم الاستثمار والإقامة', 'el' => 'Υποστήριξη επένδυσης & διαμονής']), 'text' => $t(['en' => 'Opportunities for international investors, with Golden Visa coordination through qualified partners.', 'ar' => 'فرص للمستثمرين الدوليين، مع تنسيق التأشيرة الذهبية عبر شركاء مؤهلين.', 'el' => 'Ευκαιρίες για διεθνείς επενδυτές, με συντονισμό για τη Χρυσή Βίζα μέσω εξειδικευμένων συνεργατών.']), 'link' => 'international-buyers']),
+                ],
+            ]),
+            $this->block('feature_band', [
+                'eyebrow' => $t(['en' => 'Why work with us', 'ar' => 'لماذا تعمل معنا', 'el' => 'Γιατί να συνεργαστείτε μαζί μας']),
+                'heading' => $t(['en' => 'Why work with FECTUM Hellas?', 'ar' => 'لماذا فيكتوم هيلاس؟', 'el' => 'Γιατί FECTUM Hellas;']),
+                'image' => $this->photo('hillside'),
                 'points' => [
-                    $this->item(['title' => $t(['en' => 'Development expertise', 'ar' => 'خبرة في التطوير', 'el' => 'Εμπειρία στην ανάπτυξη']), 'text' => $t(['en' => 'From planning and construction to sale and acquisition.', 'ar' => 'من التخطيط والبناء حتى البيع والشراء.', 'el' => 'Από τον σχεδιασμό και την κατασκευή έως την πώληση και την αγορά.'])]),
-                    $this->item(['title' => $t(['en' => 'Local market knowledge', 'ar' => 'معرفة بالسوق المحلية', 'el' => 'Γνώση της τοπικής αγοράς']), 'text' => $t(['en' => 'Opportunities judged by location, quality and long-term potential.', 'ar' => 'فرص تُقيَّم حسب الموقع والجودة والإمكانات على المدى البعيد.', 'el' => 'Ευκαιρίες με κριτήριο την τοποθεσία, την ποιότητα και τη μακροπρόθεσμη αξία.'])]),
+                    $this->item(['title' => $t(['en' => 'Development expertise', 'ar' => 'خبرة في التطوير', 'el' => 'Εμπειρία στην ανάπτυξη']), 'text' => $t(['en' => 'We understand property from the ground up, from planning and construction to sale and acquisition.', 'ar' => 'نفهم العقار من أساسه، من التخطيط والبناء حتى البيع والشراء.', 'el' => 'Γνωρίζουμε το ακίνητο από τα θεμέλια: από τον σχεδιασμό και την κατασκευή έως την πώληση και την αγορά.'])]),
+                    $this->item(['title' => $t(['en' => 'Local market knowledge', 'ar' => 'معرفة بالسوق المحلية', 'el' => 'Γνώση της τοπικής αγοράς']), 'text' => $t(['en' => 'Our understanding of the Greek property market helps clients evaluate opportunities by location, quality and long-term potential.', 'ar' => 'تساعد معرفتنا بسوق العقارات اليونانية العملاء على تقييم الفرص حسب الموقع والجودة والإمكانات على المدى البعيد.', 'el' => 'Η γνώση μας για την ελληνική αγορά ακινήτων βοηθά τους πελάτες να αξιολογούν ευκαιρίες με βάση την τοποθεσία, την ποιότητα και τη μακροπρόθεσμη αξία.'])]),
                 ],
             ]),
             $this->block('team_members', [
                 'eyebrow' => $t(['en' => 'Our team', 'ar' => 'فريقنا', 'el' => 'Η ομάδα μας']),
-                'heading' => $t(['en' => 'The people you will work with', 'ar' => 'الأشخاص الذين ستعمل معهم', 'el' => 'Οι άνθρωποι με τους οποίους θα συνεργαστείτε']),
-                'text' => '',
+                'heading' => $t(['en' => 'The people behind FECTUM Hellas.', 'ar' => 'الفريق وراء فيكتوم هيلاس.', 'el' => 'Οι άνθρωποι πίσω από τη FECTUM Hellas.']),
+                'text' => $t(['en' => 'Developers, sales advisers and client managers who work with you from the first viewing to completion.', 'ar' => 'مطوّرون ومستشارو مبيعات ومديرو علاقات يعملون معك من أول معاينة حتى إتمام الصفقة.', 'el' => 'Κατασκευαστές, σύμβουλοι πωλήσεων και υπεύθυνοι πελατών που είναι δίπλα σας από την πρώτη επίσκεψη έως την ολοκλήρωση.']),
+                'company' => '1',
             ]),
-            $this->block('company_details', [
-                'eyebrow' => $t(['en' => 'Company details', 'ar' => 'بيانات الشركة', 'el' => 'Στοιχεία εταιρείας']),
-                'heading' => $t(['en' => 'Registered in Greece', 'ar' => 'شركة مسجّلة في اليونان', 'el' => 'Εγγεγραμμένη στην Ελλάδα']),
-                'text' => '',
+            $this->block('office_map', [
+                'eyebrow' => $t(['en' => 'Our office', 'ar' => 'مكتبنا', 'el' => 'Το γραφείο μας']),
+                'heading' => $t(['en' => 'Based in Athens.', 'ar' => 'مقرّنا في أثينا.', 'el' => 'Με έδρα την Αθήνα.']),
+                'button' => $t(['en' => 'Contact us', 'ar' => 'تواصل معنا', 'el' => 'Επικοινωνία']),
+                'link' => 'contact',
             ]),
-            $this->block('closing_cta', $this->cta($l)),
         ];
     }
 
@@ -322,21 +352,23 @@ final class PagesSeeder extends Seeder
         $t = fn (array $s): string => $s[$l];
         return [
             $this->block('page_header', [
-                'eyebrow' => $t(['en' => 'Contact', 'ar' => 'اتصل بنا', 'el' => 'Επικοινωνία']),
+                'eyebrow' => '',
                 'heading' => $t(['en' => 'Talk to our team', 'ar' => 'تحدّث مع فريقنا', 'el' => 'Μιλήστε με την ομάδα μας']),
-                'text' => $t(['en' => 'Visit our office in Athens, call, or message us on WhatsApp.', 'ar' => 'زوروا مكتبنا في أثينا، أو اتصلوا بنا، أو راسلونا عبر واتساب.', 'el' => 'Επισκεφθείτε το γραφείο μας στην Αθήνα, καλέστε ή στείλτε μας μήνυμα στο WhatsApp.']),
+                'text' => $t(['en' => 'Whether you are looking for a home, an investment opportunity or a development partner, tell us what you need and we will take the next step with you.',
+                    'ar' => 'سواء كنت تبحث عن منزل أو فرصة استثمارية أو شريك في التطوير، أخبرنا بما تحتاج وسنخطو الخطوة التالية معك.',
+                    'el' => 'Είτε αναζητάτε κατοικία, επενδυτική ευκαιρία ή συνεργάτη ανάπτυξης, πείτε μας τι χρειάζεστε και θα κάνουμε μαζί το επόμενο βήμα.']),
             ]),
-            $this->block('contact', [
-                'heading' => $t(['en' => 'Visit or call us', 'ar' => 'زورونا أو اتصلوا بنا', 'el' => 'Επισκεφθείτε μας ή καλέστε']),
-                'intro' => '',
-                'address' => $t(['en' => "42 Adrianeiou\n11525 Athens, Greece", 'ar' => "42 Adrianeiou\n11525 أثينا، اليونان", 'el' => "Αδριανείου 42\n11525 Αθήνα"]),
-                'phone' => '+30 697 320 7477',
-                'email' => 'info@fectumhellas.gr',
-                'whatsapp' => '30 697 320 7477',
-                'hours' => [$this->item(['days' => $t(['en' => 'Mon–Fri', 'ar' => 'الاثنين–الجمعة', 'el' => 'Δευ–Παρ']), 'time' => '9:00–17:00'])],
-                // Approximate: check the pin in Admin › Pages › Contact.
-                'map' => 'osm', 'location' => '38.0010, 23.7745', 'zoom' => '16', 'layout' => 'map-end', 'map_now' => '0',
-            ], ['width' => 'boxed', 'space_above' => 'large', 'space_below' => 'large']),
+            $this->block('contact_panel', [
+                'heading' => '',
+                'reply_note' => $t(['en' => 'We reply within one working day.', 'ar' => 'نردّ خلال يوم عمل واحد.', 'el' => 'Απαντάμε εντός μίας εργάσιμης ημέρας.']),
+                'privacy_link' => '',
+                'map' => '1',
+            ]),
+            $this->block('link_strip', [
+                'text' => $t(['en' => 'Buying from abroad? Start with our property guide.', 'ar' => 'تشتري من الخارج؟ ابدأ بدليل العقارات.', 'el' => 'Αγοράζετε από το εξωτερικό; Ξεκινήστε από τον οδηγό μας.']),
+                'link_text' => $t(['en' => 'International buyers guide', 'ar' => 'دليل المشترين الدوليين', 'el' => 'Οδηγός διεθνών αγοραστών']),
+                'link' => 'international-buyers',
+            ]),
         ];
     }
 
@@ -440,13 +472,13 @@ final class PagesSeeder extends Seeder
         return $this->media[$name] ?? '';
     }
 
-    /** @return list<string> */
+    /** @return array<string, object> English slug => page row (id, created_at, updated_at) */
     private function existingSlugs(Database $db): array
     {
         $slugs = [];
-        foreach ($db->table('admin_pages')->select(['slug'])->get() as $row) {
+        foreach ($db->table('admin_pages')->select(['id', 'slug', 'created_at', 'updated_at'])->get() as $row) {
             $slug = json_decode((string) ($row->slug ?? ''), true);
-            $slugs[] = is_array($slug) ? (string) ($slug['en'] ?? reset($slug)) : (string) ($row->slug ?? '');
+            $slugs[is_array($slug) ? (string) ($slug['en'] ?? reset($slug)) : (string) ($row->slug ?? '')] = $row;
         }
         return $slugs;
     }

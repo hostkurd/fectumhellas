@@ -64,9 +64,11 @@ return [
                         'ar' => '42 Adrianeiou، 11525 أثينا، اليونان',
                         'el' => 'Αδριανείου 42, 11525 Αθήνα',
                     ])->columnSpan('full'),
-                TextInput::make('latitude')->label('fh.f.latitude')->numeric()->rules('numeric|min:-90|max:90'),
-                TextInput::make('longitude')->label('fh.f.longitude')->numeric()->rules('numeric|min:-180|max:180'),
-                TextInput::make('hours')->label('fh.set.hours')->translatable()->rules('max:120')->columnSpan('full'),
+                // The office pin on the website's maps (Contact, About). Approximate: check it.
+                TextInput::make('latitude')->label('fh.f.latitude')->numeric()->rules('numeric|min:-90|max:90')->default('38.0010')->help('fh.set.pin_help'),
+                TextInput::make('longitude')->label('fh.f.longitude')->numeric()->rules('numeric|min:-180|max:180')->default('23.7745'),
+                TextInput::make('hours')->label('fh.set.hours')->translatable()->rules('max:120')->columnSpan('full')
+                    ->default(['en' => 'Mon–Fri, 9:00–17:00', 'ar' => 'الاثنين–الجمعة، 9:00–17:00', 'el' => 'Δευ–Παρ, 9:00–17:00']),
             ]),
         ]),
 

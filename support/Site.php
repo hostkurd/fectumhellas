@@ -160,6 +160,17 @@ final class Site
         return false;
     }
 
+    /** flocms-reactive's script and styles, once per page (only pages with a live component load them). */
+    public static function reactiveAssets(): string
+    {
+        static $done = false;
+        if ($done || !class_exists(\FloCMS\Reactive\Reactive::class)) {
+            return '';
+        }
+        $done = true;
+        return \FloCMS\Reactive\Reactive::assets();
+    }
+
     /** A setting from the admin, trimmed, in the current language. */
     public static function setting(string $key, string $fallback = ''): string
     {

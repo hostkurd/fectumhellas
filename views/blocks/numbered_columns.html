@@ -1,0 +1,21 @@
+@php /* Numbered columns (site block): "What we do" on white. */ use FloCMS\Support\Site; $items = repeater_items($items); @endphp
+<section class="fh-section fh-numbered">
+    <div class="fh-wrap fh-stack">
+        <div class="fh-section-title">
+            @if($eyebrow !== '')<p class="fh-eyebrow">{{ $eyebrow }}</p>@endif
+            <h2 class="fh-h2">{{ $heading }}</h2>
+        </div>
+        @if($items)
+        <div class="fh-numbered-list">
+            @foreach($items as $i => $item)
+            @php $href = Site::link($item['link'] ?? ''); $tag = $href !== '' ? 'a' : 'div'; @endphp
+            <{{ $tag }} class="fh-numbered-item"@if($href !== '') href="{{ $href }}"@endif>
+                <span class="fh-tile-num">{{ sprintf('%02d', $i + 1) }}</span>
+                <span class="fh-numbered-title">{{ $item['title'] }}</span>
+                @if(($item['text'] ?? '') !== '')<span class="fh-numbered-text">{{ $item['text'] }}</span>@endif
+            </{{ $tag }}>
+            @endforeach
+        </div>
+        @endif
+    </div>
+</section>

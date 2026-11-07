@@ -1,14 +1,17 @@
-@php /* Team (site block): Content → Team, in its order. */ use FloCMS\Support\Site; @endphp
-@if($people)
+@php /* Team (site block): Content → Team, in its order, then the company details (approved About mockup). */ use FloCMS\Support\Site; @endphp
+@if($people || $details)
 <section class="fh-section fh-team">
     <div class="fh-wrap fh-stack">
         @if($heading !== '' || $eyebrow !== '' || $text !== '')
-        <div class="fh-section-title">
-            @if($eyebrow !== '')<p class="fh-eyebrow">{{ $eyebrow }}</p>@endif
-            @if($heading !== '')<h2 class="fh-h2">{{ $heading }}</h2>@endif
-            @if($text !== '')<p class="fh-lead">{{ $text }}</p>@endif
+        <div class="fh-section-head">
+            <div class="fh-section-title">
+                @if($eyebrow !== '')<p class="fh-eyebrow">{{ $eyebrow }}</p>@endif
+                @if($heading !== '')<h2 class="fh-h2">{{ $heading }}</h2>@endif
+            </div>
+            @if($text !== '')<p class="fh-lead fh-team-intro">{{ $text }}</p>@endif
         </div>
         @endif
+        @if($people)
         <ul class="fh-people">
             @foreach($people as $person)
             <li class="fh-person">
@@ -22,6 +25,17 @@
             </li>
             @endforeach
         </ul>
+        @endif
+        @if($details)
+        <div class="fh-company-box">
+            <h3 class="fh-company-box-title">{{ __('fh.company_details') }}</h3>
+            <dl>
+                @foreach($details as $label => $value)
+                <div><dt>{{ __($label) }}</dt><dd>{!! nl2br(e($value), false) !!}</dd></div>
+                @endforeach
+            </dl>
+        </div>
+        @endif
     </div>
 </section>
 @endif
