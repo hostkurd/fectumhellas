@@ -166,7 +166,7 @@ $download = '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" 
                 <div class="fh-dev-update-text">
                     <p class="fh-eyebrow">{{ __('fh.dev.latest_update') }}@if($latest['date'] !== '') · <time datetime="{{ $latest['datetime'] }}">{{ $latest['date'] }}</time>@endif</p>
                     <h3 class="fh-h3 is-large">{{ $latest['title'] }}</h3>
-                    @if($latest['body'] !== '')<div class="fh-prose is-small">{!! $latest['body'] !!}</div>@endif
+                    @if($latest['body'] !== '')<div class="fh-prose is-small"><p>{!! nl2br(e($latest['body'])) !!}</p></div>@endif
                 </div>
             </article>
             @if(count($updates) > 1)
@@ -174,7 +174,7 @@ $download = '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" 
                 <summary>{{ __('fh.dev.earlier_updates', ['count' => (string) (count($updates) - 1)]) }}</summary>
                 <ol>
                     @foreach(array_slice($updates, 1) as $up)
-                    <li><time datetime="{{ $up['datetime'] }}">{{ $up['date'] }}</time><div><h4>{{ $up['title'] }}</h4>@if($up['body'] !== '')<div class="fh-prose is-small">{!! $up['body'] !!}</div>@endif</div></li>
+                    <li>@if($up['date'] !== '')<time datetime="{{ $up['datetime'] }}">{{ $up['date'] }}</time>@else<span></span>@endif<div><h4>{{ $up['title'] }}</h4>@if($up['body'] !== '')<div class="fh-prose is-small"><p>{!! nl2br(e($up['body'])) !!}</p></div>@endif</div></li>
                     @endforeach
                 </ol>
             </details>
@@ -203,7 +203,7 @@ $download = '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" 
                 <h2 class="fh-h2 is-light">{{ __('fh.dev.interest_title') }}</h2>
                 <p class="fh-lead is-light">{{ __('fh.dev.interest_lead') }}</p>
             </div>
-            <div class="fh-dev-interest-card">{!! $v['form'] !!}</div>
+            <div class="fh-dev-interest-card"><div class="fh-js-only">{!! $v['form'] !!}</div><noscript><p class="fh-side-nojs">{{ __('fh.nojs_interest') }}</p></noscript></div>
         </div>
     </section>
 </main>

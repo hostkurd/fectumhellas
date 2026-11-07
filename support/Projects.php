@@ -219,6 +219,14 @@ final class Projects
     /** "October 2026" in the visitor's language. */
     public static function month(string $value): string
     {
+        $time = strtotime($value);
+        if ($time === false) {
+            return '';
+        }
+        if (Site::lang() === 'el') { // a month on its own takes the nominative ("Οκτώβριος 2026")
+            $months = ['Ιανουάριος', 'Φεβρουάριος', 'Μάρτιος', 'Απρίλιος', 'Μάιος', 'Ιούνιος', 'Ιούλιος', 'Αύγουστος', 'Σεπτέμβριος', 'Οκτώβριος', 'Νοέμβριος', 'Δεκέμβριος'];
+            return $months[(int) date('n', $time) - 1] . ' ' . date('Y', $time);
+        }
         $date = Listings::date($value);
         return $date !== '' ? (string) preg_replace('/^\d{1,2}\s+/u', '', $date) : '';
     }

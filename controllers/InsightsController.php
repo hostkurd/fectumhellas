@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace FloCMS\Controllers;
 
 use FloCMS\Core\Controller;
+use FloCMS\Core\HttpException;
 use FloCMS\Support\Articles;
 use FloCMS\Support\Catalog;
 use FloCMS\Support\Site;
@@ -18,15 +19,31 @@ class InsightsController extends Controller
 {
     public function index(): void
     {
-        $category = is_string($_GET['category'] ?? null) && array_key_exists($_GET['category'], Catalog::articleCategories()) ? $_GET['category'] : '';
-        $page = is_string($_GET['page'] ?? null) && ctype_digit($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
+        $raw = $_GET['category'] ?? '';
+        if (!is_string($raw) || ($raw !== '' && !array_key_exists($raw, Catalog::articleCategories()))) {
+            throw new HttpException(404);
+        }
+        $category = $raw;
+        $rawPage = $_GET['page'] ?? '1';
+        if (!is_string($rawPage) || !ctype_digit($rawPage) || (int) $rawPage < 1) {
+            throw new HttpException(404);
+        }
+        $page = (int) $rawPage;
         $counts = Articles::counts();
 
-        // The featured article opens the first page; it is left out of the grid below it.
-        $featured = $page === 1 ? Articles::featured($category) : null;
+        // The featured article opens the first page and is left out of the grid on every page,
+        // so the pages never shift. No featured article chosen ("All" only): the newest one.
+        $featured = Articles::featured($category);
+        if ($featured === null && $category === '') {
+            $newest = Articles::page('', 1, 0, 1)['items'];
+            $featured = $newest[0] ?? null;
+        }
         $list = Articles::page($category, $page, $featured !== null ? (int) $featured['id'] : 0);
-        if ($featured === null && $page === 1 && $category === '' && $list['items'] !== []) {
-            $featured = array_shift($list['items']); // no featured article chosen: the newest one
+        if ($page > $list['pages']) {
+            throw new HttpException(404);
+        }
+        if ($page > 1) {
+            $featured = null;
         }
 
         $query = static fn (string $cat, int $p): string => ($q = http_build_query(array_filter(['category' => $cat, 'page' => $p > 1 ? $p : null]))) !== '' ? '?' . $q : '';

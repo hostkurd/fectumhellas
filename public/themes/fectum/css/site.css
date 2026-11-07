@@ -1050,6 +1050,7 @@ html:not(.fh-js) .fh-js-only{display:none}
   .fh-article-related{padding-block:72px 80px}
 }
 
+[dir=rtl] .fh-dev-status,[dir=rtl] .fh-dev-facts dt,[dir=rtl] .fh-dev-more,[dir=rtl] .fh-dev-table thead th,[dir=rtl] .fh-unit-state,[dir=rtl] .fh-dev-plan-btn,[dir=rtl] .fh-dev-stage-state,[dir=rtl] .fh-dev-earlier summary,[dir=rtl] .fh-dev-earlier time,[dir=rtl] .fh-devlist-totals dt,[dir=rtl] .fh-devlist-badge,[dir=rtl] .fh-devlist-k{letter-spacing:0;font-size:13px;text-transform:none}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition:none !important;animation:none !important}
 }

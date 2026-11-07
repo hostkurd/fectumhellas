@@ -24,8 +24,8 @@ $arrow = '<svg class="fh-arrow" aria-hidden="true" width="16" height="16" viewBo
                 <span class="fh-in-featured-media">@if($featured['cover']){!! $featured['cover']->img(['sizes' => '(max-width: 900px) 100vw, 60vw', 'alt' => '', 'loading' => 'eager', 'fetchpriority' => 'high']) !!}@else<span class="fh-placeholder"></span>@endif</span>
                 <span class="fh-in-featured-text">
                     <span class="fh-post-meta">{{ __('fh.featured') }}@if($featured['category_label'] !== '') · {{ $featured['category_label'] }}@endif</span>
-                    <span class="fh-in-featured-title" dir="auto">{{ $featured['title'] }}</span>
-                    @if($featured['excerpt'] !== '')<span class="fh-post-excerpt" dir="auto">{{ $featured['excerpt'] }}</span>@endif
+                    <span class="fh-in-featured-title">{{ $featured['title'] }}</span>
+                    @if($featured['excerpt'] !== '')<span class="fh-post-excerpt">{{ $featured['excerpt'] }}</span>@endif
                     <span class="fh-in-date">@if($featured['date'] !== '')<time datetime="{{ $featured['datetime'] }}">{{ $featured['date'] }}</time> · @endif{{ $featured['read'] }}</span>
                     <span class="fh-link">{{ __('fh.read_article') }}{!! $arrow !!}</span>
                 </span>
@@ -42,8 +42,8 @@ $arrow = '<svg class="fh-arrow" aria-hidden="true" width="16" height="16" viewBo
                 <a class="fh-post" href="{{ $b['url'] }}">
                     <span class="fh-post-media">@if($b['cover']){!! $b['cover']->img(['sizes' => '(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 420px', 'alt' => '']) !!}@else<span class="fh-placeholder"></span>@endif</span>
                     @if($b['category_label'] !== '')<span class="fh-post-meta">{{ $b['category_label'] }}</span>@endif
-                    <span class="fh-post-title" dir="auto">{{ $b['title'] }}</span>
-                    @if($b['excerpt'] !== '')<span class="fh-post-excerpt" dir="auto">{{ $b['excerpt'] }}</span>@endif
+                    <span class="fh-post-title">{{ $b['title'] }}</span>
+                    @if($b['excerpt'] !== '')<span class="fh-post-excerpt">{{ $b['excerpt'] }}</span>@endif
                     <span class="fh-in-date">@if($b['date'] !== '')<time datetime="{{ $b['datetime'] }}">{{ $b['date'] }}</time> · @endif{{ $b['read'] }}</span>
                 </a>
                 @endforeach

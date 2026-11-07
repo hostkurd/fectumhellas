@@ -499,6 +499,7 @@ return array(
     'fh.property_question' => 'سؤال عن عقار',
     'fh.viewing_request' => 'طلب معاينة',
     // Stage 3c
+    'fh.nojs_interest' => 'لتسجيل اهتمامك، اتصل بنا أو راسلنا عبر واتساب.',
     'fh.copy_link' => 'نسخ الرابط',
     'fh.share_on' => 'مشاركة على :site',
     'fh.note' => 'ملاحظة',

@@ -9,8 +9,8 @@ $arrow = '<svg class="fh-arrow" aria-hidden="true" width="16" height="16" viewBo
             <div class="fh-article-col fh-article-head-inner">
                 <nav class="fh-crumbs" aria-label="{{ __('fh.breadcrumb') }}"><a href="{{ Site::url('') }}">{{ __('fh.home') }}</a><span aria-hidden="true">/</span><a href="{{ Site::url('insights') }}">{{ __('fh.insights_title') }}</a>@if($a['category_label'] !== '')<span aria-hidden="true">/</span><a href="{{ $v['categoryUrl'] }}">{{ $a['category_label'] }}</a>@endif</nav>
                 @if($a['category_label'] !== '')<a class="fh-eyebrow fh-article-cat" href="{{ $v['categoryUrl'] }}">{{ $a['category_label'] }}</a>@endif
-                <h1 class="fh-article-h1" dir="auto">{{ $a['title'] }}</h1>
-                @if($a['excerpt'] !== '')<p class="fh-article-lead" dir="auto">{{ $a['excerpt'] }}</p>@endif
+                <h1 class="fh-article-h1">{{ $a['title'] }}</h1>
+                @if($a['excerpt'] !== '')<p class="fh-article-lead">{{ $a['excerpt'] }}</p>@endif
                 <div class="fh-article-meta">
                     <span class="fh-in-date">@if($a['date'] !== '')<time datetime="{{ $a['datetime'] }}">{{ $a['date'] }}</time> · @endif{{ $a['read'] }}</span>
                     <div class="fh-article-share">
@@ -31,7 +31,7 @@ $arrow = '<svg class="fh-arrow" aria-hidden="true" width="16" height="16" viewBo
         @endif
 
         @if($v['body'] !== '')
-        <div class="fh-article-col fh-prose fh-article-body" dir="auto">{!! $v['body'] !!}</div>
+        <div class="fh-article-col fh-prose fh-article-body">{!! $v['body'] !!}</div>
         @endif
 
         @if($v['note'])
@@ -51,7 +51,7 @@ $arrow = '<svg class="fh-arrow" aria-hidden="true" width="16" height="16" viewBo
                 <a class="fh-post" href="{{ $b['url'] }}">
                     <span class="fh-post-media">@if($b['cover']){!! $b['cover']->img(['sizes' => '(max-width: 700px) 100vw, 420px', 'alt' => '']) !!}@else<span class="fh-placeholder"></span>@endif</span>
                     @if($b['category_label'] !== '')<span class="fh-post-meta">{{ $b['category_label'] }}</span>@endif
-                    <span class="fh-post-title" dir="auto">{{ $b['title'] }}</span>
+                    <span class="fh-post-title">{{ $b['title'] }}</span>
                     <span class="fh-in-date">@if($b['date'] !== '')<time datetime="{{ $b['datetime'] }}">{{ $b['date'] }}</time> · @endif{{ $b['read'] }}</span>
                 </a>
                 @endforeach

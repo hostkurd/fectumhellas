@@ -42,9 +42,9 @@ $extra = static fn (array $d): string => $d['from'] !== '' && $d['available'] > 
                     @if($featured['status'] !== '')<span class="fh-devlist-badge">{{ $featured['status'] }}</span>@endif</span>
                 <span class="fh-in-featured-text">
                     <span class="fh-eyebrow">{{ __('fh.dev.featured') }}</span>
-                    <span class="fh-in-featured-title" dir="auto">{{ $featured['title'] }}</span>
+                    <span class="fh-in-featured-title">{{ $featured['title'] }}</span>
                     @if($featured['location'] !== '')<span class="fh-devlist-place">{!! $pin !!}{{ $featured['location'] }}</span>@endif
-                    @if($featured['summary'] !== '')<span class="fh-post-excerpt" dir="auto">{{ $featured['summary'] }}</span>@endif
+                    @if($featured['summary'] !== '')<span class="fh-post-excerpt">{{ $featured['summary'] }}</span>@endif
                     @php $facts = array_filter([__('fh.dev.t_available_short') => $featured['total'] > 0 ? $featured['available'] . ' / ' . $featured['total'] : '', __('fh.dev.f_from') => $featured['available'] > 0 ? $featured['from'] : '', __('fh.dev.f_completion') => $featured['completion']]); @endphp
                     @if($facts)
                     <span class="fh-devlist-facts">@foreach($facts as $k => $val)<span><span class="fh-devlist-k">{{ $k }}</span><span class="fh-devlist-v"@if($k === __('fh.dev.t_available_short')) dir="ltr"@endif>{{ $val }}</span></span>@endforeach</span>
@@ -68,9 +68,9 @@ $extra = static fn (array $d): string => $d['from'] !== '' && $d['available'] > 
                     <span class="fh-devcard-media">@if($d['cover']){!! $d['cover']->img(['sizes' => '(max-width: 700px) 100vw, (max-width: 1200px) 50vw, 430px', 'alt' => '']) !!}@else<span class="fh-placeholder"></span>@endif
                         @if($d['status'] !== '')<span class="fh-devlist-badge">{{ $d['status'] }}</span>@endif</span>
                     <span class="fh-devcard-body">
-                        <span class="fh-devcard-title" dir="auto">{{ $d['title'] }}</span>
+                        <span class="fh-devcard-title">{{ $d['title'] }}</span>
                         @if($d['location'] !== '')<span class="fh-devlist-place">{!! $pin !!}{{ $d['location'] }}</span>@endif
-                        @if($d['summary'] !== '')<span class="fh-devcard-summary" dir="auto">{{ $d['summary'] }}</span>@endif
+                        @if($d['summary'] !== '')<span class="fh-devcard-summary">{{ $d['summary'] }}</span>@endif
                         @if($units($d) !== '' || $extra($d) !== '')<span class="fh-devcard-foot"><span class="fh-devcard-units">{{ $units($d) }}</span><span>{{ $extra($d) }}</span></span>@endif
                     </span>
                 </a>

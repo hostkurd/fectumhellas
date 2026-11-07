@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace FloCMS\Controllers;
 
 use FloCMS\Core\Controller;
+use FloCMS\Core\HttpException;
 use FloCMS\Support\Catalog;
 use FloCMS\Support\Projects;
 use FloCMS\Support\Site;
@@ -17,7 +18,10 @@ class DevelopmentsController extends Controller
 {
     public function index(): void
     {
-        $status = is_string($_GET['status'] ?? null) && array_key_exists($_GET['status'], Catalog::projectProgress()) ? $_GET['status'] : '';
+        $status = $_GET['status'] ?? '';
+        if (!is_string($status) || ($status !== '' && !array_key_exists($status, Catalog::projectProgress()))) {
+            throw new HttpException(404);
+        }
         $counts = Projects::counts();
         $all = Projects::all();
         $items = $status === '' ? $all : array_values(array_filter($all, static fn (array $d): bool => $d['progress'] === $status));

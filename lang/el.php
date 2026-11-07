@@ -499,6 +499,7 @@ return array(
     'fh.property_question' => 'Ερώτηση για ακίνητο',
     'fh.viewing_request' => 'Αίτημα επίσκεψης',
     // Stage 3c
+    'fh.nojs_interest' => 'Για να δηλώσετε ενδιαφέρον, καλέστε μας ή στείλτε μας μήνυμα στο WhatsApp.',
     'fh.copy_link' => 'Αντιγραφή συνδέσμου',
     'fh.share_on' => 'Κοινοποίηση στο :site',
     'fh.note' => 'Σημείωση',

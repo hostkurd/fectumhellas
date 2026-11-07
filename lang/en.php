@@ -499,6 +499,7 @@ return array(
     'fh.property_question' => 'Question about a property',
     'fh.viewing_request' => 'Viewing request',
     // Stage 3c
+    'fh.nojs_interest' => 'To register your interest, call us or message us on WhatsApp.',
     'fh.copy_link' => 'Copy link',
     'fh.share_on' => 'Share on :site',
     'fh.note' => 'Note',
