@@ -17,6 +17,7 @@ Thumbs.db
 /public/uploads/*
 !/public/uploads/.htaccess
 /storage/uploads/
+/storage/admin-uploads/
 
 # cPanel AutoSSL domain validation files
 /public/.well-known/

@@ -38,7 +38,7 @@ return [
     // Pages built from blocks, HTML or rich text, at /admin/site-pages (0.30); then
     // php flo admin:install and php flo migrate. Needs flocms-core 2.6.
     // 'pages' => true,  or ['missing' => '404'] to answer 404 for a page not translated
-    'pages' => false,
+    'pages' => true,
 
     // The site's own blocks for Builder fields (0.29): php flo make:admin-block LatestProjects.
     'blocks' => [

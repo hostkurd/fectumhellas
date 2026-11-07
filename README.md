@@ -37,6 +37,35 @@ php flo serve
 
 Open `http://localhost:8000/en/admin` and sign in.
 
+Starting lookups (cities, property types, amenities in three languages; skipped when a table already has rows, so it is safe on the live site):
+
+```
+php flo db:seed
+```
+
+Sample content for testing (six listings, the development Residence One, an article, two team members, an inquiry). Local or test server only, never the live site:
+
+```
+php flo db:seed --class=DemoSeeder
+```
+
+## Content in the admin
+
+| Sidebar | URL | Holds |
+| --- | --- | --- |
+| Inquiries | `/admin/inquiries` | Sent from the website; staff set status, owner and an internal note |
+| Properties | `/admin/listings` | Listings, with gallery, floor plans, videos, a YouTube/Vimeo link and a public PDF brochure |
+| Developments | `/admin/projects` | Developments, with their residences (listings) and progress updates on the same page |
+| Insights | `/admin/articles` | Articles |
+| Team | `/admin/team` | Team members on About |
+| Cities, Property types, Amenities | `/admin/cities` … | Lookups |
+| Pages | `/admin/site-pages` | Home, Services, About, Contact … built from blocks |
+| Settings | `/admin/settings` | Contact details, company details, social links, notification address, SEO defaults, cost of buying (Administrators only) |
+
+The resource slugs differ from the public addresses (`/properties`, `/developments`, `/insights`) because a public controller of the same name would also answer `/admin/<slug>`.
+
+A property or development can only be published with its English title and description, a city, a cover photo and (properties) a type and a price or "Price on request". Option lists shared with the website (statuses, energy classes, …) are in `support/Catalog.php`; their labels are the `fh.*` keys of `lang/*.php`.
+
 ## Roles
 
 | Role | For | Can do |
@@ -80,7 +109,7 @@ Take a cPanel backup before a deploy that runs migrations. One cPanel cron job r
 * * * * * php /home/USER/fectumhellas/flo schedule:run >> /dev/null 2>&1
 ```
 
-Kept out of Git: `.env`, `vendor/`, uploaded files (`public/uploads/`, `storage/uploads/`), caches and logs.
+Kept out of Git: `.env`, `vendor/`, uploaded files (`public/uploads/`, `storage/admin-uploads/`), caches and logs. Media library files are in `public/uploads/editor/`, brochures in `public/uploads/admin/`: include both in backups.
 
 ## Brand files
 
