@@ -194,6 +194,7 @@
     refresh();
     initMaps();
     initResultsMaps();
+    initDevelopment();
   }
 
   var leafletMaps = [];
@@ -391,6 +392,60 @@
     if (e.target.closest('[data-fh-to-results]')) { scrollResults = Date.now(); }
   });
   window.addEventListener('storage', refresh);
+
+  /* ---------- Development page: residence filter, floor plans, "Enquire about", sub navigation ---------- */
+  doc.addEventListener('click', function (e) {
+    if (!e.target.closest) { return; }
+    var pick = e.target.closest('[data-fh-units-filter] button');
+    if (pick) {
+      var state = pick.getAttribute('data-filter');
+      pick.parentNode.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', b === pick ? 'true' : 'false'); });
+      doc.querySelectorAll('[data-fh-units] tbody tr').forEach(function (tr) { tr.hidden = state !== 'all' && tr.getAttribute('data-state') !== state; });
+      doc.querySelectorAll('[data-fh-planbox]').forEach(function (box) {
+        var row = doc.querySelector('[data-fh-plan="' + box.id.replace('fh-plan-', '') + '"]');
+        if (row && row.closest('tr').hidden) { box.hidden = true; row.setAttribute('aria-expanded', 'false'); row.closest('tr').classList.remove('is-open'); }
+      });
+      return;
+    }
+    var plan = e.target.closest('[data-fh-plan]');
+    if (plan) {
+      var box = doc.getElementById('fh-plan-' + plan.getAttribute('data-fh-plan'));
+      var opening = plan.getAttribute('aria-expanded') !== 'true';
+      doc.querySelectorAll('[data-fh-plan]').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); b.closest('tr').classList.remove('is-open'); });
+      doc.querySelectorAll('[data-fh-planbox]').forEach(function (b) { b.hidden = true; });
+      if (box && opening) {
+        plan.setAttribute('aria-expanded', 'true');
+        plan.closest('tr').classList.add('is-open');
+        box.hidden = false;
+        if (box.getBoundingClientRect().top > window.innerHeight - 120) { box.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+      }
+      return;
+    }
+    var enquire = e.target.closest('[data-fh-enquire]');
+    if (enquire) {
+      var select = doc.querySelector('[data-fh-interest-unit]');
+      if (select) {
+        select.value = enquire.getAttribute('data-fh-enquire');
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
+  });
+  var subnavObserver = null;
+  function initDevelopment() {
+    if (subnavObserver) { subnavObserver.disconnect(); subnavObserver = null; }
+    doc.querySelectorAll('[data-fh-units-filter]').forEach(function (el) { el.hidden = false; });
+    var subnav = doc.querySelector('[data-fh-subnav]');
+    if (!subnav || !window.IntersectionObserver) { return; }
+    var links = Array.prototype.slice.call(subnav.querySelectorAll('a'));
+    var seen = {};
+    var io = subnavObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { seen[en.target.id] = en.isIntersecting; });
+      var current = null;
+      links.forEach(function (a) { var id = a.getAttribute('href').slice(1); if (!current && seen[id]) { current = a; } });
+      if (current) { links.forEach(function (a) { if (a === current) { a.setAttribute('aria-current', 'true'); } else { a.removeAttribute('aria-current'); } }); }
+    }, { rootMargin: '-160px 0px -55% 0px' });
+    links.forEach(function (a) { var t = doc.getElementById(a.getAttribute('href').slice(1)); if (t) { io.observe(t); } });
+  }
 
   /* =====================================================================
    * Navigation without page reloads

@@ -61,6 +61,17 @@ final class Catalog
     }
 
     /** Construction progress of a development (D6). */
+    /** Insights categories (Stage 3c), in tab order. */
+    public static function articleCategories(): array
+    {
+        return [
+            'buying_guide' => 'fh.cat.buying_guide',
+            'market_insights' => 'fh.cat.market_insights',
+            'golden_visa' => 'fh.cat.golden_visa',
+            'company_news' => 'fh.cat.company_news',
+        ];
+    }
+
     public static function projectProgress(): array
     {
         return [

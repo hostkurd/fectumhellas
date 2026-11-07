@@ -40,6 +40,8 @@ use FloCMS\Support\Catalog;
  */
 final class ListingResource extends Resource
 {
+    use \FloCMS\Support\PublishesInBulk;
+
     protected static string $table = 'listings';
     protected static string $slug = 'listings';
     protected static bool $timestamps = true;
@@ -144,17 +146,7 @@ final class ListingResource extends Resource
                 ToggleFilter::make('featured')->label('fh.f.featured'),
             ])
             ->bulkActions([
-                BulkAction::make('publish')->label('fh.bulk.publish')->color('success')
-                    ->permission(static::permission('update'))
-                    ->authorize(fn (?object $record): bool => $record !== null && $this->canEdit($record))
-                    ->action(function (BulkActionContext $context): void {
-                        $this->assertPublishable($context->records);
-                        $context->updateAll(['publish_status' => 'published']);
-                    }),
-                BulkAction::make('unpublish')->label('fh.bulk.unpublish')
-                    ->permission(static::permission('update'))
-                    ->authorize(fn (?object $record): bool => $record !== null && $this->canEdit($record))
-                    ->action(static fn (BulkActionContext $context) => $context->updateAll(['publish_status' => 'draft'])),
+                ...$this->publishBulkActions('fh.bulk.not_ready'),
                 BulkAction::make('feature')->label('fh.bulk.feature')
                     ->permission(static::permission('update'))
                     ->authorize(fn (?object $record): bool => $record !== null && $this->canEdit($record))
@@ -166,36 +158,6 @@ final class ListingResource extends Resource
                 DeleteBulkAction::make(),
             ])
             ->defaultSort('id', 'desc');
-    }
-
-    /**
-     * Bulk Publish skips the edit form, so the same publication checks run here.
-     * One listing that isn't ready stops the whole selection (nothing is written).
-     *
-     * @param iterable<object> $records
-     */
-    private function assertPublishable(iterable $records): void
-    {
-        $blocked = [];
-        foreach ($records as $record) {
-            $state = [];
-            foreach (get_object_vars($record) as $key => $value) {
-                if (is_string($value) && $value !== '' && $value[0] === '{') {
-                    $decoded = json_decode($value, true);
-                    $value = is_array($decoded) ? $decoded : $value;
-                }
-                $state[$key] = $value === null ? '' : (is_scalar($value) ? (string) $value : $value);
-            }
-            $state['publish_status'] = 'published';
-            $errors = $this->validate($state, $record);
-            unset($errors['video_url'], $errors['longitude']);
-            if ($errors !== []) {
-                $blocked[] = (string) (($record->reference ?? '') !== '' ? $record->reference : '#' . $record->id);
-            }
-        }
-        if ($blocked !== []) {
-            throw new \FloCMS\Core\ValidationException(['_form' => str_replace(':refs', implode(', ', $blocked), \FloCMS\Admin\Support\AdminLang::label('fh.bulk.not_ready'))]);
-        }
     }
 
     public function normalizeState(array $state, ?object $record): array

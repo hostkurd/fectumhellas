@@ -13,6 +13,7 @@ use FloCMS\Admin\Form\Fields\Slug;
 use FloCMS\Admin\Form\Fields\Textarea;
 use FloCMS\Admin\Form\Fields\TextInput;
 use FloCMS\Admin\Form\Fields\Toggle;
+use FloCMS\Admin\Actions\DeleteBulkAction;
 use FloCMS\Admin\Form\Form;
 use FloCMS\Admin\Form\Layout\Section;
 use FloCMS\Admin\Relations\RelationManager;
@@ -36,6 +37,8 @@ use FloCMS\Support\Catalog;
  */
 final class ProjectResource extends Resource
 {
+    use \FloCMS\Support\PublishesInBulk;
+
     protected static string $table = 'projects';
     protected static string $slug = 'projects';
     protected static bool $timestamps = true;
@@ -113,7 +116,7 @@ final class ProjectResource extends Resource
     {
         return $table
             ->columns([
-                MediaColumn::make('cover_id')->label('fh.f.cover')->toggleable(),
+                MediaColumn::make('cover_id')->label('fh.f.cover')->size('lg')->toggleable(),
                 TextColumn::make('title')->label('fh.f.title')->searchable()->sortable(),
                 RelationColumn::make('city_id')->label('fh.f.city')->resource(CityResource::class)->toggleable(),
                 BadgeColumn::make('progress')->label('fh.f.progress')->labels(Catalog::projectProgress())->colors(Catalog::projectProgressColors()),
@@ -121,12 +124,13 @@ final class ProjectResource extends Resource
                     ->format(static fn ($value): string => (int) $value . '%'),
                 CountColumn::make('residences')->label('fh.res.residences')->relation(ListingResource::class, 'project_id'),
                 BadgeColumn::make('publish_status')->label('fh.f.publish_status')->labels(Catalog::publishStatuses())->colors(Catalog::publishColors()),
-                TranslationsColumn::make('translations')->fields(['title', 'description', 'summary']),
+                TranslationsColumn::make('translations')->fields(['title', 'description', 'summary'])->toggleable(hiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('publish_status')->label('fh.f.publish_status')->options(Catalog::publishStatuses()),
                 SelectFilter::make('progress')->label('fh.f.progress')->options(Catalog::projectProgress()),
             ])
+            ->bulkActions([...$this->publishBulkActions('fh.bulk.not_ready_project'), DeleteBulkAction::make()])
             ->reorderable('sort');
     }
 

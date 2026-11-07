@@ -81,4 +81,6 @@
     // Website detail pages whose address ends in a slug (Stage 3 D2): /en/properties/<slug>.
     // Core can't take a slug as an action name, so a fallback answers them.
     \FloCMS\Core\App::fallbackUsing(static fn (string $path, \FloCMS\Core\Http\Request $request): ?\FloCMS\Core\Http\Response
-        => \FloCMS\Support\PropertyPage::handle($path, $request));
+        => \FloCMS\Support\PropertyPage::handle($path, $request)
+        ?? \FloCMS\Support\DevelopmentPage::handle($path, $request)
+        ?? \FloCMS\Support\ArticlePage::handle($path, $request));
