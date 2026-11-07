@@ -11,6 +11,7 @@ use FloCMS\Admin\Form\Fields\Slug;
 use FloCMS\Admin\Form\Fields\Textarea;
 use FloCMS\Admin\Form\Fields\TextInput;
 use FloCMS\Admin\Form\Fields\Toggle;
+use FloCMS\Admin\Actions\DeleteBulkAction;
 use FloCMS\Admin\Form\Form;
 use FloCMS\Admin\Form\Layout\Section;
 use FloCMS\Admin\Resource;
@@ -27,6 +28,8 @@ use FloCMS\Support\Catalog;
 /** Insights & Property Guide articles; public URL /<lang>/insights/<slug>. */
 final class ArticleResource extends Resource
 {
+    use \FloCMS\Support\PublishesInBulk;
+
     protected static string $table = 'articles';
     protected static string $slug = 'articles';
     protected static bool $timestamps = true;
@@ -54,7 +57,8 @@ final class ArticleResource extends Resource
                 Select::make('publish_status')->label('fh.f.publish_status')->options(Catalog::publishStatuses())
                     ->segmented()->default('draft')->required(),
                 DateTime::make('published_at')->label('fh.f.published_at')->help('fh.h.published_at'),
-                Toggle::make('featured')->label('fh.f.featured'),
+                Select::make('category')->label('fh.f.category')->options(Catalog::articleCategories())->default('buying_guide')->required(),
+                Toggle::make('featured')->label('fh.f.featured')->help('fh.h.article_featured'),
             ]),
             Section::make('cover')->label('fh.f.cover')->columns(1)->schema([
                 MediaPicker::make('cover_id')->label('fh.f.cover')->folder('Insights')->aspectRatio('16:9'),
@@ -66,15 +70,18 @@ final class ArticleResource extends Resource
     {
         return $table
             ->columns([
-                MediaColumn::make('cover_id')->label('fh.f.cover')->toggleable(),
+                MediaColumn::make('cover_id')->label('fh.f.cover')->size('md')->toggleable(),
                 TextColumn::make('title')->label('fh.f.title')->searchable()->sortable()->limit(70),
+                BadgeColumn::make('category')->label('fh.f.category')->labels(Catalog::articleCategories()),
                 BadgeColumn::make('publish_status')->label('fh.f.publish_status')->labels(Catalog::publishStatuses())->colors(Catalog::publishColors()),
                 DateColumn::make('published_at')->label('fh.f.published_at')->sortable(),
-                TranslationsColumn::make('translations')->fields(['title', 'excerpt', 'body']),
+                TranslationsColumn::make('translations')->fields(['title', 'excerpt', 'body'])->toggleable(hiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('publish_status')->label('fh.f.publish_status')->options(Catalog::publishStatuses()),
+                SelectFilter::make('category')->label('fh.f.category')->options(Catalog::articleCategories()),
             ])
+            ->bulkActions([...$this->publishBulkActions('fh.bulk.not_ready_article', static fn (object $r): array => empty($r->published_at) ? ['published_at' => date('Y-m-d H:i:s')] : []), DeleteBulkAction::make()])
             ->defaultSort('published_at', 'desc');
     }
 

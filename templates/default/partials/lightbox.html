@@ -1,0 +1,7 @@
+<?php /* The photo lightbox (property and development pages); site.js opens it from [data-fh-open] buttons and template[data-fh-photos]. */ ?>
+<dialog class="fh-lightbox" data-fh-lightbox aria-label="<?= \FloCMS\Support\Site::e(__('fh.gallery')) ?>">
+    <div class="fh-lightbox-top"><span data-fh-lb-count></span><button type="button" class="fh-lightbox-close" data-fh-lb-close aria-label="<?= \FloCMS\Support\Site::e(__('fh.close')) ?>"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <figure class="fh-lightbox-stage"><img alt="" data-fh-lb-img></figure>
+    <button type="button" class="fh-lightbox-nav is-prev" data-fh-lb-prev aria-label="<?= \FloCMS\Support\Site::e(__('fh.previous')) ?>"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <button type="button" class="fh-lightbox-nav is-next" data-fh-lb-next aria-label="<?= \FloCMS\Support\Site::e(__('fh.next')) ?>"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+</dialog>

@@ -113,6 +113,15 @@ final class Inquiries
         return self::save('listing', $mode === 'viewing' ? 'viewing' : 'question', $clean, $lang, $pageUrl, $ip, $userAgent, ['listing_id' => $listingId]);
     }
 
+    /**
+     * Saves "Register interest" on a development ($unit: the residence reference, or '')
+     * and emails the team.
+     */
+    public static function saveProject(int $projectId, string $unit, array $clean, string $lang, string $pageUrl, string $ip, string $userAgent): string
+    {
+        return self::save('project', $unit !== '' ? mb_substr($unit, 0, 60) : 'interest', $clean, $lang, $pageUrl, $ip, $userAgent, ['project_id' => $projectId]);
+    }
+
     /** Saves first, then emails; returns the reference. */
     private static function save(string $type, string $service, array $clean, string $lang, string $pageUrl, string $ip, string $userAgent, array $extra = []): string
     {
@@ -147,6 +156,12 @@ final class Inquiries
                 $about = (string) $rows[0]->reference . ' · ' . Translations::get($rows[0]->title ?? '', 'en');
             }
         }
+        if (isset($extra['project_id'])) {
+            $rows = $db->table('projects')->select(['title'])->where('id', '=', (int) $extra['project_id'])->limit(1)->get();
+            if (isset($rows[0])) {
+                $about = Translations::get($rows[0]->title ?? '', 'en') . ($service !== 'interest' ? ' · ' . $service : '');
+            }
+        }
         if (self::email($reference, $type, $service, $clean, $lang, $pageUrl, $about)) {
             $db->table('inquiries')->where('id', '=', $id)->update(['email_sent' => 1]);
         }
@@ -160,15 +175,17 @@ final class Inquiries
         if ($to === '' || filter_var($to, FILTER_VALIDATE_EMAIL) === false) {
             return false;
         }
-        $topic = $type === 'listing'
-            ? self::english($service === 'viewing' ? 'fh.viewing_request' : 'fh.property_question')
-            : self::english(self::TOPICS[$service][0] ?? 'fh.topic.other');
+        $topic = match ($type) {
+            'listing' => self::english($service === 'viewing' ? 'fh.viewing_request' : 'fh.property_question'),
+            'project' => self::english('fh.register_interest'),
+            default => self::english(self::TOPICS[$service][0] ?? 'fh.topic.other'),
+        };
         $method = self::english(self::METHODS[$clean['preferred_contact']] ?? 'fh.contact.email');
         $lines = [
             'New inquiry from the website: ' . $reference,
             '',
             'Topic: ' . $topic,
-            ...($about !== '' ? ['Property: ' . $about] : []),
+            ...($about !== '' ? [($type === 'project' ? 'Development: ' : 'Property: ') . $about] : []),
             'Name: ' . $clean['name'],
             'Email: ' . $clean['email'],
             'Phone: ' . ($clean['phone'] !== '' ? $clean['phone'] : '-'),

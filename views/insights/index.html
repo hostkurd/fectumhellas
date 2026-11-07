@@ -1,0 +1,75 @@
+@php /* Insights & Property Guide (approved Insights mockup). Data from FloCMS\Controllers\InsightsController::index. */
+use FloCMS\Support\Site;
+$tabs = $data['tabs']; $featured = $data['featured']; $list = $data['list']; $pageUrl = $data['pageUrl']; $current = $data['category'];
+$arrow = '<svg class="fh-arrow" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+@endphp
+<main id="main" class="fh-insights">
+    <header class="fh-list-head">
+        <div class="fh-wrap fh-list-head-text">
+            <nav class="fh-crumbs" aria-label="{{ __('fh.breadcrumb') }}"><a href="{{ Site::url('') }}">{{ __('fh.home') }}</a><span aria-hidden="true">/</span><span aria-current="page">{{ __('fh.insights_title') }}</span></nav>
+            <h1 class="fh-h1">{{ __('fh.insights_title') }}</h1>
+            <p class="fh-lead">{{ __('fh.insights_lead') }}</p>
+            @if(count($tabs) > 2)
+            <nav class="fh-tabs" aria-label="{{ __('fh.categories') }}">
+                @foreach($tabs as $t)<a href="{{ $t['url'] }}"@if($t['key'] === $current) aria-current="page"@endif>{{ $t['label'] }}</a>@endforeach
+            </nav>
+            @endif
+        </div>
+    </header>
+
+    @if($featured)
+    <section class="fh-in-featured-sec">
+        <div class="fh-wrap">
+            <a class="fh-in-featured" href="{{ $featured['url'] }}">
+                <span class="fh-in-featured-media">@if($featured['cover']){!! $featured['cover']->img(['sizes' => '(max-width: 900px) 100vw, 60vw', 'alt' => '', 'loading' => 'eager', 'fetchpriority' => 'high']) !!}@else<span class="fh-placeholder"></span>@endif</span>
+                <span class="fh-in-featured-text">
+                    <span class="fh-post-meta">{{ __('fh.featured') }}@if($featured['category_label'] !== '') · {{ $featured['category_label'] }}@endif</span>
+                    <span class="fh-in-featured-title" dir="auto">{{ $featured['title'] }}</span>
+                    @if($featured['excerpt'] !== '')<span class="fh-post-excerpt" dir="auto">{{ $featured['excerpt'] }}</span>@endif
+                    <span class="fh-in-date">@if($featured['date'] !== '')<time datetime="{{ $featured['datetime'] }}">{{ $featured['date'] }}</time> · @endif{{ $featured['read'] }}</span>
+                    <span class="fh-link">{{ __('fh.read_article') }}{!! $arrow !!}</span>
+                </span>
+            </a>
+        </div>
+    </section>
+    @endif
+
+    <section class="fh-in-list">
+        <div class="fh-wrap">
+            @if($list['items'])
+            <div class="fh-posts is-list">
+                @foreach($list['items'] as $b)
+                <a class="fh-post" href="{{ $b['url'] }}">
+                    <span class="fh-post-media">@if($b['cover']){!! $b['cover']->img(['sizes' => '(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 420px', 'alt' => '']) !!}@else<span class="fh-placeholder"></span>@endif</span>
+                    @if($b['category_label'] !== '')<span class="fh-post-meta">{{ $b['category_label'] }}</span>@endif
+                    <span class="fh-post-title" dir="auto">{{ $b['title'] }}</span>
+                    @if($b['excerpt'] !== '')<span class="fh-post-excerpt" dir="auto">{{ $b['excerpt'] }}</span>@endif
+                    <span class="fh-in-date">@if($b['date'] !== '')<time datetime="{{ $b['datetime'] }}">{{ $b['date'] }}</time> · @endif{{ $b['read'] }}</span>
+                </a>
+                @endforeach
+            </div>
+            @elseif(!$featured)
+            <p class="fh-empty">{{ __('fh.no_articles') }}@if($current !== '') <a href="{{ Site::url('insights') }}">{{ __('fh.all_articles') }}</a>@endif</p>
+            @endif
+            @if($list['pages'] > 1)
+            <nav class="fh-pager" aria-label="{{ __('fh.pages') }}">
+                @if($list['page'] > 1)<a class="fh-pager-step" href="{{ $pageUrl($list['page'] - 1) }}"><svg aria-hidden="true" class="fh-arrow fh-flip" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>{{ __('fh.newer_articles') }}</a>@endif
+                @for($i = max(1, $list['page'] - 2); $i <= min($list['pages'], $list['page'] + 2); $i++)
+                <a class="fh-pager-num" href="{{ $pageUrl($i) }}" @if($i === $list['page'])aria-current="page"@endif>{{ $i }}</a>
+                @endfor
+                @if($list['page'] < $list['pages'])<a class="fh-pager-step" href="{{ $pageUrl($list['page'] + 1) }}">{{ __('fh.older_articles') }}{!! $arrow !!}</a>@endif
+            </nav>
+            @endif
+        </div>
+    </section>
+
+    <section class="fh-in-band">
+        <div class="fh-wrap fh-in-band-inner">
+            <div class="fh-in-band-text">
+                <h2 class="fh-h2 is-light">{{ __('fh.insights_cta_title') }}</h2>
+                <p class="fh-lead is-light">{{ __('fh.insights_cta_lead') }}</p>
+            </div>
+            <a class="fh-btn fh-btn-white" href="{{ Site::pageUrl('contact') }}">{{ __('fh.talk_team') }}</a>
+        </div>
+    </section>
+</main>

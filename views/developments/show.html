@@ -1,0 +1,210 @@
+@php /* One development (approved Development mockup). $data from FloCMS\Support\DevelopmentPage::data(). */
+use FloCMS\Support\Site;
+$v = $data; $d = $v['d']; $units = $v['units']; $updates = $v['updates']; $latest = $updates[0] ?? null;
+$gallery = $v['gallery']; $shown = array_slice($gallery, 0, 3);
+$nav = array_filter([
+    'overview' => __('fh.dev.overview'),
+    'residences' => $units ? __('fh.dev.residences') : '',
+    'progress' => ($v['stages'] || $updates || $d['percent'] > 0) ? __('fh.dev.progress') : '',
+    'location' => $v['map'] ? __('fh.location') : '',
+    'interest' => __('fh.register_interest'),
+]);
+$facts = array_filter([
+    __('fh.dev.f_location') => $d['location'],
+    __('fh.dev.f_residences') => $d['total'] > 0 ? __('fh.dev.available_of', ['available' => (string) $d['available'], 'total' => (string) $d['total']]) : '',
+    __('fh.dev.f_from') => $d['from'],
+    __('fh.dev.f_completion') => $d['completion'],
+]);
+$arrow = '<svg class="fh-arrow" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+$download = '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>';
+@endphp
+<main id="main" class="fh-dev">
+    <section class="fh-dev-hero" aria-label="{{ $d['title'] }}">
+        @if($v['hero']){!! $v['hero']->img(['sizes' => '100vw', 'alt' => '', 'loading' => 'eager', 'fetchpriority' => 'high', 'class' => 'fh-dev-hero-img']) !!}@endif
+        <div class="fh-dev-hero-shade" aria-hidden="true"></div>
+        <div class="fh-wrap fh-dev-hero-inner">
+            <nav class="fh-crumbs is-light" aria-label="{{ __('fh.breadcrumb') }}"><a href="{{ Site::url('') }}">{{ __('fh.home') }}</a><span aria-hidden="true">/</span><a href="{{ Site::url('developments') }}">{{ __('fh.nav.developments') }}</a><span aria-hidden="true">/</span><span aria-current="page">{{ $d['title'] }}</span></nav>
+            @if($d['status'] !== '')<span class="fh-dev-status">{{ $d['status'] }}</span>@endif
+            <h1 class="fh-dev-h1">{{ $d['title'] }}</h1>
+            @if($v['summary'] !== '')<p class="fh-dev-lead">{{ $v['summary'] }}</p>@endif
+            <div class="fh-actions">
+                @if($units)<a class="fh-btn fh-btn-white" href="#residences">{{ __('fh.dev.view_residences') }}<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>@endif
+                @if($v['brochure'] !== '')<a class="fh-btn fh-btn-line is-light" href="{{ $v['brochure'] }}" target="_blank" rel="noopener" data-fh-no-swap>{!! $download !!}{{ __('fh.dev.brochure_pdf') }}</a>@endif
+            </div>
+        </div>
+    </section>
+
+    @if($facts)
+    <section class="fh-dev-facts" aria-label="{{ __('fh.dev.key_facts') }}">
+        <dl class="fh-wrap">
+            @foreach($facts as $label => $value)<div><dt>{{ $label }}</dt><dd>{{ $value }}</dd></div>@endforeach
+        </dl>
+    </section>
+    @endif
+
+    @if(count($nav) > 2)
+    <nav class="fh-dev-subnav" aria-label="{{ __('fh.on_this_page') }}" data-fh-subnav>
+        <div class="fh-wrap">@foreach($nav as $id => $label)<a href="#{{ $id }}">{{ $label }}</a>@endforeach</div>
+    </nav>
+    @endif
+
+    <section id="overview" class="fh-dev-sec">
+        <div class="fh-wrap fh-dev-overview">
+            <div class="fh-dev-overview-text">
+                <p class="fh-eyebrow">{{ __('fh.dev.overview') }}</p>
+                <h2 class="fh-h2">{{ $d['title'] }}</h2>
+                @if($v['description'] !== '')<div class="fh-prose">{!! $v['description'] !!}</div>@endif
+                @if($v['highlights'])
+                <ul class="fh-dev-highlights">
+                    @foreach($v['highlights'] as $h)<li><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>{{ $h }}</li>@endforeach
+                </ul>
+                @endif
+            </div>
+            @if($shown)
+            <div class="fh-dev-photos is-{{ count($shown) }}" data-fh-gallery>
+                @foreach($shown as $i => $photo)
+                <button type="button" class="fh-dev-photo" data-fh-open="{{ $i }}" aria-label="{{ __('fh.open_photo', ['n' => (string) ($i + 1)]) }}">{!! $photo->img(['sizes' => $i === 0 ? '(max-width: 900px) 100vw, 45vw' : '(max-width: 900px) 50vw, 22vw', 'alt' => $photo->alt() !== '' ? $photo->alt() : $d['title']]) !!}</button>
+                @endforeach
+                @if(count($gallery) > 3)<button type="button" class="fh-dev-more" data-fh-open="3">{{ __('fh.view_all_photos', ['count' => (string) count($gallery)]) }}</button>@endif
+            </div>
+            <template data-fh-photos>@foreach($gallery as $photo)<a href="{{ $photo->url() }}" data-alt="{{ $photo->alt() !== '' ? $photo->alt() : $d['title'] }}"></a>@endforeach</template>
+            @endif
+        </div>
+        @if($v['embed'] !== '')
+        <div class="fh-wrap fh-dev-video">
+            <button type="button" class="fh-video" data-fh-video="{{ $v['embed'] }}" aria-label="{{ __('fh.play_video') }}">
+                @if($v['hero']){!! $v['hero']->img(['sizes' => '(max-width: 1000px) 100vw, 960px', 'alt' => '']) !!}@endif
+                <span class="fh-video-play"><svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg></span>
+                <span class="fh-video-note">{{ __('fh.video_note') }}</span>
+            </button>
+        </div>
+        @endif
+    </section>
+
+    @if($units)
+    <section id="residences" class="fh-dev-sec is-white">
+        <div class="fh-wrap fh-dev-stack">
+            <div class="fh-section-head">
+                <div class="fh-stack-sm"><p class="fh-eyebrow">{{ __('fh.dev.residences') }}</p><h2 class="fh-h2">{{ __('fh.dev.availability') }}</h2></div>
+                @if($v['counts']['sold'] > 0 && $v['counts']['available'] > 0)
+                <div class="fh-dev-filter" role="group" aria-label="{{ __('fh.dev.show_residences') }}" data-fh-units-filter hidden>
+                    <button type="button" data-filter="all" aria-pressed="true">{{ __('fh.dev.filter_all') }} ({{ $v['counts']['all'] }})</button>
+                    <button type="button" data-filter="available" aria-pressed="false">{{ __('fh.unit.available') }} ({{ $v['counts']['available'] }})</button>
+                    <button type="button" data-filter="sold" aria-pressed="false">{{ __('fh.unit.sold') }} ({{ $v['counts']['sold'] }})</button>
+                </div>
+                @endif
+            </div>
+            <div class="fh-dev-table-wrap" tabindex="0" role="region" aria-label="{{ __('fh.dev.availability') }}">
+                <table class="fh-dev-table" data-fh-units>
+                    <thead><tr>
+                        <th scope="col">{{ __('fh.dev.col_residence') }}</th><th scope="col">{{ __('fh.fact.floor') }}</th><th scope="col">{{ __('fh.fact.type') }}</th>
+                        <th scope="col">{{ __('fh.fact.area') }}</th><th scope="col">{{ __('fh.fact.bedrooms') }}</th><th scope="col">{{ __('fh.fact.outdoor') }}</th>
+                        <th scope="col">{{ __('fh.dev.col_price') }}</th><th scope="col">{{ __('fh.fact.status') }}</th><th scope="col"><span class="fh-sr">{{ __('fh.floor_plans') }}</span></th>
+                    </tr></thead>
+                    <tbody>
+                    @foreach($units as $u)
+                    <tr data-state="{{ $u['state'] }}" data-unit="{{ $u['ref'] }}">
+                        <th scope="row"><a href="{{ $u['url'] }}" class="fh-ltr">{{ $u['ref'] }}</a></th>
+                        <td>{{ $u['floor'] }}</td><td>{{ $u['type'] }}</td><td class="fh-ltr-cell">{{ $u['area'] }}</td><td>{{ $u['beds'] }}</td><td class="fh-ltr-cell">{{ $u['outdoor'] }}</td>
+                        <td class="fh-dev-price">{{ $u['price'] }}</td>
+                        <td><span class="fh-unit-state is-{{ $u['state'] }}">{{ $u['state_label'] }}</span></td>
+                        <td class="fh-dev-plan-cell">@if($u['plan'] || $u['pdf'] !== '')<button type="button" class="fh-dev-plan-btn" aria-expanded="false" aria-controls="fh-plan-{{ $u['id'] }}" data-fh-plan="{{ $u['id'] }}">{{ __('fh.dev.floor_plan') }}</button>@endif</td>
+                    </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @foreach($units as $u)
+            @if($u['plan'] || $u['pdf'] !== '')
+            <div class="fh-dev-planbox" id="fh-plan-{{ $u['id'] }}" role="region" aria-label="{{ __('fh.dev.plan_of', ['ref' => $u['ref']]) }}" data-fh-planbox hidden>
+                <div class="fh-dev-planbox-media">
+                    @if($u['plan'])<a href="{{ $u['plan']->url() }}" target="_blank" rel="noopener" data-fh-no-swap>{!! $u['plan']->img(['sizes' => '(max-width: 900px) 100vw, 50vw', 'alt' => __('fh.dev.plan_of', ['ref' => $u['ref']])]) !!}</a>
+                    @else<span class="fh-placeholder"></span>@endif
+                </div>
+                <div class="fh-dev-planbox-text">
+                    <p class="fh-eyebrow">{{ __('fh.dev.col_residence') }} <span class="fh-ltr">{{ $u['ref'] }}</span></p>
+                    <h3 class="fh-h3 is-large">{{ implode(Site::isRtl() ? '، ' : ', ', array_filter([$u['type'], $u['floor']])) }}</h3>
+                    <p class="fh-dev-planbox-facts">{!! implode(' · ', array_map(static fn (string $t): string => '<bdi>' . e($t) . '</bdi>', array_filter([$u['area'], $u['beds'] !== '' ? __('fh.dev.beds', ['n' => $u['beds']]) : '', $u['outdoor'] !== '' ? __('fh.fact.outdoor') . ' ' . $u['outdoor'] : '']))) !!}</p>
+                    <p class="fh-dev-planbox-price">{{ $u['price'] }}</p>
+                    <div class="fh-actions">
+                        @if($u['open'])<a class="fh-btn fh-btn-solid" href="#interest" data-fh-enquire="{{ $u['ref'] }}">{{ __('fh.dev.enquire_about', ['ref' => $u['ref']]) }}</a>@endif
+                        @if($u['pdf'] !== '')<a class="fh-btn fh-btn-line" href="{{ $u['pdf'] }}" target="_blank" rel="noopener" data-fh-no-swap>{!! $download !!}{{ __('fh.dev.plan_pdf') }}</a>@endif
+                        <a class="fh-link" href="{{ $u['url'] }}">{{ __('fh.dev.residence_page') }}{!! $arrow !!}</a>
+                    </div>
+                    <p class="fh-small">{{ __('fh.dev.plan_note') }}</p>
+                </div>
+            </div>
+            @endif
+            @endforeach
+        </div>
+    </section>
+    @endif
+
+    @if(isset($nav['progress']))
+    <section id="progress" class="fh-dev-sec">
+        <div class="fh-wrap fh-dev-stack is-wide">
+            <div class="fh-section-head">
+                <div class="fh-stack-sm"><p class="fh-eyebrow">{{ __('fh.dev.progress') }}</p><h2 class="fh-h2">{{ __('fh.dev.follow') }}</h2></div>
+                @if($latest && $latest['date'] !== '')<span class="fh-small">{{ __('fh.dev.last_updated', ['date' => $latest['date']]) }}</span>@endif
+            </div>
+            @if($d['percent'] > 0)
+            <div class="fh-dev-bar">
+                <div class="fh-dev-bar-label"><span>{{ __('fh.dev.overall') }}</span><span class="fh-ltr">{{ $d['percent'] }}%</span></div>
+                <div class="fh-dev-bar-track" role="progressbar" aria-label="{{ __('fh.dev.overall') }}" aria-valuenow="{{ $d['percent'] }}" aria-valuemin="0" aria-valuemax="100"><span style="--fh-p: {{ $d['percent'] }}%"></span></div>
+            </div>
+            @endif
+            @if($v['stages'])
+            <ol class="fh-dev-stages">
+                @foreach($v['stages'] as $s)
+                <li class="is-{{ $s['status'] }}"><span class="fh-dev-stage-mark" aria-hidden="true"><span></span></span><span class="fh-dev-stage-state">{{ $s['label'] }}@if($s['date'] !== '') · {{ $s['date'] }}@endif</span><span class="fh-dev-stage-name">{{ $s['name'] }}</span></li>
+                @endforeach
+            </ol>
+            @endif
+            @if($latest)
+            <article class="fh-dev-update">
+                @if($latest['photos']){!! $latest['photos'][0]->img(['sizes' => '(max-width: 900px) 100vw, 50vw', 'alt' => $latest['photos'][0]->alt() !== '' ? $latest['photos'][0]->alt() : $latest['title'], 'class' => 'fh-dev-update-img']) !!}@endif
+                <div class="fh-dev-update-text">
+                    <p class="fh-eyebrow">{{ __('fh.dev.latest_update') }}@if($latest['date'] !== '') · <time datetime="{{ $latest['datetime'] }}">{{ $latest['date'] }}</time>@endif</p>
+                    <h3 class="fh-h3 is-large">{{ $latest['title'] }}</h3>
+                    @if($latest['body'] !== '')<div class="fh-prose is-small">{!! $latest['body'] !!}</div>@endif
+                </div>
+            </article>
+            @if(count($updates) > 1)
+            <details class="fh-dev-earlier">
+                <summary>{{ __('fh.dev.earlier_updates', ['count' => (string) (count($updates) - 1)]) }}</summary>
+                <ol>
+                    @foreach(array_slice($updates, 1) as $up)
+                    <li><time datetime="{{ $up['datetime'] }}">{{ $up['date'] }}</time><div><h4>{{ $up['title'] }}</h4>@if($up['body'] !== '')<div class="fh-prose is-small">{!! $up['body'] !!}</div>@endif</div></li>
+                    @endforeach
+                </ol>
+            </details>
+            @endif
+            @endif
+        </div>
+    </section>
+    @endif
+
+    @if($v['map'])
+    <section id="location" class="fh-dev-sec is-white">
+        <div class="fh-wrap fh-dev-stack">
+            <p class="fh-eyebrow">{{ __('fh.location') }}</p>
+            <h2 class="fh-h2">{{ $d['location'] !== '' ? $d['location'] : $d['title'] }}</h2>
+            @php $fhMap = ['height' => 'is-tall', 'label' => '', 'lat' => $v['map']['lat'], 'lng' => $v['map']['lng'], 'zoom' => 15]; @endphp
+            @php include template_partial('map'); @endphp
+            <p class="fh-small">{{ __('fh.dev.map_note') }}</p>
+        </div>
+    </section>
+    @endif
+
+    <section id="interest" class="fh-dev-interest">
+        <div class="fh-wrap fh-dev-interest-inner">
+            <div class="fh-dev-interest-text">
+                <p class="fh-eyebrow is-light">{{ __('fh.register_interest') }}</p>
+                <h2 class="fh-h2 is-light">{{ __('fh.dev.interest_title') }}</h2>
+                <p class="fh-lead is-light">{{ __('fh.dev.interest_lead') }}</p>
+            </div>
+            <div class="fh-dev-interest-card">{!! $v['form'] !!}</div>
+        </div>
+    </section>
+</main>
+@if($gallery)@php include template_partial('lightbox'); @endphp@endif
