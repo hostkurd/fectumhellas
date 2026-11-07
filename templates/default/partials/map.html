@@ -1,19 +1,21 @@
 <?php
 /*
  * The office map (Contact, About): Leaflet from the site, OpenStreetMap tiles.
- * Set $fhMap = ['height' => 'is-tall'|'' , 'label' => 'FECTUM Hellas'] before
- * including; the pin comes from Settings › Contact details (latitude/longitude).
+ * Set $fhMap = ['height' => 'is-tall'|'', 'label' => 'FECTUM Hellas'] before
+ * including; the pin comes from Settings › Contact details (latitude/longitude),
+ * or from $fhMap['lat'], ['lng'] and ['zoom'] (a property; label '' = no label).
  * Without JavaScript: a link to the place on openstreetmap.org.
  */
 use FloCMS\Support\Site;
 
-$fhLat = (float) Site::setting('contact.latitude', '38.0010');
-$fhLng = (float) Site::setting('contact.longitude', '23.7745');
-$fhPin = trim((string) ($fhMap['label'] ?? '')) !== '' ? (string) $fhMap['label'] : 'FECTUM Hellas';
-$fhOsm = 'https://www.openstreetmap.org/?mlat=' . $fhLat . '&mlon=' . $fhLng . '#map=17/' . $fhLat . '/' . $fhLng;
+$fhLat = isset($fhMap['lat']) ? (float) $fhMap['lat'] : (float) Site::setting('contact.latitude', '38.0010');
+$fhLng = isset($fhMap['lng']) ? (float) $fhMap['lng'] : (float) Site::setting('contact.longitude', '23.7745');
+$fhZoom = (int) ($fhMap['zoom'] ?? 16);
+$fhPin = (string) ($fhMap['label'] ?? 'FECTUM Hellas');
+$fhOsm = 'https://www.openstreetmap.org/?mlat=' . $fhLat . '&mlon=' . $fhLng . '#map=' . $fhZoom . '/' . $fhLat . '/' . $fhLng;
 ?>
 <div class="fh-map <?= Site::e((string) ($fhMap['height'] ?? '')) ?>" data-fh-map
-     data-lat="<?= Site::e((string) $fhLat) ?>" data-lng="<?= Site::e((string) $fhLng) ?>" data-label="<?= Site::e($fhPin) ?>"
+     data-zoom="<?= $fhZoom ?>" data-lat="<?= Site::e((string) $fhLat) ?>" data-lng="<?= Site::e((string) $fhLng) ?>" data-label="<?= Site::e($fhPin) ?>"
      data-css="<?= Site::e(Site::asset('themes/fectum/lib/leaflet/leaflet.css')) ?>" data-js="<?= Site::e(Site::asset('themes/fectum/lib/leaflet/leaflet.js')) ?>"
      role="region" aria-label="<?= Site::e(__('fh.map_label')) ?>">
     <a class="fh-map-fallback" href="<?= Site::e($fhOsm) ?>" rel="noopener"><?= Site::e(__('fh.map_open')) ?></a>

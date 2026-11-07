@@ -1,0 +1,199 @@
+@php /* One property (approved Property mockup). $data from FloCMS\Support\PropertyPage::data(). */
+use FloCMS\Support\Site;
+$d = $data; $p = $d['p']; $row = $d['row'];
+$photos = $d['photos']; $shown = array_slice($photos, 0, 5); $more = count($photos) - 4;
+$tabs = array_filter([
+    'facts' => __('fh.tab_overview'),
+    'costs' => $d['costs'] ? __('fh.tab_costs') : '',
+    'plans' => $d['plans'] ? __('fh.floor_plans') : '',
+    'video' => ($d['embed'] !== '' || $d['videos']) ? __('fh.video_tour') : '',
+    'location' => $d['map'] ? __('fh.location') : '',
+    'brochure' => $d['brochure'] !== '' ? __('fh.brochure') : '',
+]);
+$cardData = json_encode(['id' => $p['id'], 'title' => $p['title'], 'price' => $p['price'], 'url' => $p['url'], 'img' => $photos ? $photos[0]->url('thumb') : ''], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+@endphp
+<main id="main" class="fh-property" data-fh-card="{{ $cardData }}">
+    <section class="fh-prop-head">
+        <div class="fh-wrap">
+            <nav class="fh-crumbs" aria-label="{{ __('fh.breadcrumb') }}"><a href="{{ Site::url('') }}">{{ __('fh.home') }}</a><span aria-hidden="true">/</span><a href="{{ Site::url('properties') }}">{{ __('fh.nav.properties') }}</a><span aria-hidden="true">/</span><span aria-current="page" class="fh-ltr">{{ $p['reference'] }}</span></nav>
+            <div class="fh-prop-title-row">
+                <div class="fh-prop-title">
+                    <div class="fh-badges"><span class="fh-badge is-solid">{{ $p['status'] }}</span>@if($d['build'] !== '')<span class="fh-badge">{{ $d['build'] }}</span>@endif</div>
+                    <h1 class="fh-h1 fh-prop-h1">{{ $p['title'] }}</h1>
+                    @if($p['location'] !== '')<span class="fh-prop-location"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>{{ $p['location'] }}</span>@endif
+                </div>
+                <div class="fh-prop-price">
+                    <span class="fh-prop-amount">{{ $p['price'] }}</span>
+                    <span class="fh-prop-sub">{{ __('fh.property_id') }} <span class="fh-ltr">{{ $p['reference'] }}</span>@if($d['perM2'] !== '') · <span class="fh-ltr">{{ $d['perM2'] }}</span>@endif</span>
+                    <div class="fh-prop-actions" hidden data-fh-card-actions>
+                        <button type="button" class="fh-pill" data-fh-compare="{{ $p['id'] }}" data-fh-full="{{ __('fh.compare_full') }}" aria-pressed="false"><svg class="fh-i-off" aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/></svg><svg class="fh-i-on" aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="fh-i-off">{{ __('fh.add_compare') }}</span><span class="fh-i-on">{{ __('fh.in_compare') }}</span></button>
+                        <button type="button" class="fh-pill" data-fh-save="{{ $p['id'] }}" aria-pressed="false"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 7.3 4.2 4.2 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></svg><span class="fh-i-off">{{ __('fh.save') }}</span><span class="fh-i-on">{{ __('fh.saved') }}</span></button>
+                        @if($d['form'] !== '')<a class="fh-pill fh-prop-jump" href="#fh-inquiry">{{ __('fh.contact_about') }}</a>@endif
+                        <button type="button" class="fh-pill" data-fh-share data-fh-copied="{{ __('fh.link_copied') }}" data-title="{{ $p['title'] }}"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.3M8.2 13.2l7.6 4.3"/></svg>{{ __('fh.share') }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="fh-gallery-sec" aria-label="{{ __('fh.gallery') }}">
+        <div class="fh-wrap fh-stack-sm">
+            @if($photos)
+            <div class="fh-gallery is-{{ min(count($photos), 5) }}" data-fh-gallery>
+                @foreach($shown as $i => $photo)
+                @if($i === 4 && $more > 1)
+                <button type="button" class="fh-gallery-item is-more" data-fh-open="4" aria-label="{{ __('fh.view_all_photos', ['count' => (string) count($photos)]) }}">{!! $photo->img(['sizes' => '25vw', 'alt' => '']) !!}<span><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>{{ __('fh.view_all_photos', ['count' => (string) count($photos)]) }}</span></button>
+                @else
+                <button type="button" class="fh-gallery-item" data-fh-open="{{ $i }}" aria-label="{{ __('fh.open_photo', ['n' => (string) ($i + 1)]) }}">{!! $photo->img(['sizes' => $i === 0 ? '(max-width: 900px) 100vw, 50vw' : '25vw', 'alt' => $photo->alt() !== '' ? $photo->alt() : $p['title'], 'loading' => $i === 0 ? 'eager' : 'lazy', 'fetchpriority' => $i === 0 ? 'high' : 'auto']) !!}</button>
+                @endif
+                @endforeach
+            </div>
+            <template data-fh-photos>@foreach($photos as $photo)<a href="{{ $photo->url() }}" data-alt="{{ $photo->alt() !== '' ? $photo->alt() : $p['title'] }}"></a>@endforeach</template>
+            @else
+            <div class="fh-gallery is-1"><span class="fh-gallery-item"><span class="fh-placeholder"></span></span></div>
+            @endif
+            @if(count($tabs) > 1)
+            <nav class="fh-prop-tabs" aria-label="{{ __('fh.on_this_page') }}">
+                @foreach($tabs as $id => $label)<a href="#{{ $id }}">{{ $label }}</a>@endforeach
+            </nav>
+            @endif
+        </div>
+    </section>
+
+    <section class="fh-prop-body">
+        <div class="fh-wrap fh-prop-grid">
+            <div class="fh-prop-main">
+                @if($d['closed'])<p class="fh-closed-note">{{ __($d['status'] === 'sold' ? 'fh.closed_sold' : 'fh.closed_rented') }}</p>@endif
+
+                <div id="facts" class="fh-prop-sec">
+                    <h2 class="fh-prop-h2">{{ __('fh.key_facts') }}</h2>
+                    <dl class="fh-facts">
+                        @foreach($d['facts'] as $f)
+                        <div><dt>{{ $f['k'] }}</dt><dd@if(!empty($f['ltr'])) class="fh-ltr"@endif>{{ $f['v'] }}</dd></div>
+                        @endforeach
+                    </dl>
+                </div>
+
+                @if($d['summary'] !== '' || $d['description'] !== '')
+                <div class="fh-prop-sec">
+                    <h2 class="fh-prop-h2">{{ __('fh.about_property') }}</h2>
+                    @if($d['summary'] !== '')<p class="fh-prop-summary">{{ $d['summary'] }}</p>@endif
+                    @if($d['description'] !== '')<div class="fh-prose">{!! $d['description'] !!}</div>@endif
+                </div>
+                @endif
+
+                @if($d['amenities'])
+                <div class="fh-prop-sec">
+                    <h2 class="fh-prop-h2">{{ __('fh.features_amenities') }}</h2>
+                    <ul class="fh-amenities">
+                        @foreach($d['amenities'] as $a)<li><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>{{ $a }}</li>@endforeach
+                    </ul>
+                </div>
+                @endif
+
+                @if($d['costs'])
+                @php $c = $d['costs']; $sum = 0.0; foreach ($c['lines'] as $l) { $sum += $c['price'] * $l['rate'] / 100; } @endphp
+                <div id="costs" class="fh-prop-sec">
+                    <div class="fh-prop-sec-head"><h2 class="fh-prop-h2">{{ __('fh.cost_of_buying') }}</h2><span>{{ __('fh.cost_estimate') }}</span></div>
+                    <div class="fh-calc" data-fh-calc data-price="{{ (int) round($c['price']) }}" data-lang="{{ Site::lang() }}">
+                        <div class="fh-calc-top">
+                            <label class="fh-calc-price"><span>{{ __('fh.purchase_price') }}</span><span class="fh-calc-field"><span aria-hidden="true">€</span><input type="text" inputmode="numeric" value="{{ number_format($c['price'], 0, '.', ',') }}" data-fh-calc-input dir="ltr" aria-describedby="fh-calc-total"></span></label>
+                            <button type="button" class="fh-text-btn" data-fh-calc-reset>{{ __('fh.use_asking_price') }}</button>
+                        </div>
+                        <dl class="fh-calc-lines">
+                            @foreach($c['lines'] as $l)
+                            <div data-rate="{{ $l['rate'] }}"><dt>{{ $l['name'] }} <span>· <span class="fh-ltr">{{ rtrim(rtrim(number_format($l['rate'], 2, '.', ''), '0'), '.') }}%</span></span></dt><dd class="fh-ltr" data-fh-calc-amount>{{ Site::price(round($c['price'] * $l['rate'] / 100)) }}</dd></div>
+                            @endforeach
+                            <div class="is-sum"><dt>{{ __('fh.cost_total') }}</dt><dd class="fh-ltr" data-fh-calc-sum>{{ Site::price(round($sum)) }}</dd></div>
+                        </dl>
+                        <div class="fh-calc-grand" id="fh-calc-total" aria-live="polite"><span>{{ __('fh.cost_grand') }}</span><strong class="fh-ltr" data-fh-calc-grand>{{ Site::price(round($c['price'] + $sum)) }}</strong></div>
+                    </div>
+                    @if($c['note'] !== '')<p class="fh-small">{{ $c['note'] }}</p>@endif
+                </div>
+                @endif
+
+                @if($d['plans'])
+                <div id="plans" class="fh-prop-sec">
+                    <h2 class="fh-prop-h2">{{ __('fh.floor_plans') }}</h2>
+                    <div class="fh-plans">
+                        @foreach($d['plans'] as $plan)
+                        <figure><a href="{{ $plan->url() }}" class="fh-plan" target="_blank" rel="noopener" data-fh-no-swap>{!! $plan->img(['sizes' => '(max-width: 900px) 100vw, 40vw', 'alt' => $plan->alt() !== '' ? $plan->alt() : __('fh.floor_plan')]) !!}</a>@if($plan->title !== '')<figcaption>{{ $plan->title }}</figcaption>@endif</figure>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                @if($d['embed'] !== '' || $d['videos'])
+                <div id="video" class="fh-prop-sec">
+                    <h2 class="fh-prop-h2">{{ __('fh.video_tour') }}</h2>
+                    @if($d['embed'] !== '')
+                    <button type="button" class="fh-video" data-fh-video="{{ $d['embed'] }}" aria-label="{{ __('fh.play_video') }}">
+                        @if($photos){!! $photos[0]->img(['sizes' => '(max-width: 900px) 100vw, 60vw', 'alt' => '']) !!}@endif
+                        <span class="fh-video-play"><svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg></span>
+                        <span class="fh-video-note">{{ __('fh.video_note') }}</span>
+                    </button>
+                    @endif
+                    @foreach($d['videos'] as $video)<div class="fh-video-file">{!! $video->video(['controls' => true, 'preload' => 'metadata']) !!}</div>@endforeach
+                </div>
+                @endif
+
+                @if($d['map'])
+                @php $fhMap = ['height' => 'is-prop', 'label' => '', 'lat' => $d['map']['lat'], 'lng' => $d['map']['lng'], 'zoom' => 15]; @endphp
+                <div id="location" class="fh-prop-sec">
+                    <h2 class="fh-prop-h2">{{ __('fh.location') }}</h2>
+                    @php include template_partial('map'); @endphp
+                    <p class="fh-small">{{ __('fh.location_note') }}</p>
+                </div>
+                @endif
+
+                @if($d['brochure'] !== '')
+                <div id="brochure" class="fh-brochure">
+                    <div class="fh-brochure-text"><span class="fh-pdf" aria-hidden="true">PDF</span><span><b>{{ __('fh.brochure_title') }}</b><span><span class="fh-ltr">{{ $p['reference'] }}</span> · {{ __('fh.brochure_text') }}</span></span></div>
+                    <a class="fh-btn fh-btn-line" href="{{ $d['brochure'] }}" target="_blank" rel="noopener" data-fh-no-swap><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>{{ __('fh.download') }}</a>
+                </div>
+                @endif
+            </div>
+
+            <aside class="fh-prop-side" aria-label="{{ __('fh.contact_about') }}">
+                <div class="fh-side-card" id="fh-inquiry">
+                    <div class="fh-side-price"><span>{{ $p['price'] }}</span><span class="fh-ltr">{{ $p['reference'] }}</span></div>
+                    @if($d['form'] !== '')
+                    <div class="fh-js-only">{!! $d['form'] !!}</div>
+                    <noscript><p class="fh-side-nojs">{{ __('fh.nojs_contact') }}</p></noscript>
+                    @else
+                    <p class="fh-side-nojs">{{ __($d['status'] === 'sold' ? 'fh.closed_sold' : 'fh.closed_rented') }}</p>
+                    @endif
+                </div>
+                <div class="fh-side-talk">
+                    <span class="fh-side-talk-title">{{ __('fh.prefer_talk') }}</span>
+                    <div class="fh-side-talk-btns">
+                        @if($d['whatsapp'] !== '')<a href="{{ Site::whatsapp($d['whatsapp']) }}" target="_blank" rel="noopener"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l1.6-4.6A8.5 8.5 0 1 1 7.7 19.6L3 21z"/></svg>WhatsApp</a>@endif
+                        @if($d['phone'] !== '')<a href="tel:{{ Site::tel($d['phone']) }}"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>{{ __('fh.call_us') }}</a>@endif
+                    </div>
+                    @if($d['brochure'] !== '')<a class="fh-side-brochure" href="{{ $d['brochure'] }}" target="_blank" rel="noopener" data-fh-no-swap><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>{{ __('fh.download_brochure') }}</a>@endif
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    @if($d['similar'])
+    <section class="fh-section fh-similar" aria-label="{{ __('fh.similar') }}">
+        <div class="fh-wrap fh-stack">
+            <div class="fh-section-head"><h2 class="fh-h2">{{ __('fh.similar') }}</h2><a class="fh-link" href="{{ Site::url('properties') }}">{{ __('fh.all_properties') }}</a></div>
+            <div class="fh-cards">
+                @foreach($d['similar'] as $p)
+                @php include template_partial('property-card'); @endphp
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+    <div class="fh-compare-bar" data-fh-compare-bar hidden></div>
+</main>
+
+<dialog class="fh-lightbox" data-fh-lightbox aria-label="{{ __('fh.gallery') }}">
+    <div class="fh-lightbox-top"><span data-fh-lb-count></span><button type="button" class="fh-lightbox-close" data-fh-lb-close aria-label="{{ __('fh.close') }}"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <figure class="fh-lightbox-stage"><img alt="" data-fh-lb-img></figure>
+    <button type="button" class="fh-lightbox-nav is-prev" data-fh-lb-prev aria-label="{{ __('fh.previous') }}"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <button type="button" class="fh-lightbox-nav is-next" data-fh-lb-next aria-label="{{ __('fh.next') }}"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+</dialog>

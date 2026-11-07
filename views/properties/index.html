@@ -1,0 +1,12 @@
+@php /* Properties (approved Properties mockup): title, then the live search (App\Components\PropertySearch). */ use FloCMS\Support\Site; @endphp
+<main id="main" class="fh-properties">
+    <header class="fh-list-head">
+        <div class="fh-wrap fh-list-head-text">
+            <nav class="fh-crumbs" aria-label="{{ __('fh.breadcrumb') }}"><a href="{{ Site::url('') }}">{{ __('fh.home') }}</a><span aria-hidden="true">/</span><span aria-current="page">{{ __('fh.nav.properties') }}</span></nav>
+            <h1 class="fh-h1">{{ __('fh.properties_title') }}</h1>
+            <p class="fh-lead">{{ __('fh.properties_lead') }}</p>
+        </div>
+    </header>
+    {!! $data['search'] !!}
+    <div class="fh-compare-bar" data-fh-compare-bar hidden></div>
+</main>

@@ -59,3 +59,8 @@ $fhSocial = array_filter(array_map([Site::class, 'link'], [
 </div>
 </div>
 </footer>
+<script type="application/json" data-fh-t><?= json_encode([
+    'title' => __('fh.compare'), 'region' => __('fh.compare_region'), 'selected' => __('fh.compare_selected'), 'add' => __('fh.compare_add'),
+    'oneMore' => __('fh.compare_one_more'), 'clear' => __('fh.clear'), 'remove' => __('fh.remove'), 'compareN' => __('fh.compare_n'),
+    'compareUrl' => Site::url('compare'),
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>

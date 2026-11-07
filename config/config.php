@@ -77,3 +77,8 @@
 
     // Reverse proxies whose X-Forwarded-For header is trusted (IPs or CIDR ranges)
     Config::set('trusted_proxies', array_filter(array_map('trim', explode(',', (string) Env::get('TRUSTED_PROXIES', '')))));
+
+    // Website detail pages whose address ends in a slug (Stage 3 D2): /en/properties/<slug>.
+    // Core can't take a slug as an action name, so a fallback answers them.
+    \FloCMS\Core\App::fallbackUsing(static fn (string $path, \FloCMS\Core\Http\Request $request): ?\FloCMS\Core\Http\Response
+        => \FloCMS\Support\PropertyPage::handle($path, $request));

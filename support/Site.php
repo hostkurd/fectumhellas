@@ -126,6 +126,87 @@ final class Site
         return self::url($tail, $lang) . ($query !== '' ? '?' . $query : '');
     }
 
+    /** @var array<string, mixed> Title, description, path, image, robots, json-ld of a controller page (Site::head()). */
+    private static array $meta = [];
+
+    /**
+     * A controller page's search-engine details (Stage 3 D6), printed by the
+     * layout with head(): title, description, path (the address without the
+     * language, same in every language: "properties/villa-x"), image (absolute
+     * URL), robots, type (website / article), jsonld (list of objects).
+     */
+    public static function meta(array $meta): void
+    {
+        self::$meta = $meta + self::$meta;
+    }
+
+    /** <title>, description, canonical, hreflang, Open Graph, Twitter, robots and JSON-LD for a controller page. */
+    public static function head(): string
+    {
+        $m = self::$meta;
+        $e = static fn (string $v): string => self::e($v);
+        $site = 'FECTUM Hellas';
+        $title = trim((string) ($m['title'] ?? ''));
+        $full = $title !== '' ? $title . ' · ' . $site : $site;
+        $description = trim((string) ($m['description'] ?? self::setting('seo.description')));
+        $html = '<title>' . $e($full) . '</title>' . "\n";
+        if ($description !== '') {
+            $html .= '<meta name="description" content="' . $e(mb_substr($description, 0, 300)) . '">' . "\n";
+        }
+        if (isset($m['path'])) {
+            $path = trim((string) $m['path'], '/');
+            $canonical = self::url($path) . (string) ($m['query'] ?? '');
+            $html .= '<link rel="canonical" href="' . $e($canonical) . '">' . "\n";
+            foreach (array_keys(self::LANGUAGES) as $lang) {
+                $html .= '<link rel="alternate" hreflang="' . $lang . '" href="' . $e(self::url($path, $lang) . (string) ($m['query'] ?? '')) . '">' . "\n";
+            }
+            $html .= '<link rel="alternate" hreflang="x-default" href="' . $e(self::url($path, 'en') . (string) ($m['query'] ?? '')) . '">' . "\n";
+            $html .= '<meta property="og:url" content="' . $e($canonical) . '">' . "\n";
+        }
+        $html .= '<meta property="og:site_name" content="' . $site . '">' . "\n"
+            . '<meta property="og:type" content="' . $e((string) ($m['type'] ?? 'website')) . '">' . "\n"
+            . '<meta property="og:title" content="' . $e($title !== '' ? $title : $site) . '">' . "\n"
+            . '<meta property="og:locale" content="' . ['en' => 'en_GB', 'ar' => 'ar_AR', 'el' => 'el_GR'][self::lang()] . '">' . "\n";
+        if ($description !== '') {
+            $html .= '<meta property="og:description" content="' . $e(mb_substr($description, 0, 300)) . '">' . "\n";
+        }
+        $image = (string) ($m['image'] ?? '');
+        if ($image === '' && function_exists('setting') && ($share = media(setting('seo.share_image'))) !== null) {
+            $image = self::absolute($share->url());
+        }
+        if ($image !== '') {
+            $html .= '<meta property="og:image" content="' . $e($image) . '">' . "\n" . '<meta name="twitter:card" content="summary_large_image">' . "\n";
+        }
+        if (($m['robots'] ?? '') !== '') {
+            $html .= '<meta name="robots" content="' . $e((string) $m['robots']) . '">' . "\n";
+        }
+        foreach ((array) ($m['jsonld'] ?? []) as $data) {
+            $html .= '<script type="application/ld+json">' . json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) . '</script>' . "\n";
+        }
+        return $html;
+    }
+
+    /** An absolute address for a site path or URL (for Open Graph and JSON-LD). */
+    public static function absolute(string $url): string
+    {
+        if ($url === '' || preg_match('~^https?://~i', $url) === 1) {
+            return $url;
+        }
+        $origin = (string) preg_replace('~^(https?://[^/]+).*$~i', '$1', self::base());
+        return $origin . '/' . ltrim($url, '/');
+    }
+
+    /** JSON-LD BreadcrumbList for [label => path] (path '' = home). */
+    public static function breadcrumbLd(array $crumbs): array
+    {
+        $items = [];
+        $i = 1;
+        foreach ($crumbs as $label => $path) {
+            $items[] = ['@type' => 'ListItem', 'position' => $i++, 'name' => (string) $label, 'item' => self::url((string) $path)];
+        }
+        return ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => $items];
+    }
+
     public static function isHome(): bool
     {
         if (function_exists('current_page') && ($page = current_page()) !== null) {

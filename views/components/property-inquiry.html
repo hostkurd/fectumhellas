@@ -1,0 +1,34 @@
+@php /* Property inquiry (flocms-reactive component App\Components\PropertyInquiry): question or viewing request. */
+$err = static fn (string $f): string => (string) ($errors[$f] ?? '');
+$described = static fn (string $f): string => isset($errors[$f]) ? ' aria-invalid="true" aria-describedby="fh-pe-' . $f . '"' : '';
+$viewing = $c->mode === 'viewing';
+@endphp
+@if($c->sent !== '')
+<div class="fh-sent is-compact" role="status">
+    <span class="fh-sent-icon"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+    <h2 class="fh-h3">{{ __('fh.thank_you') }}</h2>
+    <p>{!! __($viewing ? 'fh.sent_viewing' : 'fh.sent_question', ['reference' => '<strong class="fh-ltr">' . e($c->sent) . '</strong>']) !!}</p>
+    <button type="button" class="fh-link" data-rx-action="again">{{ __('fh.send_another') }}</button>
+</div>
+@else
+<form class="fh-form is-compact" data-rx-submit="send" novalidate>
+    <div class="fh-hp" aria-hidden="true"><label>Website<input type="text" name="website" data-rx-bind="website" data-rx-model="defer" tabindex="-1" autocomplete="off"></label></div>
+    @if($notice !== '')<p class="fh-form-alert" role="alert">{{ $notice }}</p>
+    @elseif($errors)<p class="fh-form-alert" role="alert">{{ __('fh.e.check') }}</p>@endif
+    <div class="fh-segment" role="group" aria-label="{{ __('fh.request_type') }}">
+        <button type="button" data-rx-action="pick" data-rx-set="mode" data-rx-value="question" aria-pressed="{{ $viewing ? 'false' : 'true' }}">{{ __('fh.ask_question') }}</button>
+        <button type="button" data-rx-action="pick" data-rx-set="mode" data-rx-value="viewing" aria-pressed="{{ $viewing ? 'true' : 'false' }}">{{ __('fh.request_viewing') }}</button>
+    </div>
+    <label class="fh-input{{ $err('name') !== '' ? ' has-error' : '' }}"><span>{{ __('fh.f_name') }}</span><input type="text" value="{{ $c->name }}" data-rx-bind="name" data-rx-model="lazy" autocomplete="name" maxlength="190"{!! $described('name') !!}>@if($err('name') !== '')<small id="fh-pe-name">{{ $err('name') }}</small>@endif</label>
+    <div class="fh-form-pair">
+        <label class="fh-input{{ $err('email') !== '' ? ' has-error' : '' }}"><span>{{ __('fh.f_email') }}</span><input type="email" value="{{ $c->email }}" data-rx-bind="email" data-rx-model="lazy" autocomplete="email" maxlength="190" dir="ltr"{!! $described('email') !!}>@if($err('email') !== '')<small id="fh-pe-email">{{ $err('email') }}</small>@endif</label>
+        <label class="fh-input{{ $err('phone') !== '' ? ' has-error' : '' }}"><span>{{ __('fh.f_phone') }}</span><input type="tel" value="{{ $c->phone }}" data-rx-bind="phone" data-rx-model="lazy" autocomplete="tel" maxlength="40" dir="ltr"{!! $described('phone') !!}>@if($err('phone') !== '')<small id="fh-pe-phone">{{ $err('phone') }}</small>@endif</label>
+    </div>
+    @if($viewing)
+    <label class="fh-input{{ $err('date') !== '' ? ' has-error' : '' }}"><span>{{ __('fh.preferred_date') }} <em>{{ __('fh.optional') }}</em></span><input type="date" value="{{ $c->date }}" min="{{ $today }}" data-rx-bind="date" data-rx-model="lazy"{!! $described('date') !!}>@if($err('date') !== '')<small id="fh-pe-date">{{ $err('date') }}</small>@endif</label>
+    @endif
+    <label class="fh-input{{ $err('message') !== '' ? ' has-error' : '' }}"><span>{{ __('fh.message') }}</span><textarea rows="3" data-rx-bind="message" data-rx-model="defer" maxlength="5000"{!! $described('message') !!}>{{ $c->message }}</textarea>@if($err('message') !== '')<small id="fh-pe-message">{{ $err('message') }}</small>@endif</label>
+    <label class="fh-consent{{ $err('consent') !== '' ? ' has-error' : '' }}"><input type="checkbox" data-rx-bind="consent" data-rx-model="lazy"@if($c->consent) checked@endif{!! $described('consent') !!}><span>@if($privacy !== ''){!! __('fh.consent_link', ['link' => '<a href="' . e($privacy) . '">' . e(__('fh.privacy_policy')) . '</a>']) !!}@else{{ __('fh.consent') }}@endif @if($err('consent') !== '')<small id="fh-pe-consent">{{ $err('consent') }}</small>@endif</span></label>
+    <button type="submit" class="fh-btn fh-btn-solid fh-btn-block">{{ __($viewing ? 'fh.request_viewing' : 'fh.send_inquiry') }}<span class="fh-spinner" data-rx-loading aria-hidden="true"></span></button>
+</form>
+@endif
