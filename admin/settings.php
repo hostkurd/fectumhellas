@@ -5,6 +5,9 @@
  * Pages need settings.manage: Administrators and Super Admins, not Editors.
  */
 use FloCMS\Admin\Form\Fields\MediaPicker;
+use FloCMS\Admin\Form\Fields\Placeholder;
+use FloCMS\Admin\Support\AdminLang;
+use FloCMS\Support\OfflineMode;
 use FloCMS\Admin\Form\Fields\Repeater;
 use FloCMS\Admin\Form\Fields\Textarea;
 use FloCMS\Admin\Form\Fields\TextInput;
@@ -13,6 +16,34 @@ use FloCMS\Admin\Form\Layout\Section;
 use FloCMS\Admin\Settings\SettingsPage;
 
 return [
+    // Website offline switch (flocms-core's offline mode, see support/OfflineMode.php)
+    SettingsPage::make('website')
+        ->label('fh.set.website')
+        ->icon('shield')
+        ->description('fh.set.website_desc')
+        ->columns(1)
+        ->schema([
+            Placeholder::make('status_now')->label('fh.set.status_now')
+                ->content(static fn (): string => AdminLang::label(OfflineMode::isOn() ? 'fh.set.status_offline' : 'fh.set.status_online')),
+            Toggle::make('offline')->label('fh.set.offline')->default(false)->help('fh.set.offline_help'),
+            TextInput::make('title')->label('fh.set.offline_title')->translatable()->rules('max:120')
+                ->default([
+                    'en' => "We'll be back soon",
+                    'ar' => 'سنعود قريباً',
+                    'el' => 'Επιστρέφουμε σύντομα',
+                ]),
+            Textarea::make('message')->label('fh.set.offline_message')->translatable()->rows(3)->rules('max:500')
+                ->default([
+                    'en' => 'Our new website is on its way. In the meantime, our team is happy to help by phone, WhatsApp or email.',
+                    'ar' => 'موقعنا الجديد قيد الإعداد. وحتى ذلك الحين، يسعد فريقنا بمساعدتكم عبر الهاتف أو واتساب أو البريد الإلكتروني.',
+                    'el' => 'Ο νέος μας ιστότοπος έρχεται σύντομα. Στο μεταξύ, η ομάδα μας είναι στη διάθεσή σας τηλεφωνικά, μέσω WhatsApp ή email.',
+                ]),
+            Toggle::make('show_contact')->label('fh.set.offline_contact')->default(true)->help('fh.set.offline_contact_help'),
+        ])
+        ->afterSave(static function (array $values): void {
+            OfflineMode::set(in_array($values['offline'] ?? false, [true, 1, '1'], true));
+        }),
+
     SettingsPage::make('contact')
         ->label('fh.set.contact')
         ->icon('phone')

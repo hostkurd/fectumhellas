@@ -1,76 +1,85 @@
-<style>
-    .container{
-        display: flex;
-        background-color: #fff;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-    }
-    .block-container{
-        width: 90vw;
-        max-width: 800px;
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 15vh;
-    }
-    .block-container img{
-        width: 100%;
-        margin-bottom: 15px;
-    }
-    .block-container h1{
-        font-family: Arial, Helvetica, sans-serif;
-        text-align: center;
-        font-size: 2rem;
-        margin-bottom: 15px;
-    }
-    .description{
-        font-family: Arial, Helvetica, sans-serif;
-        text-align: center;
-        margin: 0;
-        font-size: 1.2rem;
-    }
-    .contact-text{
-        font-family: Arial, Helvetica, sans-serif;
-        text-align: center;
-        margin-top: 40px;
-        font-size: 0.9rem !important;
-        padding: 10px;
-        border-radius: 5px;
-        line-height: 25px;
-    }
-    .contact-text span{
-        font-weight: 700;
-        margin: 0 7px;
-    }
-    @media only screen and (max-width: 700px) {
-        .block-container h1 {font-size: 1.4rem;}
-        .block-container p{font-size: 1rem;}
-    }
-</style>
-
-<!DOCTYPE html>
-<html lang="en">
+<?php
+/*
+ * Offline page: shown by flocms-core to visitors while Settings → Website
+ * status → "Website offline" is on. Staff signed in to the admin panel see
+ * the real website. Texts and contacts come from the admin settings.
+ *
+ * 503 + Retry-After tell search engines the site is temporarily unavailable,
+ * so they keep (and don't replace) what they have indexed.
+ */
+if (!headers_sent()) {
+    http_response_code(503);
+    header('Retry-After: 3600');
+    header('Cache-Control: no-store');
+    header('X-Robots-Tag: noindex');
+}
+$fhLang = defined('ACTIVE_LANG') ? (string) ACTIVE_LANG : 'en';
+$fhRtl = $fhLang === 'ar';
+$fhE = static fn (mixed $v): string => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
+$fhSetting = static fn (string $key, string $fallback = ''): string => function_exists('setting') ? (string) (setting($key) ?? $fallback) : $fallback;
+$fhTitle = $fhSetting('website.title', "We'll be back soon");
+$fhMessage = $fhSetting('website.message');
+$fhShowContact = !function_exists('setting') || in_array(setting('website.show_contact', true), [true, 1, '1'], true);
+$fhPhone = $fhSetting('contact.phone');
+$fhWhatsapp = $fhSetting('contact.whatsapp');
+$fhEmail = $fhSetting('contact.email');
+$fhBase = defined('SITE_URI') ? rtrim((string) SITE_URI, '/') : '';
+$fhLanguages = ['en' => 'English', 'ar' => 'العربية', 'el' => 'Ελληνικά'];
+$fhLabels = [
+    'en' => ['phone' => 'Phone', 'whatsapp' => 'WhatsApp', 'email' => 'Email'],
+    'ar' => ['phone' => 'الهاتف', 'whatsapp' => 'واتساب', 'email' => 'البريد الإلكتروني'],
+    'el' => ['phone' => 'Τηλέφωνο', 'whatsapp' => 'WhatsApp', 'email' => 'Email'],
+][$fhLang] ?? ['phone' => 'Phone', 'whatsapp' => 'WhatsApp', 'email' => 'Email'];
+?><!DOCTYPE html>
+<html lang="<?= $fhE($fhLang) ?>" dir="<?= $fhRtl ? 'rtl' : 'ltr' ?>">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link type="text/css" href="<?=SITE_URI;?>/css/admin/admin.min.css" rel="stylesheet">
-    <title><?=Config::get('Site_Name');?></title>
-    <link rel="shortcut icon" href="<?=imgPath;?>/fav/favicon-16x16.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title><?= $fhE($fhTitle) ?> · FECTUM Hellas</title>
+    <link rel="icon" href="<?= $fhE($fhBase) ?>/images/brand/logo-mark-blue.svg" type="image/svg+xml">
+    <style>
+        *{box-sizing:border-box}
+        html,body{height:100%;margin:0}
+        body{display:flex;flex-direction:column;background:#F6F8FC;color:#3D4454;font-family:Manrope,"Segoe UI",Tahoma,Arial,sans-serif;line-height:1.6}
+        .bar{height:6px;background:#2B4285}
+        main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+        .card{width:100%;max-width:640px;padding:48px 40px;background:#fff;border:1px solid #DFE4EE;border-radius:14px;text-align:center}
+        .logo{display:block;width:260px;max-width:80%;height:auto;margin:0 auto 32px}
+        h1{margin:0 0 12px;color:#2B4285;font-size:30px;line-height:1.25;font-weight:700}
+        p{margin:0 auto;max-width:480px;color:#575E6E;font-size:17px}
+        .contact{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:32px 0 0;padding:0;list-style:none}
+        .contact a{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;max-width:100%;padding:10px 16px;border:1px solid #DFE4EE;border-radius:999px;color:#2B4285;font-weight:600;font-size:15px;text-decoration:none}
+        .contact a:hover,.contact a:focus-visible{background:#2B4285;border-color:#2B4285;color:#fff;outline:none}
+        .contact span{color:inherit;font-weight:500;opacity:.75}
+        .ltr{direction:ltr;unicode-bidi:isolate}
+        nav{display:flex;justify-content:center;gap:18px;padding:0 20px 28px;font-size:14px}
+        nav a{color:#575E6E;text-decoration:none}
+        nav a[aria-current]{color:#2B4285;font-weight:700}
+        nav a:hover,nav a:focus-visible{color:#2B4285;text-decoration:underline}
+        @media (max-width:600px){.card{padding:36px 22px}h1{font-size:24px}p{font-size:16px}}
+    </style>
 </head>
 <body>
-
-    <div class="container">
-        <div class="block-container">
-            <img src="<?=imgPath;?>/illustrations/offline.svg" alt="404 not found">
-            <h1><?=config::getsetting('offline_mode_title');?></h1>
-            <p class="text-center description"><?=config::getsetting('offline_mode_text');?></p>
-            <p class="contact-text">
-                <span>Phone:</span><?=config::getsetting('phone');?>
-                <span>email:</span><?=config::getsetting('email');?>
-            </p>
-
+    <div class="bar" aria-hidden="true"></div>
+    <main>
+        <div class="card">
+            <img class="logo" src="<?= $fhE($fhBase) ?>/images/brand/logo-line.svg" alt="FECTUM Hellas" width="260" height="40">
+            <h1><?= $fhE($fhTitle) ?></h1>
+            <?php if ($fhMessage !== ''): ?><p><?= nl2br($fhE($fhMessage), false) ?></p><?php endif; ?>
+            <?php if ($fhShowContact && ($fhPhone !== '' || $fhWhatsapp !== '' || $fhEmail !== '')): ?>
+            <ul class="contact">
+                <?php if ($fhPhone !== ''): ?><li><a href="tel:<?= $fhE(preg_replace('/[^0-9+]/', '', $fhPhone)) ?>"><span><?= $fhE($fhLabels['phone']) ?></span> <b class="ltr"><?= $fhE($fhPhone) ?></b></a></li><?php endif; ?>
+                <?php if ($fhWhatsapp !== ''): ?><li><a href="https://wa.me/<?= $fhE(preg_replace('/\D/', '', $fhWhatsapp)) ?>" rel="noopener"><span><?= $fhE($fhLabels['whatsapp']) ?></span> <b class="ltr"><?= $fhE($fhWhatsapp) ?></b></a></li><?php endif; ?>
+                <?php if ($fhEmail !== ''): ?><li><a href="mailto:<?= $fhE($fhEmail) ?>"><span><?= $fhE($fhLabels['email']) ?></span> <b class="ltr"><?= $fhE($fhEmail) ?></b></a></li><?php endif; ?>
+            </ul>
+            <?php endif; ?>
         </div>
-    </div>
+    </main>
+    <nav aria-label="Language">
+        <?php foreach ($fhLanguages as $code => $name): ?>
+        <a href="<?= $fhE($fhBase . '/' . $code . '/') ?>" lang="<?= $code ?>"<?= $code === $fhLang ? ' aria-current="true"' : '' ?>><?= $fhE($name) ?></a>
+        <?php endforeach; ?>
+    </nav>
 </body>
 </html>
