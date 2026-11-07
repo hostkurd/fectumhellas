@@ -59,7 +59,11 @@ return [
             ]),
             Section::make('office')->label('fh.set.office')->schema([
                 Textarea::make('address')->label('fh.f.address')->translatable()->rows(3)->rules('max:300')
-                    ->default('42 Adrianeiou, 11525 Athens, Greece')->columnSpan('full'),
+                    ->default([
+                        'en' => '42 Adrianeiou, 11525 Athens, Greece',
+                        'ar' => '42 Adrianeiou، 11525 أثينا، اليونان',
+                        'el' => 'Αδριανείου 42, 11525 Αθήνα',
+                    ])->columnSpan('full'),
                 TextInput::make('latitude')->label('fh.f.latitude')->numeric()->rules('numeric|min:-90|max:90'),
                 TextInput::make('longitude')->label('fh.f.longitude')->numeric()->rules('numeric|min:-180|max:180'),
                 TextInput::make('hours')->label('fh.set.hours')->translatable()->rules('max:120')->columnSpan('full'),
@@ -77,7 +81,11 @@ return [
             TextInput::make('vat')->label('fh.set.vat')->rules('max:40'),
             Textarea::make('registered_office')->label('fh.set.registered_office')->translatable()->rows(2)->rules('max:300')->columnSpan('full'),
             TextInput::make('tagline')->label('fh.set.tagline')->translatable()->rules('max:120')
-                ->default('Building value. Across Greece.')->columnSpan('full'),
+                ->default([
+                    'en' => 'Building value. Across Greece.',
+                    'ar' => 'نبني القيمة في أنحاء اليونان',
+                    'el' => 'Χτίζουμε αξία σε όλη την Ελλάδα.',
+                ])->columnSpan('full'),
         ]),
 
     SettingsPage::make('social')
