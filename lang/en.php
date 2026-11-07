@@ -211,4 +211,16 @@ return array(
     'fh.set.line_active' => 'In use',
     'fh.set.add_cost_line' => 'Add cost line',
     'fh.set.costs_note' => 'Note under the calculator',
+    // Website status (offline switch)
+    'fh.set.website' => 'Website status',
+    'fh.set.website_desc' => 'Take the website offline while it is being prepared',
+    'fh.set.status_now' => 'Right now',
+    'fh.set.status_online' => 'Online: visitors see the website',
+    'fh.set.status_offline' => 'Offline: visitors see the offline page',
+    'fh.set.offline' => 'Website offline',
+    'fh.set.offline_help' => 'Visitors see the page below. Everyone signed in to the admin panel still sees the full website, so you can check it before switching it back on.',
+    'fh.set.offline_title' => 'Heading on the offline page',
+    'fh.set.offline_message' => 'Text on the offline page',
+    'fh.set.offline_contact' => 'Show phone, WhatsApp and email',
+    'fh.set.offline_contact_help' => 'Taken from Contact details.',
 );

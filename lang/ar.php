@@ -211,4 +211,16 @@ return array(
     'fh.set.line_active' => 'مفعّل',
     'fh.set.add_cost_line' => 'إضافة بند',
     'fh.set.costs_note' => 'ملاحظة أسفل الحاسبة',
+    // Website status (offline switch)
+    'fh.set.website' => 'حالة الموقع',
+    'fh.set.website_desc' => 'إيقاف الموقع مؤقتاً أثناء تجهيزه',
+    'fh.set.status_now' => 'الوضع الحالي',
+    'fh.set.status_online' => 'متاح: الزوار يرون الموقع',
+    'fh.set.status_offline' => 'متوقف: الزوار يرون صفحة التوقف',
+    'fh.set.offline' => 'إيقاف الموقع',
+    'fh.set.offline_help' => 'يرى الزوار الصفحة أدناه. كل من سجّل الدخول إلى لوحة الإدارة يرى الموقع كاملاً، لتتمكن من مراجعته قبل إعادة تشغيله.',
+    'fh.set.offline_title' => 'عنوان صفحة التوقف',
+    'fh.set.offline_message' => 'نص صفحة التوقف',
+    'fh.set.offline_contact' => 'إظهار الهاتف وواتساب والبريد',
+    'fh.set.offline_contact_help' => 'تؤخذ من بيانات التواصل.',
 );
