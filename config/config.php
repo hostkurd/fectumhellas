@@ -49,16 +49,18 @@
     Config::set('roles', array(
         0 => 'User',
         1 => 'Editor',
-        2 => 'Admin',
-        3 => 'Super Admin',
+        2 => 'Administrator',
+        3 => 'Super Admin', // HostKurd developers only
     ));
 
     // Role => permissions (requires flocms-core 2.1+). Supports 'name', 'prefix.*' and '*'.
-    // Roles: 0 User, 1 Editor, 2 Admin, 3 Super Admin. Roles not listed get no permissions.
+    // FECTUM Hellas staff use two roles: Editor (content, media, inquiries) and Administrator
+    // (also users, roles, website settings and the activity log). Super Admin is kept for
+    // HostKurd developers. Roles not listed get no permissions.
     Config::set('permissions', array(
         0 => array(),
         1 => array('content.*'),
-        2 => array('content.*', 'users.manage', 'users.assign_role', 'settings.*', 'activity.view'),
+        2 => array('content.*', 'users.manage', 'users.assign_role', 'roles.manage', 'settings.*', 'activity.view'),
         3 => array('*'),
     ));
 

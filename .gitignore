@@ -12,3 +12,8 @@ Thumbs.db
 .idea/
 .vscode/
 /.phpunit.cache/
+
+# Uploaded files (the folder's .htaccess stays in Git)
+/public/uploads/*
+!/public/uploads/.htaccess
+/storage/uploads/

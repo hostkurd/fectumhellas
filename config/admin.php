@@ -66,10 +66,10 @@ return [
 
     // Brand colour for buttons, links and highlights (#rrggbb); null keeps the default blue.
     // Pick a colour dark enough for white text: admin:doctor checks the contrast.
-    'primary_color' => null,
+    'primary_color' => '#1D6470',
 
     // Logo image URL for the sidebar (square works best); null shows the brand's first letter
-    'logo' => null,
+    'logo' => '/images/brand/logo-mark.svg',
 
     // Sidebar style: 'light' or 'dark'
     'sidebar' => 'light',
@@ -121,7 +121,8 @@ return [
     'roles' => ['permissions' => []],
 
     // Name at the top of the sidebar
-    'brand' => \FloCMS\Core\Env::get('SITE_NAME_ADMIN', 'Admin'),
+    // Set here, not from SITE_NAME_ADMIN: flocms-admin 0.39.3 reads this file before .env is loaded.
+    'brand' => 'FECTUM Hellas',
 
     // Rows per list page (a resource can set its own with ->perPage())
     'per_page' => 25,
@@ -132,7 +133,7 @@ return [
     'translation_mode' => 'page',
 
     // Content languages written right to left (inputs get dir="rtl")
-    'rtl_languages' => ['ar', 'ku', 'ckb', 'fa', 'he', 'ur'],
+    'rtl_languages' => ['ar'],
 
     // Permission names are "<prefix>.<slug>.<view|create|update|delete>",
     // e.g. content.properties.update. The skeleton's Editor role has content.*
