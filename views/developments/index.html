@@ -1,0 +1,98 @@
+@php /* Developments list (approved Developments mockup). Data from FloCMS\Controllers\DevelopmentsController::index. */
+use FloCMS\Support\Site;
+$tabs = $data['tabs']; $featured = $data['featured']; $items = $data['items']; $current = $data['status'];
+$arrow = '<svg class="fh-arrow" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+$pin = '<svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>';
+// "4 of 6 available" / "Register interest" / "All residences sold", and the price or completion beside it
+$units = static function (array $d): string {
+    if ($d['total'] === 0) { return $d['progress'] === 'completed' ? '' : __('fh.register_interest'); }
+    return $d['available'] > 0 ? __('fh.dev.available_of', ['available' => (string) $d['available'], 'total' => (string) $d['total']]) : __('fh.dev.all_sold');
+};
+$extra = static fn (array $d): string => $d['from'] !== '' && $d['available'] > 0 ? __('fh.dev.from_price', ['price' => $d['from']]) : ($d['completion'] !== '' ? __('fh.dev.completion_at', ['date' => $d['completion']]) : '');
+@endphp
+<main id="main" class="fh-devlist">
+    <header class="fh-list-head">
+        <div class="fh-wrap fh-list-head-text">
+            <nav class="fh-crumbs" aria-label="{{ __('fh.breadcrumb') }}"><a href="{{ Site::url('') }}">{{ __('fh.home') }}</a><span aria-hidden="true">/</span><span aria-current="page">{{ __('fh.nav.developments') }}</span></nav>
+            <div class="fh-devlist-intro">
+                <div class="fh-stack-sm">
+                    <h1 class="fh-h1">{{ __('fh.nav.developments') }}</h1>
+                    <p class="fh-lead">{{ __('fh.dev.list_lead') }}</p>
+                </div>
+                @if($data['total'] > 0)
+                <dl class="fh-devlist-totals">
+                    <div><dt>{{ __('fh.dev.t_developments') }}</dt><dd>{{ $data['total'] }}</dd></div>
+                    <div><dt>{{ __('fh.dev.t_available') }}</dt><dd>{{ $data['available'] }}</dd></div>
+                </dl>
+                @endif
+            </div>
+            @if(count($tabs) > 2)
+            <nav class="fh-tabs" aria-label="{{ __('fh.dev.show_developments') }}">
+                @foreach($tabs as $t)<a href="{{ $t['url'] }}"@if($t['key'] === $current) aria-current="page"@endif>{{ $t['label'] }} ({{ $t['count'] }})</a>@endforeach
+            </nav>
+            @endif
+        </div>
+    </header>
+
+    @if($featured)
+    <section class="fh-in-featured-sec">
+        <div class="fh-wrap">
+            <a class="fh-in-featured fh-devlist-featured" href="{{ $featured['url'] }}">
+                <span class="fh-in-featured-media">@if($featured['cover']){!! $featured['cover']->img(['sizes' => '(max-width: 900px) 100vw, 60vw', 'alt' => '', 'loading' => 'eager', 'fetchpriority' => 'high']) !!}@else<span class="fh-placeholder"></span>@endif
+                    @if($featured['status'] !== '')<span class="fh-devlist-badge">{{ $featured['status'] }}</span>@endif</span>
+                <span class="fh-in-featured-text">
+                    <span class="fh-eyebrow">{{ __('fh.dev.featured') }}</span>
+                    <span class="fh-in-featured-title" dir="auto">{{ $featured['title'] }}</span>
+                    @if($featured['location'] !== '')<span class="fh-devlist-place">{!! $pin !!}{{ $featured['location'] }}</span>@endif
+                    @if($featured['summary'] !== '')<span class="fh-post-excerpt" dir="auto">{{ $featured['summary'] }}</span>@endif
+                    @php $facts = array_filter([__('fh.dev.t_available_short') => $featured['total'] > 0 ? $featured['available'] . ' / ' . $featured['total'] : '', __('fh.dev.f_from') => $featured['available'] > 0 ? $featured['from'] : '', __('fh.dev.f_completion') => $featured['completion']]); @endphp
+                    @if($facts)
+                    <span class="fh-devlist-facts">@foreach($facts as $k => $val)<span><span class="fh-devlist-k">{{ $k }}</span><span class="fh-devlist-v"@if($k === __('fh.dev.t_available_short')) dir="ltr"@endif>{{ $val }}</span></span>@endforeach</span>
+                    @endif
+                    @if($featured['percent'] > 0 && $featured['progress'] !== 'completed')
+                    <span class="fh-dev-bar"><span class="fh-dev-bar-label"><span>{{ __('fh.dev.progress') }}</span><span class="fh-ltr">{{ $featured['percent'] }}%</span></span><span class="fh-dev-bar-track is-thin"><span style="--fh-p: {{ $featured['percent'] }}%"></span></span></span>
+                    @endif
+                    <span class="fh-link">{{ __('fh.dev.view_development') }}{!! $arrow !!}</span>
+                </span>
+            </a>
+        </div>
+    </section>
+    @endif
+
+    <section class="fh-in-list">
+        <div class="fh-wrap">
+            @if($items)
+            <div class="fh-devlist-grid">
+                @foreach($items as $d)
+                <a class="fh-devcard" href="{{ $d['url'] }}">
+                    <span class="fh-devcard-media">@if($d['cover']){!! $d['cover']->img(['sizes' => '(max-width: 700px) 100vw, (max-width: 1200px) 50vw, 430px', 'alt' => '']) !!}@else<span class="fh-placeholder"></span>@endif
+                        @if($d['status'] !== '')<span class="fh-devlist-badge">{{ $d['status'] }}</span>@endif</span>
+                    <span class="fh-devcard-body">
+                        <span class="fh-devcard-title" dir="auto">{{ $d['title'] }}</span>
+                        @if($d['location'] !== '')<span class="fh-devlist-place">{!! $pin !!}{{ $d['location'] }}</span>@endif
+                        @if($d['summary'] !== '')<span class="fh-devcard-summary" dir="auto">{{ $d['summary'] }}</span>@endif
+                        @if($units($d) !== '' || $extra($d) !== '')<span class="fh-devcard-foot"><span class="fh-devcard-units">{{ $units($d) }}</span><span>{{ $extra($d) }}</span></span>@endif
+                    </span>
+                </a>
+                @endforeach
+            </div>
+            @elseif(!$featured)
+            <p class="fh-empty">{{ __('fh.dev.none') }}@if($current !== '') <a href="{{ Site::url('developments') }}">{{ __('fh.dev.show_all') }}</a>@endif</p>
+            @endif
+        </div>
+    </section>
+
+    <section class="fh-devlist-band">
+        <div class="fh-wrap fh-devlist-band-inner">
+            <div class="fh-stack-sm fh-devlist-band-text">
+                <p class="fh-eyebrow">{{ __('fh.dev.offplan_eyebrow') }}</p>
+                <h2 class="fh-h2">{{ __('fh.dev.offplan_title') }}</h2>
+                <p class="fh-lead">{{ __('fh.dev.offplan_lead') }}</p>
+            </div>
+            <div class="fh-actions">
+                <a class="fh-btn fh-btn-solid" href="{{ Site::pageUrl('contact') }}">{{ __('fh.talk_team') }}</a>
+                <a class="fh-btn fh-btn-line" href="{{ Site::url('insights') }}?category=buying_guide">{{ __('fh.dev.read_guide') }}</a>
+            </div>
+        </div>
+    </section>
+</main>
