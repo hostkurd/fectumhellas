@@ -139,6 +139,33 @@
     doc.head.appendChild(js);
   }
 
+  // Browsers without Speculation Rules (Safari, Firefox): fetch a page into the cache
+  // when the pointer rests on its link or a finger touches it, so it opens at once.
+  var canSpeculate = window.HTMLScriptElement && HTMLScriptElement.supports && HTMLScriptElement.supports('speculationrules');
+  if (!canSpeculate) {
+    var fetched = {};
+    var hoverTimer;
+    var preload = function (a) {
+      if (!a || a.target || a.hasAttribute('download') || a.hasAttribute('data-fh-no-preload')) { return; }
+      var url;
+      try { url = new URL(a.href, location.href); } catch (e) { return; }
+      if (url.origin !== location.origin || url.search || /\/(admin|forms|flo-reactive)(\/|$)/.test(url.pathname)) { return; }
+      url.hash = '';
+      if (url.href === location.href.split('#')[0] || fetched[url.href]) { return; }
+      fetched[url.href] = true;
+      var link = doc.createElement('link');
+      link.rel = 'prefetch';
+      link.href = url.href;
+      doc.head.appendChild(link);
+    };
+    doc.addEventListener('pointerover', function (e) {
+      var a = e.target.closest && e.target.closest('a[href]');
+      clearTimeout(hoverTimer);
+      if (a) { hoverTimer = setTimeout(function () { preload(a); }, 120); }
+    }, { passive: true });
+    doc.addEventListener('touchstart', function (e) { preload(e.target.closest && e.target.closest('a[href]')); }, { passive: true });
+  }
+
   window.addEventListener('storage', refresh);
   doc.querySelectorAll('[data-fh-card-actions]').forEach(function (el) { el.hidden = false; });
   refresh();

@@ -18,6 +18,13 @@
 }
 [dir=rtl]{--fh-font:"IBM Plex Sans Arabic","Manrope",system-ui,Tahoma,sans-serif}
 
+/* Page to page: a short cross-fade with the header held in place (browsers with cross-document View Transitions) */
+@view-transition{navigation:auto}
+.fh-header{view-transition-name:fh-header}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.22s;animation-timing-function:ease}
+::view-transition-group(fh-header){animation-duration:.22s}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
+
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;scroll-padding-top:calc(var(--fh-header) + 16px)}
 body.fh{margin:0;background:var(--fh-bg);color:var(--fh-text);font-family:var(--fh-font);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
