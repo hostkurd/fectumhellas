@@ -66,7 +66,7 @@ return [
 
     // Brand colour for buttons, links and highlights (#rrggbb); null keeps the default blue.
     // Pick a colour dark enough for white text: admin:doctor checks the contrast.
-    'primary_color' => '#1D6470',
+    'primary_color' => '#2B4285',
 
     // Logo image URL for the sidebar (square works best); null shows the brand's first letter
     'logo' => '/images/brand/logo-mark.svg',
