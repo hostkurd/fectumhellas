@@ -57,7 +57,13 @@ Roles and permissions are set in `config/config.php` and can be adjusted on the 
 
 ## Deploy (cPanel, over SSH)
 
-The domain's document root points to the project's `public/` folder.
+The project lives outside `public_html` (e.g. `~/fectumhellas`) and the domain serves only its `public/` folder. On our server the domain's folder is a symlink, created once as the account user:
+
+```
+ln -s /home/USER/fectumhellas/public ~/public_html/fectumhellas.gr
+```
+
+Remove the link with `rm` (no trailing slash), never with cPanel File Manager. cPanel AutoSSL writes its checks to `public/.well-known/`, which Git ignores.
 
 ```
 cd ~/fectumhellas
@@ -78,4 +84,9 @@ Kept out of Git: `.env`, `vendor/`, uploaded files (`public/uploads/`, `storage/
 
 ## Brand files
 
-Logos are in `public/images/brand/`: wide, stacked and mark only, in navy (`#0e2841`) and white.
+Logos are in `public/images/brand/`:
+
+- `logo-line.svg` and `logo-line-white.svg`: the one-line logo used by the website header and footer, in logo blue (`#2B4285`) and white.
+- Wide, stacked and mark only, in navy (`#0e2841`) and white.
+
+The admin uses `#2B4285` as its brand colour (`config/admin.php`).
