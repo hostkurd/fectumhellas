@@ -119,6 +119,7 @@ return [
             Textarea::make('description')->label('fh.f.meta_description')->translatable()->rows(3)->rules('max:170')
                 ->default('Real estate development and investment in Greece.'),
             MediaPicker::make('share_image')->label('fh.set.share_image')->folder('Social')->aspectRatio('16:9'),
+            Toggle::make('hide_site')->label('fh.set.hide_site')->help('fh.set.hide_site_help')->default(false),
         ]),
 
     SettingsPage::make('costs')

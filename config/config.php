@@ -83,4 +83,5 @@
     \FloCMS\Core\App::fallbackUsing(static fn (string $path, \FloCMS\Core\Http\Request $request): ?\FloCMS\Core\Http\Response
         => \FloCMS\Support\PropertyPage::handle($path, $request)
         ?? \FloCMS\Support\DevelopmentPage::handle($path, $request)
-        ?? \FloCMS\Support\ArticlePage::handle($path, $request));
+        ?? \FloCMS\Support\ArticlePage::handle($path, $request)
+        ?? \FloCMS\Support\Sitemaps::handle($path, $request));

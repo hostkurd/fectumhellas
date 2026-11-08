@@ -641,4 +641,7 @@ return array(
     'fh.nf.rent_lead' => 'Long-term rentals in Athens and on the coast.',
     'fh.nf.dev_lead' => 'New-build projects, plans and progress.',
     'fh.nf.insights_lead' => 'Buying in Greece, Golden Visa, market news.',
+    // Stage 3d: search engines
+    'fh.set.hide_site' => 'Hide the website from search engines',
+    'fh.set.hide_site_help' => 'For before launch: robots.txt asks search engines not to visit any page. Turn it off when the website goes live.',
 );
