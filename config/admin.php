@@ -19,11 +19,31 @@ return [
 
     // Optional dashboard widgets, explicitly registered. Empty keeps resource-count cards.
     'widgets' => [
-        // App\Admin\Widgets\Overview::class,
+        // The FECTUM Hellas dashboard (flocms-admin 0.42), in this order on the page
+        \App\Admin\Widgets\Headline::class,
+        \App\Admin\Widgets\InquiriesPerDay::class,
+        \App\Admin\Widgets\InquirySources::class,
+        \App\Admin\Widgets\LatestInquiries::class,
+        \App\Admin\Widgets\NeedsAttention::class,
+        \App\Admin\Widgets\PropertiesByStatus::class,
+        \App\Admin\Widgets\DevelopmentsProgress::class,
+        \App\Admin\Widgets\RecentActivity::class,
+        \App\Admin\Widgets\MostAskedAbout::class,
+        \App\Admin\Widgets\VisitorLanguages::class,
     ],
     'widgets_path' => 'admin/Widgets',
     'widgets_namespace' => 'App\\Admin\\Widgets',
-    'widget_columns' => 2,
+    'widget_columns' => 3,
+    // Dashboard period buttons (days) and the one it opens on (0.42)
+    'dashboard_periods' => [7, 30, 90, 365],
+    'dashboard_period' => 30,
+    // Quick buttons under the greeting; the first is the main one (0.42)
+    'dashboard_actions' => [
+        [\App\Admin\Resources\ListingResource::class, 'label' => 'fh.dash.qa_property', 'icon' => 'plus'],
+        [\App\Admin\Resources\ProjectResource::class, 'label' => 'fh.dash.qa_development', 'icon' => 'plus'],
+        [\App\Admin\Resources\ArticleResource::class, 'label' => 'fh.dash.qa_article', 'icon' => 'pencil'],
+        [\App\Admin\Resources\ProjectUpdateResource::class, 'label' => 'fh.dash.qa_update', 'icon' => 'camera'],
+    ],
 
     // Pages of your own in the panel (0.36): reports, tools, help pages.
     // php flo make:admin-page SalesReport --view --table adds one here.
