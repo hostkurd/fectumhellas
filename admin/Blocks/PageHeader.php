@@ -27,6 +27,10 @@ final class PageHeader extends Block
             TextInput::make('heading')->label('fh.bf.heading')->required()->rules('max:160')->columnSpan('full'),
             Textarea::make('text')->label('fh.bf.text')->rows(3)->rules('max:500')->columnSpan('full'),
             MediaPicker::make('image')->label('fh.bf.image')->folder('Pages'),
+            TextInput::make('button')->label('fh.bf.button')->rules('max:40'),
+            TextInput::make('button_link')->label('fh.bf.button_link')->rules('max:255')->help('fh.bf.link_anchor_help'),
+            TextInput::make('button2')->label('fh.bf.button2')->rules('max:40'),
+            TextInput::make('link2')->label('fh.bf.link2')->rules('max:255')->help('fh.bf.link_anchor_help'),
         ];
     }
 

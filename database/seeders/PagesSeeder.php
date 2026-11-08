@@ -309,12 +309,67 @@ final class PagesSeeder extends Seeder
     private function buyers(string $l): array
     {
         $t = fn (array $s): string => $s[$l];
+        $items = fn (array $rows): array => array_map(fn (array $r): array => $this->item(array_map(fn ($v) => is_array($v) ? $v[$l] : $v, $r)), $rows);
         return [
             $this->block('page_header', [
                 'eyebrow' => $t(['en' => 'International buyers', 'ar' => 'المشترون الدوليون', 'el' => 'Διεθνείς αγοραστές']),
                 'heading' => $t(['en' => 'Buying property in Greece as an international buyer', 'ar' => 'شراء عقار في اليونان كمشترٍ دولي', 'el' => 'Αγορά ακινήτου στην Ελλάδα από το εξωτερικό']),
                 'text' => $t(['en' => 'Ownership, process, costs and tax numbers, coordinated with our qualified legal and professional partners.', 'ar' => 'الملكية والإجراءات والتكاليف والرقم الضريبي، بالتنسيق مع شركائنا القانونيين والمهنيين المؤهلين.', 'el' => 'Ιδιοκτησία, διαδικασία, κόστη και ΑΦΜ, σε συντονισμό με τους εξειδικευμένους νομικούς και επαγγελματίες συνεργάτες μας.']),
                 'image' => $this->photo('sea'),
+                'button' => $t(['en' => 'See the steps', 'ar' => 'تعرّف على الخطوات', 'el' => 'Δείτε τα βήματα']),
+                'button_link' => '#steps',
+                'button2' => $t(['en' => 'Talk to our team', 'ar' => 'تحدّث مع فريقنا', 'el' => 'Μιλήστε με την ομάδα μας']),
+                'link2' => 'contact',
+            ]),
+            $this->block('facts', [
+                'heading' => $t(['en' => 'At a glance', 'ar' => 'لمحة سريعة', 'el' => 'Με μια ματιά']),
+                'items' => $items([
+                    ['icon' => 'globe', 'title' => ['en' => 'Open to international buyers', 'ar' => 'متاح للمشترين الدوليين', 'el' => 'Ανοιχτό σε διεθνείς αγοραστές'],
+                     'text' => ['en' => 'Buyers from the EU and from outside the EU can buy in most areas of Greece.', 'ar' => 'يمكن للمشترين من داخل الاتحاد الأوروبي وخارجه الشراء في معظم مناطق اليونان.', 'el' => 'Αγοραστές από την ΕΕ και εκτός ΕΕ μπορούν να αγοράσουν στις περισσότερες περιοχές της Ελλάδας.']],
+                    ['icon' => 'id', 'title' => ['en' => 'A Greek tax number', 'ar' => 'رقم ضريبي يوناني', 'el' => 'Ελληνικό ΑΦΜ'],
+                     'text' => ['en' => 'Every buyer needs a tax number (AFM). Your lawyer can arrange it for you.', 'ar' => 'يحتاج كل مشترٍ إلى رقم ضريبي (AFM)، ويمكن لمحاميك إصداره لك.', 'el' => 'Κάθε αγοραστής χρειάζεται ΑΦΜ. Ο δικηγόρος σας μπορεί να τον εκδώσει για εσάς.']],
+                    ['icon' => 'remote', 'title' => ['en' => 'Possible from abroad', 'ar' => 'ممكن من الخارج', 'el' => 'Εφικτό από το εξωτερικό'],
+                     'text' => ['en' => 'With a power of attorney your lawyer signs for you; viewings can be by video.', 'ar' => 'بموجب توكيل يوقّع محاميك نيابة عنك، ويمكن إجراء المعاينات بالفيديو.', 'el' => 'Με πληρεξούσιο ο δικηγόρος σας υπογράφει για εσάς· οι προβολές μπορούν να γίνουν με βίντεο.']],
+                    ['icon' => 'shield', 'title' => ['en' => 'Checked by a lawyer', 'ar' => 'بمراجعة محامٍ', 'el' => 'Ελεγμένο από δικηγόρο'],
+                     'text' => ['en' => 'The title and permits of every property are checked before you sign.', 'ar' => 'يُراجَع سند الملكية وتراخيص كل عقار قبل التوقيع.', 'el' => 'Οι τίτλοι και οι άδειες κάθε ακινήτου ελέγχονται πριν υπογράψετε.']],
+                ]),
+            ]),
+            $this->block('steps', [
+                'eyebrow' => $t(['en' => 'The process', 'ar' => 'الإجراءات', 'el' => 'Η διαδικασία']),
+                'heading' => $t(['en' => 'How buying works', 'ar' => 'كيف يتم الشراء', 'el' => 'Πώς γίνεται η αγορά']),
+                'text' => $t(['en' => 'Five steps from the first viewing to the keys. We coordinate each one with our legal and professional partners.', 'ar' => 'خمس خطوات من أول معاينة حتى استلام المفاتيح، ننسّق كلًّا منها مع شركائنا القانونيين والمهنيين.', 'el' => 'Πέντε βήματα από την πρώτη επίσκεψη έως τα κλειδιά. Συντονίζουμε το καθένα με τους νομικούς και επαγγελματίες συνεργάτες μας.']),
+                'items' => $items([
+                    ['title' => ['en' => 'Choose a property', 'ar' => 'اختيار العقار', 'el' => 'Επιλογή ακινήτου'],
+                     'text' => ['en' => 'We shortlist properties that fit your needs and arrange viewings in person or by video.', 'ar' => 'نختار لك العقارات المناسبة ونرتّب المعاينات حضوريًا أو بالفيديو.', 'el' => 'Επιλέγουμε ακίνητα που σας ταιριάζουν και οργανώνουμε προβολές από κοντά ή με βίντεο.']],
+                    ['title' => ['en' => 'Tax number and bank account', 'ar' => 'الرقم الضريبي والحساب المصرفي', 'el' => 'ΑΦΜ και τραπεζικός λογαριασμός'],
+                     'text' => ['en' => 'You get a Greek tax number (AFM) and, usually, a Greek bank account.', 'ar' => 'تحصل على رقم ضريبي يوناني (AFM)، وعادةً على حساب مصرفي يوناني.', 'el' => 'Εκδίδετε ελληνικό ΑΦΜ και, συνήθως, ανοίγετε ελληνικό τραπεζικό λογαριασμό.']],
+                    ['title' => ['en' => 'Legal checks', 'ar' => 'المراجعة القانونية', 'el' => 'Νομικός έλεγχος'],
+                     'text' => ['en' => 'Your lawyer checks the title, the permits and any area restrictions.', 'ar' => 'يتحقق محاميك من سند الملكية والتراخيص وأي قيود على المنطقة.', 'el' => 'Ο δικηγόρος σας ελέγχει τους τίτλους, τις άδειες και τυχόν περιορισμούς της περιοχής.']],
+                    ['title' => ['en' => 'Sign at the notary', 'ar' => 'التوقيع لدى كاتب العدل', 'el' => 'Υπογραφή στον συμβολαιογράφο'],
+                     'text' => ['en' => 'The contract is signed before a notary and the transfer tax or VAT is paid.', 'ar' => 'يُوقَّع العقد أمام كاتب العدل وتُدفع ضريبة نقل الملكية أو ضريبة القيمة المضافة.', 'el' => 'Το συμβόλαιο υπογράφεται ενώπιον συμβολαιογράφου και καταβάλλεται ο φόρος μεταβίβασης ή ο ΦΠΑ.']],
+                    ['title' => ['en' => 'Registration and keys', 'ar' => 'التسجيل والمفاتيح', 'el' => 'Μεταγραφή και κλειδιά'],
+                     'text' => ['en' => 'The deed is registered at the land registry and the property is yours.', 'ar' => 'يُسجَّل العقد في السجل العقاري ويصبح العقار ملكك.', 'el' => 'Το συμβόλαιο μεταγράφεται στο κτηματολόγιο και το ακίνητο είναι δικό σας.']],
+                ]),
+            ], ['anchor' => 'steps']),
+            $this->block('cost_list', [
+                'eyebrow' => $t(['en' => 'Costs', 'ar' => 'التكاليف', 'el' => 'Κόστη']),
+                'heading' => $t(['en' => 'Costs to plan for', 'ar' => 'تكاليف يجب أخذها في الحسبان', 'el' => 'Κόστη που πρέπει να υπολογίσετε']),
+                'text' => $t(['en' => 'Besides the price, budget for these costs. The calculator on every property page shows an estimate for that property.', 'ar' => 'إضافة إلى السعر، خصّص ميزانية لهذه التكاليف. تعرض الحاسبة في صفحة كل عقار تقديرًا خاصًا به.', 'el' => 'Πέρα από την τιμή, υπολογίστε αυτά τα κόστη. Ο υπολογιστής σε κάθε ακίνητο δείχνει μια εκτίμηση για το συγκεκριμένο ακίνητο.']),
+                'link_text' => $t(['en' => 'Browse properties', 'ar' => 'تصفّح العقارات', 'el' => 'Δείτε τα ακίνητα']),
+                'link' => 'properties',
+                'items' => $items([
+                    ['title' => ['en' => 'Transfer tax or VAT', 'ar' => 'ضريبة نقل الملكية أو القيمة المضافة', 'el' => 'Φόρος μεταβίβασης ή ΦΠΑ'],
+                     'text' => ['en' => 'Depends on the property: resale homes pay transfer tax, some new builds VAT.', 'ar' => 'حسب العقار: تُدفع ضريبة نقل الملكية على العقارات المستعملة، وضريبة القيمة المضافة على بعض العقارات الجديدة.', 'el' => 'Εξαρτάται από το ακίνητο: τα μεταπωλούμενα πληρώνουν φόρο μεταβίβασης, ορισμένα νεόδμητα ΦΠΑ.']],
+                    ['title' => ['en' => 'Notary', 'ar' => 'كاتب العدل', 'el' => 'Συμβολαιογράφος'],
+                     'text' => ['en' => 'For drawing up and signing the contract.', 'ar' => 'لتحرير العقد وتوقيعه.', 'el' => 'Για τη σύνταξη και την υπογραφή του συμβολαίου.']],
+                    ['title' => ['en' => 'Land registry', 'ar' => 'السجل العقاري', 'el' => 'Κτηματολόγιο'],
+                     'text' => ['en' => 'For registering the deed in your name.', 'ar' => 'لتسجيل العقد باسمك.', 'el' => 'Για τη μεταγραφή του συμβολαίου στο όνομά σας.']],
+                    ['title' => ['en' => 'Lawyer', 'ar' => 'المحامي', 'el' => 'Δικηγόρος'],
+                     'text' => ['en' => 'For the legal checks and, if needed, signing for you.', 'ar' => 'للمراجعة القانونية، وللتوقيع نيابة عنك عند الحاجة.', 'el' => 'Για τον νομικό έλεγχο και, αν χρειαστεί, την υπογραφή για εσάς.']],
+                    ['title' => ['en' => 'Agency fee', 'ar' => 'أتعاب الوكالة', 'el' => 'Αμοιβή μεσίτη'],
+                     'text' => ['en' => 'Where an agency is involved in the sale.', 'ar' => 'عند مشاركة وكالة في عملية البيع.', 'el' => 'Όταν στην πώληση συμμετέχει μεσιτικό γραφείο.']],
+                ]),
+                'note' => $t(['en' => 'Rates change and depend on the property. Your lawyer confirms the exact amounts.', 'ar' => 'تتغيّر النسب وتختلف حسب العقار، ويؤكد محاميك المبالغ الدقيقة.', 'el' => 'Οι συντελεστές αλλάζουν και εξαρτώνται από το ακίνητο. Ο δικηγόρος σας επιβεβαιώνει τα ακριβή ποσά.']),
             ]),
             $this->block('faq', [
                 'heading' => $t(['en' => 'Questions international buyers ask', 'ar' => 'أسئلة يطرحها المشترون الدوليون', 'el' => 'Ερωτήσεις διεθνών αγοραστών']),
@@ -343,6 +398,16 @@ final class PagesSeeder extends Seeder
                       'el' => 'Ναι. Με πληρεξούσιο ο δικηγόρος σας μπορεί να υπογράψει για εσάς, και μπορούμε να οργανώσουμε προβολές μέσω βίντεο.']],
                 ]),
             ], ['width' => 'boxed', 'space_above' => 'large', 'space_below' => 'large']),
+            $this->block('feature_band', [
+                'look' => 'light',
+                'eyebrow' => $t(['en' => 'Investment & residency', 'ar' => 'الاستثمار والإقامة', 'el' => 'Επένδυση & διαμονή']),
+                'heading' => $t(['en' => 'Investing with residency in mind?', 'ar' => 'تستثمر بهدف الإقامة؟', 'el' => 'Επενδύετε με στόχο την άδεια διαμονής;']),
+                'text' => $t(['en' => 'Where residency is involved, we help you find suitable properties and coordinate the purchase with qualified legal partners, who review your individual eligibility.', 'ar' => 'عندما يتعلق الأمر بالإقامة، نساعدك في إيجاد العقارات المناسبة وننسّق الشراء مع شركاء قانونيين مؤهلين يراجعون أهليتك.', 'el' => 'Όταν αφορά άδεια διαμονής, σας βοηθάμε να βρείτε κατάλληλα ακίνητα και συντονίζουμε την αγορά με εξειδικευμένους νομικούς συνεργάτες, που εξετάζουν την επιλεξιμότητά σας.']),
+                'image' => $this->photo('islet'),
+                'points' => [],
+                'link_text' => $t(['en' => 'Investment & residency support', 'ar' => 'دعم الاستثمار والإقامة', 'el' => 'Υποστήριξη επένδυσης & διαμονής']),
+                'link' => 'services',
+            ]),
             $this->block('closing_cta', $this->cta($l)),
         ];
     }

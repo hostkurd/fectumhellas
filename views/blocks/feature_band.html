@@ -1,13 +1,15 @@
-@php /* Feature band (site block): blue text side with points beside a photo. */ $img = media($image); $points = repeater_items($points); @endphp
-<section class="fh-band fh-feature">
+@php /* Feature band (site block): text side with points and a link beside a photo. Blue, or white with the photo first ("light"). */ use FloCMS\Support\Site; $img = media($image); $points = repeater_items($points); $light = ($look ?? '') === 'light'; $href = Site::link($link ?? ''); $intro = (string) ($text ?? ''); @endphp
+<section class="fh-band fh-feature{{ $light ? ' is-light' : '' }}">
     <div class="fh-band-text fh-feature-text">
         <div class="fh-section-title">
-            @if($eyebrow !== '')<p class="fh-eyebrow is-light">{{ $eyebrow }}</p>@endif
-            <h2 class="fh-h2 is-light">{{ $heading }}</h2>
+            @if($eyebrow !== '')<p class="fh-eyebrow{{ $light ? ' fh-eyebrow-line' : ' is-light' }}">{{ $eyebrow }}</p>@endif
+            <h2 class="fh-h2{{ $light ? '' : ' is-light' }}">{{ $heading }}</h2>
         </div>
+        @if($intro !== '')<p class="fh-feature-intro">{{ $intro }}</p>@endif
         @foreach($points as $point)
         <div class="fh-feature-point"><h3>{{ $point['title'] }}</h3>@if(($point['text'] ?? '') !== '')<p>{{ $point['text'] }}</p>@endif</div>
         @endforeach
+        @if($href !== '' && ($link_text ?? '') !== '')<a class="fh-link{{ $light ? '' : ' is-light' }}" href="{{ $href }}">{{ $link_text }}<svg aria-hidden="true" class="fh-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>@endif
     </div>
     <div class="fh-band-media">@if($img){!! $img->img(['sizes' => '(max-width: 1100px) 100vw, 50vw', 'alt' => '']) !!}@else<span class="fh-placeholder"></span>@endif</div>
 </section>

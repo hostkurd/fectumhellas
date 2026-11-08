@@ -1,0 +1,29 @@
+@php /* Facts (site block): up to four facts with icons on one white card. Right after a page header it overlaps the photo (site.css). */
+$items = repeater_items($items);
+$paths = [
+    'globe' => '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/>',
+    'id' => '<rect x="3" y="5" width="18" height="14" rx="1"/><circle cx="9" cy="11" r="2.2"/><path d="M5.8 16c.6-1.6 1.8-2.4 3.2-2.4s2.6.8 3.2 2.4M15 10h3M15 13.5h3"/>',
+    'remote' => '<rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4M9.5 10.5l2 2 3.5-4"/>',
+    'shield' => '<path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.2-7.5 9.5-4.3-1.3-7.5-4.9-7.5-9.5V6z"/><path d="M8.8 12.2l2.2 2.2 4.2-4.6"/>',
+    'home' => '<path d="M4 21V9l8-5 8 5v12M9 21v-6h6v6"/>',
+    'key' => '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/>',
+    'document' => '<path d="M5 3h10l4 4v14H5z"/><path d="M15 3v4h4M8 12h8M8 16h6"/>',
+    'chat' => '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/>',
+];
+@endphp
+@if($items)
+<section class="fh-glance">
+    <div class="fh-wrap">
+        @if($heading !== '')<h2 class="fh-sr">{{ $heading }}</h2>@endif
+        <div class="fh-glance-card" style="--fh-glance: {{ count($items) }}">
+            @foreach($items as $item)
+            <div class="fh-fact">
+                <span class="fh-fact-icon"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">{!! $paths[$item['icon'] ?? ''] ?? $paths['globe'] !!}</svg></span>
+                <h3 class="fh-fact-title">{{ $item['title'] }}</h3>
+                @if(($item['text'] ?? '') !== '')<p>{{ $item['text'] }}</p>@endif
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif

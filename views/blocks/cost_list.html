@@ -1,0 +1,23 @@
+@php /* Cost list (site block): heading, text and link beside a numbered list on a white card. */ use FloCMS\Support\Site; $items = repeater_items($items); $href = Site::link($link); @endphp
+<section class="fh-costs">
+    <div class="fh-wrap fh-split-5-7">
+        <div class="fh-split-head">
+            @if($eyebrow !== '')<p class="fh-eyebrow fh-eyebrow-line">{{ $eyebrow }}</p>@endif
+            <h2 class="fh-h2">{{ $heading }}</h2>
+            @if($text !== '')<p class="fh-split-lead">{{ $text }}</p>@endif
+            @if($href !== '' && $link_text !== '')<a class="fh-link" href="{{ $href }}">{{ $link_text }}<svg aria-hidden="true" class="fh-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>@endif
+        </div>
+        @if($items || $note !== '')
+        <div class="fh-costs-card">
+            @if($items)
+            <ol class="fh-costs-list">
+                @foreach($items as $i => $item)
+                <li class="fh-cost"><span class="fh-cost-num" aria-hidden="true">{{ sprintf('%02d', $i + 1) }}</span><div><h3 class="fh-cost-title">{{ $item['title'] }}</h3>@if(($item['text'] ?? '') !== '')<p>{{ $item['text'] }}</p>@endif</div></li>
+                @endforeach
+            </ol>
+            @endif
+            @if($note !== '')<p class="fh-costs-note">{{ $note }}</p>@endif
+        </div>
+        @endif
+    </div>
+</section>
