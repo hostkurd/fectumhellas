@@ -20,7 +20,7 @@
 
   /* ---------- Saved and Compare (localStorage) ---------- */
   function read(key) {
-    try { var v = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(v) ? v.filter(function (n) { return Number.isInteger(n) && n > 0; }) : []; }
+    try { var v = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(v) ? v.filter(function (n) { return Number.isInteger(n) && n > 0 && n <= 999999999; }) : []; }
     catch (e) { return []; }
   }
   function write(key, list) {
@@ -135,7 +135,8 @@
   }
 
   /* ---------- Compare and Saved pages: the address follows this browser's lists ---------- */
-  function idList(value) { return String(value || '').split(',').map(Number).filter(function (n) { return Number.isInteger(n) && n > 0; }); }
+  // Same rule as the server (Shortlist::ids): whole numbers 1 to 999999999
+  function idList(value) { return String(value || '').split(',').map(Number).filter(function (n) { return Number.isInteger(n) && n > 0 && n <= 999999999; }); }
   function shortlistUrl(page, ids) {
     // The page's own address with only ?ids= (commas kept readable)
     return location.origin + location.pathname + (ids.length ? '?ids=' + ids.join(',') : '');
@@ -143,6 +144,7 @@
   function reopen(href) {
     if (canSwap) { navigate(href, 'replace', window.scrollY); } else { location.replace(href); }
   }
+  var lastSync = '';
   function syncShortlist() {
     var page = doc.querySelector('[data-fh-shortlist]');
     if (!page) { return; }
@@ -158,12 +160,19 @@
       write(key, list);
       refresh();
     }
-    // Saved: this browser's list is the page. Compare: a shared link keeps its own properties.
-    var wanted = kind === 'saved' ? list.slice(0, 50) : (requested.length ? null : list.slice(0, MAX_COMPARE));
-    if (wanted && wanted.join(',') !== requested.join(',') && page.getAttribute('data-fh-synced') !== '1') {
-      page.setAttribute('data-fh-synced', '1');
-      reopen(shortlistUrl(kind, wanted));
-    }
+    // Saved: this browser's list is the page. Compare: an address with ?ids= (a shared link) keeps its own properties.
+    var wanted = kind === 'saved' ? list.slice(0, 50) : (page.hasAttribute('data-fh-explicit') ? null : list.slice(0, MAX_COMPARE));
+    if (!wanted || wanted.join(',') === requested.join(',') || page.getAttribute('data-fh-synced') === '1') { return; }
+    // Never the same correction twice in a row (a list this browser cannot save, or one the server reads differently)
+    var target = shortlistUrl(kind, wanted);
+    var last = '';
+    try { last = sessionStorage.getItem('fh-sync') || ''; } catch (e) { last = lastSync; }
+    var stamp = last.split(' ');
+    if (stamp[0] === target && Date.now() - Number(stamp[1] || 0) < 15000) { return; }
+    lastSync = target + ' ' + Date.now();
+    try { sessionStorage.setItem('fh-sync', lastSync); } catch (e) { /* the variable keeps it for this page */ }
+    page.setAttribute('data-fh-synced', '1');
+    reopen(target);
   }
 
   /* ---------- Short messages (screen readers + a brief note on screen) ---------- */

@@ -5,7 +5,7 @@ $slots = max(0, 3 - $n);
 $countLabel = $n === 1 ? __('fh.sv.one') : __('fh.sv.many', ['n' => (string) $n]);
 $back = '<svg class="fh-arrow" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>';
 @endphp
-<main id="main" class="fh-cmp" data-fh-shortlist="compare" data-fh-requested="{{ implode(',', $data['requested']) }}" data-fh-shown="{{ implode(',', $data['shown']) }}">
+<main id="main" class="fh-cmp" data-fh-shortlist="compare" @if($data['explicit'])data-fh-explicit @endifdata-fh-requested="{{ implode(',', $data['requested']) }}" data-fh-shown="{{ implode(',', $data['shown']) }}">
     <header class="fh-list-head">
         <div class="fh-wrap fh-list-head-text">
             <nav class="fh-crumbs" aria-label="{{ __('fh.breadcrumb') }}"><a href="{{ Site::url('') }}">{{ __('fh.home') }}</a><span aria-hidden="true">/</span><a href="{{ Site::url('properties') }}">{{ __('fh.nav.properties') }}</a><span aria-hidden="true">/</span><span aria-current="page">{{ __('fh.cmp.crumb') }}</span></nav>
@@ -64,7 +64,7 @@ $back = '<svg class="fh-arrow" aria-hidden="true" width="16" height="16" viewBox
                     </thead>
                     @foreach($table['groups'] as $g)
                     <tbody>
-                        <tr class="fh-cmp-group"><th scope="colgroup" colspan="4"><span>{{ $g['title'] }}</span></th></tr>
+                        <tr class="fh-cmp-group"><th scope="rowgroup" colspan="4"><span>{{ $g['title'] }}</span></th></tr>
                         @foreach($g['rows'] as $r)
                         <tr class="{{ $r['differs'] ? 'is-diff' : ($n > 1 ? 'is-same' : '') }}">
                             <th scope="row">@if($r['differs'])<span class="fh-cmp-dot" role="img" aria-label="{{ __('fh.cmp.differs') }}"></span>@endif{{ $r['label'] }}</th>
@@ -72,7 +72,7 @@ $back = '<svg class="fh-arrow" aria-hidden="true" width="16" height="16" viewBox
                             <td>
                                 @if($c['type'] === 'yesno')
                                     @if($c['yes'])<svg role="img" aria-label="{{ __('fh.cmp.yes') }}" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>@else<span class="fh-cmp-no" role="img" aria-label="{{ __('fh.cmp.no') }}">—</span>@endif
-                                @elseif(trim($c['text']) === '')<span class="fh-cmp-no" role="img" aria-label="{{ __('fh.cmp.unknown') }}">—</span>
+                                @elseif(trim($c['text']) === '')<span class="fh-cmp-no" role="img" aria-label="{{ ($c['na'] ?? false) ? __('fh.cmp.na') : __('fh.cmp.unknown') }}">—</span>
                                 @else<bdi>{{ $c['text'] }}</bdi>@endif
                                 @if($c['best'] !== '')<span class="fh-cmp-best">{{ $c['best'] }}</span>@endif
                             </td>

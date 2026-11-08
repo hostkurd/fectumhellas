@@ -29,6 +29,8 @@ class CompareController extends Controller
         $this->data['table'] = Shortlist::compare($rows);
         $this->data['requested'] = $requested;
         $this->data['shown'] = $shown;
-        $this->data['without'] = static fn (int $id): string => Shortlist::url('compare', array_values(array_diff($shown, [$id])));
+        // Taking the last one off a comparison keeps "?ids=": the visitor's own list doesn't replace a shared link
+        $this->data['without'] = static fn (int $id): string => ($rest = array_values(array_diff($shown, [$id]))) !== [] ? Shortlist::url('compare', $rest) : Site::url('compare') . '?ids=';
+        $this->data['explicit'] = isset($_GET['ids']);
     }
 }

@@ -86,6 +86,7 @@ final class Shortlist
         $props = [];
         $area = [];
         $perM2 = [];
+        $rental = [];
         foreach ($rows as $i => $row) {
             $card = Listings::card($row);
             $status = (string) ($row->status ?? '');
@@ -94,6 +95,7 @@ final class Shortlist
             $area[$i] = $a;
             // Per m² for homes for sale only (a monthly rent per m² compares nothing)
             $perM2[$i] = $price > 0 && $a > 0 && in_array($status, ['for_sale', 'off_plan'], true) ? round($price / $a) : 0.0;
+            $rental[$i] = in_array($status, ['for_rent', 'rented'], true);
             $props[] = $card + ['id' => (int) $row->id];
         }
         $low = array_filter($perM2, static fn (float $v): bool => $v > 0);
@@ -113,8 +115,8 @@ final class Shortlist
         $groups = [
             ['title' => __('fh.cmp.price'), 'rows' => [
                 $text(__('fh.cmp.price_row'), array_column($props, 'price')),
-                $text(__('fh.cmp.per_m2'), array_map(static fn (float $v): string => $v > 0 ? Site::price($v) : '', $perM2),
-                    static fn (int $i): string => $minPerM2 > 0 && $perM2[$i] === $minPerM2 ? __('fh.cmp.lowest') : ''),
+                self::markRentals($text(__('fh.cmp.per_m2'), array_map(static fn (float $v): string => $v > 0 ? Site::price($v) : '', $perM2),
+                    static fn (int $i): string => $minPerM2 > 0 && $perM2[$i] === $minPerM2 ? __('fh.cmp.lowest') : ''), $rental),
             ]],
             ['title' => __('fh.cmp.property'), 'rows' => [
                 $text(__('fh.fact.type'), array_column($props, 'type')),
@@ -144,6 +146,15 @@ final class Shortlist
             $groups[$g]['rows'] = $kept;
         }
         return ['props' => $props, 'groups' => array_values(array_filter($groups, static fn (array $g): bool => $g['rows'] !== []))];
+    }
+
+    /** Rentals get no price per m² on purpose: their dash reads "Not applicable", not "Not given". */
+    private static function markRentals(array $row, array $rental): array
+    {
+        foreach ($row['cells'] as $i => $cell) {
+            $row['cells'][$i]['na'] = !empty($rental[$i]);
+        }
+        return $row;
     }
 
     /** "New build · 2026", "Under construction · 2027", "2004" or ''. */

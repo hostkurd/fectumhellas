@@ -620,5 +620,6 @@ return array(
     'fh.sv.empty_lead' => 'Tap the heart on any property to keep it here.',
     'fh.sv.saved_when' => 'Saved :when',
     'fh.sv.gone' => 'These properties are no longer listed. Please reload the page.',
-    'fh.sv.message' => 'My saved list (:n properties). Please send availability and next steps.',
+    'fh.sv.message' => 'My saved list (:count). Please send availability and next steps.',
+    'fh.cmp.na' => 'Not applicable',
 );

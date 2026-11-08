@@ -65,6 +65,7 @@ final class SavedInquiry extends Component
             $this->notice = 'fh.e.too_many';
             return;
         }
+        $this->count = count($ids); // the message names what is actually sent
         [$clean] = Inquiries::validate($this->input());
         try {
             $this->sent = Inquiries::saveSaved($ids, $clean, Site::lang(), $this->page, $ip, (string) ($_SERVER['HTTP_USER_AGENT'] ?? ''));
@@ -87,6 +88,6 @@ final class SavedInquiry extends Component
     private function input(): array
     {
         return ['topic' => 'buying', 'name' => $this->name, 'email' => $this->email, 'phone' => $this->phone,
-            'preferred_contact' => 'email', 'message' => __('fh.sv.message', ['n' => (string) $this->count]), 'consent' => $this->consent ? '1' : ''];
+            'preferred_contact' => 'email', 'message' => __('fh.sv.message', ['count' => $this->count === 1 ? __('fh.sv.one') : __('fh.sv.many', ['n' => (string) $this->count])]), 'consent' => $this->consent ? '1' : ''];
     }
 }
