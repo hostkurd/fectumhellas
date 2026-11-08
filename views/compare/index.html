@@ -1,0 +1,103 @@
+@php /* Compare properties (approved Compare mockup). Data from FloCMS\Controllers\CompareController::index. */
+use FloCMS\Support\Site;
+$table = $data['table']; $props = $table['props']; $n = count($props); $without = $data['without'];
+$slots = max(0, 3 - $n);
+$countLabel = $n === 1 ? __('fh.sv.one') : __('fh.sv.many', ['n' => (string) $n]);
+$back = '<svg class="fh-arrow" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>';
+@endphp
+<main id="main" class="fh-cmp" data-fh-shortlist="compare" data-fh-requested="{{ implode(',', $data['requested']) }}" data-fh-shown="{{ implode(',', $data['shown']) }}">
+    <header class="fh-list-head">
+        <div class="fh-wrap fh-list-head-text">
+            <nav class="fh-crumbs" aria-label="{{ __('fh.breadcrumb') }}"><a href="{{ Site::url('') }}">{{ __('fh.home') }}</a><span aria-hidden="true">/</span><a href="{{ Site::url('properties') }}">{{ __('fh.nav.properties') }}</a><span aria-hidden="true">/</span><span aria-current="page">{{ __('fh.cmp.crumb') }}</span></nav>
+            <div class="fh-cmp-title">
+                <div class="fh-list-head-text">
+                    <h1 class="fh-h1">{{ __('fh.cmp.title') }}</h1>
+                    <p class="fh-lead">{{ __('fh.cmp.lead') }}</p>
+                </div>
+                <a class="fh-link fh-back" href="{{ Site::url('properties') }}">{!! $back !!}{{ __('fh.cmp.back') }}</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="fh-cmp-sec">
+        <div class="fh-wrap fh-cmp-inner">
+            @if($n > 0)
+            <div class="fh-cmp-tools">
+                @if($n > 1)<label class="fh-switch fh-js-only"><input type="checkbox" role="switch" checked data-fh-cmp-highlight>{{ __('fh.cmp.highlight') }}</label>@else<span></span>@endif
+                <div class="fh-cmp-tools-end">
+                    <span class="fh-cmp-count" role="status">{{ $countLabel }}</span>
+                    @if($n > 1)<button type="button" class="fh-btn fh-btn-line fh-btn-sm fh-js-only" data-fh-share data-title="{{ __('fh.cmp.title') }}" data-fh-copied="{{ __('fh.link_copied') }}"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.3M8.2 13.2l7.6 4.3"/></svg>{{ __('fh.cmp.share') }}</button>@endif
+                </div>
+            </div>
+            @endif
+
+            @if($n < 2)
+            <div class="fh-cmp-note" role="status">
+                <span>{{ $n === 0 ? __('fh.cmp.none') : __('fh.cmp.one_more') }}</span>
+                <a class="fh-link" href="{{ Site::url('properties') }}">{{ __('fh.browse_properties') }}</a>
+            </div>
+            @endif
+
+            @if($n > 0)
+            <div class="fh-cmp-scroll" tabindex="0" role="region" aria-label="{{ __('fh.cmp.table') }}">
+                <table class="fh-cmp-table is-hl" data-fh-cmp-table>
+                    <colgroup><col class="fh-cmp-labels">@for($i = 0; $i < 3; $i++)<col>@endfor</colgroup>
+                    <thead>
+                        <tr>
+                            <td class="fh-cmp-corner"><small>{{ __('fh.cmp.comparing') }}</small><span>{{ $countLabel }}</span></td>
+                            @foreach($props as $p)
+                            <th scope="col" class="fh-cmp-prop">
+                                <span class="fh-cmp-media">
+                                    @if($p['cover']){!! $p['cover']->img(['sizes' => '360px', 'alt' => '']) !!}@else<span class="fh-placeholder" aria-hidden="true"></span>@endif
+                                    @if($p['status'] !== '')<span class="fh-card-status is-{{ $p['status_key'] }}">{{ $p['status'] }}</span>@endif
+                                    <a class="fh-cmp-remove" href="{{ $without($p['id']) }}" data-fh-cmp-remove="{{ $p['id'] }}" aria-label="{{ __('fh.cmp.remove', ['title' => $p['title']]) }}"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></a>
+                                </span>
+                                <span class="fh-card-meta"><span class="fh-card-location">{{ $p['location'] }}</span><span class="fh-card-ref fh-ltr">{{ $p['reference'] }}</span></span>
+                                <a class="fh-cmp-name" href="{{ $p['url'] }}">{{ $p['title'] }}</a>
+                                <span class="fh-cmp-price">{{ $p['price'] }}</span>
+                            </th>
+                            @endforeach
+                            @for($i = 0; $i < $slots; $i++)
+                            <td class="fh-cmp-prop">@if($i === 0)<a class="fh-cmp-add" href="{{ Site::url('properties') }}"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>{{ __('fh.compare_add') }}</a>@endif</td>
+                            @endfor
+                        </tr>
+                    </thead>
+                    @foreach($table['groups'] as $g)
+                    <tbody>
+                        <tr class="fh-cmp-group"><th scope="colgroup" colspan="4"><span>{{ $g['title'] }}</span></th></tr>
+                        @foreach($g['rows'] as $r)
+                        <tr class="{{ $r['differs'] ? 'is-diff' : ($n > 1 ? 'is-same' : '') }}">
+                            <th scope="row">@if($r['differs'])<span class="fh-cmp-dot" role="img" aria-label="{{ __('fh.cmp.differs') }}"></span>@endif{{ $r['label'] }}</th>
+                            @foreach($r['cells'] as $c)
+                            <td>
+                                @if($c['type'] === 'yesno')
+                                    @if($c['yes'])<svg role="img" aria-label="{{ __('fh.cmp.yes') }}" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>@else<span class="fh-cmp-no" role="img" aria-label="{{ __('fh.cmp.no') }}">—</span>@endif
+                                @elseif(trim($c['text']) === '')<span class="fh-cmp-no" role="img" aria-label="{{ __('fh.cmp.unknown') }}">—</span>
+                                @else<bdi>{{ $c['text'] }}</bdi>@endif
+                                @if($c['best'] !== '')<span class="fh-cmp-best">{{ $c['best'] }}</span>@endif
+                            </td>
+                            @endforeach
+                            @for($i = 0; $i < $slots; $i++)<td></td>@endfor
+                        </tr>
+                        @endforeach
+                    </tbody>
+                    @endforeach
+                    <tfoot>
+                        <tr>
+                            <td></td>
+                            @foreach($props as $p)
+                            <td class="fh-cmp-actions">
+                                <a class="fh-btn fh-btn-solid" href="{{ $p['url'] }}">{{ __('fh.view_property') }}</a>
+                                @if(!in_array($p['status_key'], ['sold', 'rented'], true))<a class="fh-btn fh-btn-line" href="{{ $p['url'] }}#fh-inquiry">{{ __('fh.request_viewing') }}</a>@endif
+                            </td>
+                            @endforeach
+                            @for($i = 0; $i < $slots; $i++)<td></td>@endfor
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <p class="fh-cmp-small">{{ __('fh.cmp.note') }}</p>
+            @endif
+        </div>
+    </section>
+</main>

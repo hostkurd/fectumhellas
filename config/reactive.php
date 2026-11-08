@@ -5,4 +5,5 @@ return [
     'search' => App\Components\PropertySearch::class,
     'property' => App\Components\PropertyInquiry::class,
     'development' => App\Components\DevelopmentInquiry::class,
+    'saved' => App\Components\SavedInquiry::class,
 ];

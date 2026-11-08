@@ -122,6 +122,17 @@ final class Inquiries
         return self::save('project', $unit !== '' ? mb_substr($unit, 0, 60) : 'interest', $clean, $lang, $pageUrl, $ip, $userAgent, ['project_id' => $projectId]);
     }
 
+    /**
+     * Saves a Saved page shortlist ("Send list to our team", Stage 3d) with the
+     * property ids, and emails the team the references.
+     *
+     * @param list<int> $ids published listing ids, in the visitor's order
+     */
+    public static function saveSaved(array $ids, array $clean, string $lang, string $pageUrl, string $ip, string $userAgent): string
+    {
+        return self::save('saved', 'shortlist', $clean, $lang, $pageUrl, $ip, $userAgent, ['saved_ids' => json_encode(array_values(array_map('intval', $ids)))]);
+    }
+
     /** Saves first, then emails; returns the reference. */
     private static function save(string $type, string $service, array $clean, string $lang, string $pageUrl, string $ip, string $userAgent, array $extra = []): string
     {
@@ -162,6 +173,17 @@ final class Inquiries
                 $about = Translations::get($rows[0]->title ?? '', 'en') . ($service !== 'interest' ? ' · ' . $service : '');
             }
         }
+        if (isset($extra['saved_ids'])) {
+            $ids = array_slice(array_map('intval', (array) json_decode((string) $extra['saved_ids'], true)), 0, 50);
+            if ($ids !== []) {
+                $marks = implode(', ', array_fill(0, count($ids), '?'));
+                $refs = [];
+                foreach ($db->query('SELECT `id`, `reference`, `title` FROM `listings` WHERE `id` IN (' . $marks . ')', $ids)->fetchAll(\PDO::FETCH_OBJ) as $r) {
+                    $refs[(int) $r->id] = (string) $r->reference . ' · ' . Translations::get($r->title ?? '', 'en');
+                }
+                $about = implode('; ', array_values(array_filter(array_map(static fn (int $id): string => $refs[$id] ?? '', $ids))));
+            }
+        }
         if (self::email($reference, $type, $service, $clean, $lang, $pageUrl, $about)) {
             $db->table('inquiries')->where('id', '=', $id)->update(['email_sent' => 1]);
         }
@@ -178,6 +200,7 @@ final class Inquiries
         $topic = match ($type) {
             'listing' => self::english($service === 'viewing' ? 'fh.viewing_request' : 'fh.property_question'),
             'project' => self::english('fh.register_interest'),
+            'saved' => self::english('fh.inquiry_type.saved'),
             default => self::english(self::TOPICS[$service][0] ?? 'fh.topic.other'),
         };
         $method = self::english(self::METHODS[$clean['preferred_contact']] ?? 'fh.contact.email');
@@ -185,7 +208,7 @@ final class Inquiries
             'New inquiry from the website: ' . $reference,
             '',
             'Topic: ' . $topic,
-            ...($about !== '' ? [($type === 'project' ? 'Development: ' : 'Property: ') . $about] : []),
+            ...($about !== '' ? [($type === 'project' ? 'Development: ' : ($type === 'saved' ? 'Properties: ' : 'Property: ')) . $about] : []),
             'Name: ' . $clean['name'],
             'Email: ' . $clean['email'],
             'Phone: ' . ($clean['phone'] !== '' ? $clean['phone'] : '-'),
@@ -200,7 +223,7 @@ final class Inquiries
         try {
             Mailer::send(new Message(
                 to: $to,
-                subject: $reference . ' · ' . $topic . ($about !== '' ? ' · ' . strtok($about, ' ') : '') . ' · ' . $clean['name'],
+                subject: $reference . ' · ' . $topic . ($about !== '' && $type !== 'saved' ? ' · ' . strtok($about, ' ') : '') . ' · ' . $clean['name'],
                 text: implode("\n", $lines),
                 headers: ['Reply-To' => $clean['email']],
             ));

@@ -5,6 +5,8 @@
  * then price and Compare. $p comes from Listings::card(). Save and Compare
  * need JavaScript, so they start hidden (site.js shows them). data-fh-card
  * carries what the compare bar shows for this property.
+ * On the Saved page ($fhSavedCard = true) the foot shows when it was saved
+ * (filled in by site.js from this browser) in place of Compare.
  */
 use FloCMS\Support\Site;
 $fhCardData = json_encode([
@@ -32,6 +34,6 @@ $fhBeds = $p['beds'] === null ? '' : ((int) $p['beds'] === 1 ? __('fh.beds_one')
 <button type="button" class="fh-card-save" hidden data-fh-card-actions data-fh-save="<?= (int) $p['id'] ?>" aria-pressed="false" aria-label="<?= Site::e(__('fh.save_ref', ['ref' => $p['reference']])) ?>"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 7.3 4.2 4.2 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></svg></button>
 <span class="fh-card-foot">
 <span class="fh-card-price"><?= Site::e($p['price']) ?></span>
-<button type="button" class="fh-card-compare" hidden data-fh-card-actions data-fh-compare="<?= (int) $p['id'] ?>" data-fh-full="<?= Site::e(__('fh.compare_full')) ?>" aria-pressed="false" aria-label="<?= Site::e(__('fh.compare_ref', ['ref' => $p['reference']])) ?>"><svg class="fh-i-off" aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/></svg><svg class="fh-i-on" aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="fh-i-off"><?= Site::e(__('fh.compare')) ?></span><span class="fh-i-on"><?= Site::e(__('fh.comparing')) ?></span></button>
+<?php if (!empty($fhSavedCard)) { ?><span class="fh-card-when" data-fh-saved-at="<?= (int) $p['id'] ?>" data-fh-saved-label="<?= Site::e(__('fh.sv.saved_when')) ?>"></span><?php } else { ?><button type="button" class="fh-card-compare" hidden data-fh-card-actions data-fh-compare="<?= (int) $p['id'] ?>" data-fh-full="<?= Site::e(__('fh.compare_full')) ?>" aria-pressed="false" aria-label="<?= Site::e(__('fh.compare_ref', ['ref' => $p['reference']])) ?>"><svg class="fh-i-off" aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/></svg><svg class="fh-i-on" aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="fh-i-off"><?= Site::e(__('fh.compare')) ?></span><span class="fh-i-on"><?= Site::e(__('fh.comparing')) ?></span></button><?php } ?>
 </span>
 </article>
