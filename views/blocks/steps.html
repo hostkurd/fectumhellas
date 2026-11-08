@@ -1,0 +1,19 @@
+@php /* Steps (site block): numbered steps on a line, the first one filled. */ $items = repeater_items($items); @endphp
+<section class="fh-steps">
+    <div class="fh-wrap fh-steps-inner">
+        <div class="fh-steps-head">
+            <div class="fh-steps-title">
+                @if($eyebrow !== '')<p class="fh-eyebrow fh-eyebrow-line">{{ $eyebrow }}</p>@endif
+                <h2 class="fh-h2">{{ $heading }}</h2>
+            </div>
+            @if($text !== '')<p class="fh-steps-lead">{{ $text }}</p>@endif
+        </div>
+        @if($items)
+        <ol class="fh-steps-list" style="--fh-steps: {{ count($items) }}">
+            @foreach($items as $i => $item)
+            <li class="fh-step"><span class="fh-step-num" aria-hidden="true">{{ sprintf('%02d', $i + 1) }}</span><h3 class="fh-step-title">{{ $item['title'] }}</h3>@if(($item['text'] ?? '') !== '')<p>{{ $item['text'] }}</p>@endif</li>
+            @endforeach
+        </ol>
+        @endif
+    </div>
+</section>
