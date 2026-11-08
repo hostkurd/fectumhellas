@@ -439,6 +439,8 @@ return array(
     'fh.add_compare' => 'أضف للمقارنة',
     'fh.in_compare' => 'في المقارنة',
     'fh.share' => 'مشاركة',
+    'fh.share_article' => 'شارك هذا المقال',
+    'fh.share_contact' => 'المشاركة والتواصل',
     'fh.link_copied' => 'تم نسخ الرابط.',
     'fh.compare_region' => 'مقارنة العقارات',
     'fh.compare_selected' => 'تم اختيار :n من 3',
