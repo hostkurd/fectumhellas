@@ -180,6 +180,13 @@ return array(
     'fh.inquiry_type.service' => 'خدمة',
     'fh.inquiry_type.saved' => 'القائمة المحفوظة',
     'fh.inquiry_type.contact' => 'صفحة التواصل',
+    // The admin bell: a new inquiry (flocms-admin 0.41)
+    'fh.notify.inquiry' => 'استفسار جديد من :name',
+    'fh.notify.body_listing' => 'عقار · :about · :ref',
+    'fh.notify.body_project' => 'مشروع · :about · :ref',
+    'fh.notify.body_service' => 'خدمة · :ref',
+    'fh.notify.body_saved' => 'القائمة المحفوظة · :count عقارات · :ref',
+    'fh.notify.body_contact' => 'صفحة التواصل · :ref',
     'fh.contact.email' => 'البريد الإلكتروني',
     'fh.contact.phone' => 'الهاتف',
     'fh.contact.whatsapp' => 'واتساب',

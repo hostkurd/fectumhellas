@@ -5,6 +5,8 @@ namespace FloCMS\Support;
 
 use FloCMS\Admin\Mail\Mailer;
 use FloCMS\Admin\Mail\Message;
+use FloCMS\Admin\Notifications\Notification;
+use FloCMS\Admin\Notifications\Recipients;
 use FloCMS\Admin\Translation\Translations;
 use FloCMS\Core\App;
 use FloCMS\Core\RateLimit\FileRateLimiter;
@@ -160,6 +162,8 @@ final class Inquiries
         $reference = sprintf('FH-%s-%04d', date('Y'), $id);
         $db->table('inquiries')->where('id', '=', $id)->update(['reference' => $reference]);
 
+        self::notify($id, $type, $clean['name'], $reference, $extra);
+
         $about = '';
         if (isset($extra['listing_id'])) {
             $rows = $db->table('listings')->select(['reference', 'title'])->where('id', '=', (int) $extra['listing_id'])->limit(1)->get();
@@ -188,6 +192,39 @@ final class Inquiries
             $db->table('inquiries')->where('id', '=', $id)->update(['email_sent' => 1]);
         }
         return $reference;
+    }
+
+    /**
+     * Tells the staff who may see inquiries, in the admin bell (flocms-admin 0.41).
+     * Sent before the email, so they hear of it even when the email fails. Each
+     * person reads it in their own panel language. sendTo() never throws for a
+     * missing table or a storage error (it logs them); anything else is logged
+     * here, so the visitor's inquiry is never lost because of the bell.
+     */
+    private static function notify(int $id, string $type, string $name, string $reference, array $extra): void
+    {
+        try {
+            $db = App::db();
+            $about = '';
+            $count = 0;
+            if (isset($extra['listing_id'])) {
+                $about = (string) ($db->table('listings')->select(['reference'])->where('id', '=', (int) $extra['listing_id'])->first()->reference ?? '');
+            } elseif (isset($extra['project_id'])) {
+                $about = Translations::get((string) ($db->table('projects')->select(['title'])->where('id', '=', (int) $extra['project_id'])->first()->title ?? ''), 'en');
+            } elseif (isset($extra['saved_ids'])) {
+                $count = count((array) json_decode((string) $extra['saved_ids'], true));
+            }
+            $body = in_array($type, ['listing', 'project', 'service', 'saved', 'contact'], true) ? 'fh.notify.body_' . $type : 'fh.notify.body_contact';
+            if (in_array($type, ['listing', 'project'], true) && $about === '') { $body = 'fh.notify.body_service'; }
+            Notification::make()
+                ->title('fh.notify.inquiry', ['name' => mb_substr($name, 0, 100)])
+                ->body($body, ['about' => $about, 'ref' => $reference, 'count' => $count])
+                ->icon('mail')
+                ->url('inquiries/edit/' . $id)
+                ->sendTo(Recipients::permission('content.inquiries.view'));
+        } catch (\Throwable $error) {
+            error_log('fectumhellas: inquiry ' . $reference . ' was saved, but the admin notification failed: ' . $error->getMessage());
+        }
     }
 
     /** Emails the team (in English, the admin language); true when sent. */

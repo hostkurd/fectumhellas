@@ -44,6 +44,13 @@ final class InquiryResource extends Resource
         return false;
     }
 
+    /** How many inquiries are still New, beside Inquiries in the sidebar (flocms-admin 0.41). */
+    public function navigationBadge(): int
+    {
+        $db = \FloCMS\Core\App::db();
+        return $db === null ? 0 : $db->table('inquiries')->where('status', '=', 'new')->count();
+    }
+
     public function form(Form $form): Form
     {
         return $form->schema([
