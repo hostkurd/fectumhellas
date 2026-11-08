@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Admin\Widgets;
 
 use App\Admin\Resources\InquiryResource;
+use App\Admin\Widgets\Support\Dash;
 use FloCMS\Admin\Widgets\ChartWidget;
 use FloCMS\Admin\Widgets\WidgetContext;
 
@@ -19,6 +20,11 @@ final class InquiriesPerDay extends ChartWidget
     public function headerSubtitle(WidgetContext $context): string
     {
         return $context->period()->label();
+    }
+
+    public function headerLink(WidgetContext $context): ?array
+    {
+        return ['label' => Dash::t('fh.dash.open_inquiries'), 'url' => Dash::listUrl('inquiries', ['status' => 'new'], 'created_at')];
     }
 
     protected function data(WidgetContext $context): array
