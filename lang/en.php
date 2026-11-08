@@ -727,4 +727,10 @@ return array(
     'fh.dash.qa_development' => 'New development',
     'fh.dash.qa_article' => 'New article',
     'fh.dash.qa_update' => 'Progress update',
+    // Inquiry actions
+    'fh.act.mark_contacted' => 'Mark as contacted',
+    'fh.act.mark_closed' => 'Mark as closed',
+    'fh.act.assign_owner' => 'Assign owner',
+    'fh.act.assign_to_me' => 'Assign to me',
+    'fh.perm.inquiries_delete' => 'Delete inquiries',
 );

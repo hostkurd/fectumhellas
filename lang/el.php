@@ -727,4 +727,10 @@ return array(
     'fh.dash.qa_development' => 'Νέο έργο',
     'fh.dash.qa_article' => 'Νέο άρθρο',
     'fh.dash.qa_update' => 'Ενημέρωση προόδου',
+    // Inquiry actions
+    'fh.act.mark_contacted' => 'Σήμανση: Έγινε επικοινωνία',
+    'fh.act.mark_closed' => 'Σήμανση: Κλειστό',
+    'fh.act.assign_owner' => 'Ανάθεση υπευθύνου',
+    'fh.act.assign_to_me' => 'Ανάθεση σε μένα',
+    'fh.perm.inquiries_delete' => 'Διαγραφή αιτημάτων',
 );

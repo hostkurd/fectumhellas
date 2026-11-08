@@ -727,4 +727,10 @@ return array(
     'fh.dash.qa_development' => 'مشروع جديد',
     'fh.dash.qa_article' => 'مقال جديد',
     'fh.dash.qa_update' => 'تحديث سير العمل',
+    // Inquiry actions
+    'fh.act.mark_contacted' => 'وضع علامة: تم التواصل',
+    'fh.act.mark_closed' => 'وضع علامة: مغلق',
+    'fh.act.assign_owner' => 'تعيين المسؤول',
+    'fh.act.assign_to_me' => 'إسناده إليّ',
+    'fh.perm.inquiries_delete' => 'حذف الاستفسارات',
 );
