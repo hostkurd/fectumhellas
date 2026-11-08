@@ -57,6 +57,15 @@ TXT;
         $langs = ['en' => 'ltr', 'ar' => 'rtl', 'el' => 'ltr'];
         $this->title('FECTUM Hellas launch check · ' . $this->base);
 
+        // Offline mode (Settings › Website status): visitors, and this check, get the offline page (503)
+        $offline = $this->get('/en/')['status'] === 503;
+        if ($offline) {
+            $this->section('Website');
+            $this->line('  FAIL  The website is in offline mode: every visitor page answers 503 with the offline page.');
+            $this->line('        Switch it off in the admin (Settings › Website status) and run the check again.');
+            $this->line('        Only the admin and settings checks run now.');
+            $this->count['fail']++;
+        } else {
         $this->section('Website pages');
         foreach ($langs as $lang => $dir) {
             foreach (['' => 'Home', 'properties' => 'Properties', 'developments' => 'Developments', 'insights' => 'Insights'] as $path => $label) {
@@ -115,6 +124,8 @@ TXT;
             $this->result($r['status'] === 200 && str_contains($r['body'], 'noindex'), $label . ' page answers and is kept out of search results');
         }
 
+        }
+
         $this->section('Admin');
         $login = $this->get('/en/admin/users/login');
         $this->result($login['status'] === 200, 'The admin login page answers', 'HTTP ' . $login['status']);
@@ -132,7 +143,9 @@ TXT;
         }
 
         $this->section('Server and settings');
-        if (str_starts_with($this->base, 'https://')) {
+        if ($offline) {
+            // checked with the website online
+        } elseif (str_starts_with($this->base, 'https://')) {
             $plain = $this->get('http://' . substr($this->base, 8) . '/', false);
             $this->result(in_array($plain['status'], [301, 302, 307, 308], true) && str_starts_with($plain['headers']['location'] ?? '', 'https://'), 'http:// redirects to https://', 'HTTP ' . $plain['status']);
         } else {
