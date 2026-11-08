@@ -439,6 +439,8 @@ return array(
     'fh.add_compare' => 'Προσθήκη στη σύγκριση',
     'fh.in_compare' => 'Σε σύγκριση',
     'fh.share' => 'Κοινοποίηση',
+    'fh.share_article' => 'Κοινοποιήστε το άρθρο',
+    'fh.share_contact' => 'Κοινοποίηση και επικοινωνία',
     'fh.link_copied' => 'Ο σύνδεσμος αντιγράφηκε.',
     'fh.compare_region' => 'Σύγκριση ακινήτων',
     'fh.compare_selected' => ':n από 3 επιλεγμένα',

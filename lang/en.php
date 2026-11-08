@@ -439,6 +439,8 @@ return array(
     'fh.add_compare' => 'Add to compare',
     'fh.in_compare' => 'In compare',
     'fh.share' => 'Share',
+    'fh.share_article' => 'Share this article',
+    'fh.share_contact' => 'Share and contact',
     'fh.link_copied' => 'Link copied.',
     'fh.compare_region' => 'Compare properties',
     'fh.compare_selected' => ':n of 3 selected',
