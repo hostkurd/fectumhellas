@@ -297,6 +297,8 @@ return array(
     'fh.bf.heading' => 'العنوان',
     'fh.bf.eyebrow' => 'تسمية صغيرة فوق العنوان',
     'fh.bf.text' => 'النص',
+    'fh.bf.statement' => 'نص كبير',
+    'fh.bf.statement_help' => 'جملة أو جملتان تظهران بخط كبير فوق النص.',
     'fh.bf.image' => 'الصورة',
     'fh.bf.points' => 'النقاط',
     'fh.bf.title' => 'العنوان',

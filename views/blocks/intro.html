@@ -1,16 +1,17 @@
-@php /* Intro (site block): heading and photo beside the text and points. */ use FloCMS\Support\Site; $img = media($image); $href = Site::link($link); @endphp
-<section class="fh-section fh-intro">
+@php /* Intro (site block): photo beside the eyebrow, heading, large text, text, points and link. Without a photo: heading on one side, the rest on the other. */ use FloCMS\Support\Site; $img = media($image); $href = Site::link($link); $lead = (string) ($statement ?? ''); $items = repeater_items($points); @endphp
+<section class="fh-section fh-intro{{ $img ? ' has-media' : '' }}">
     <div class="fh-wrap fh-intro-grid">
+        @if($img)<div class="fh-intro-media">{!! $img->img(['sizes' => '(max-width: 900px) 100vw, 50vw']) !!}</div>@endif
         <div class="fh-intro-head">
             @if($eyebrow !== '')<p class="fh-eyebrow">{{ $eyebrow }}</p>@endif
             <h2 class="fh-h2 is-large">{{ $heading }}</h2>
-            @if($img)<div class="fh-intro-media">{!! $img->img(['sizes' => '(max-width: 900px) 100vw, 45vw']) !!}</div>@endif
         </div>
         <div class="fh-intro-body">
-            @if($text !== '')<p class="fh-lead is-dark">{!! nl2br(e($text), false) !!}</p>@endif
-            @if(repeater_items($points))
+            @if($lead !== '')<p class="fh-intro-lead">{!! nl2br(e($lead), false) !!}</p>@endif
+            @if($text !== '')<p class="fh-intro-text">{!! nl2br(e($text), false) !!}</p>@endif
+            @if($items)
             <div class="fh-points">
-                @foreach(repeater_items($points) as $point)
+                @foreach($items as $point)
                 <div class="fh-point"><h3 class="fh-h3">{{ $point['title'] }}</h3>@if(($point['text'] ?? '') !== '')<p>{{ $point['text'] }}</p>@endif</div>
                 @endforeach
             </div>
