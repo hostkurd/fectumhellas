@@ -297,6 +297,8 @@ return array(
     'fh.bf.heading' => 'Τίτλος',
     'fh.bf.eyebrow' => 'Μικρή ετικέτα πάνω από τον τίτλο',
     'fh.bf.text' => 'Κείμενο',
+    'fh.bf.statement' => 'Μεγάλο κείμενο',
+    'fh.bf.statement_help' => 'Μία ή δύο προτάσεις με μεγάλα γράμματα, πάνω από το κείμενο.',
     'fh.bf.image' => 'Φωτογραφία',
     'fh.bf.points' => 'Σημεία',
     'fh.bf.title' => 'Τίτλος',

@@ -160,6 +160,7 @@ final class PagesSeeder extends Seeder
             $this->block('intro', [
                 'eyebrow' => $t(['en' => 'About FECTUM Hellas', 'ar' => 'عن فيكتوم هيلاس', 'el' => 'Η FECTUM Hellas']),
                 'heading' => $t(['en' => 'Property in Greece, built around your future.', 'ar' => 'عقارات في اليونان، مصمّمة حول مستقبلك.', 'el' => 'Ακίνητα στην Ελλάδα, γύρω από το μέλλον σας.']),
+                'statement' => $t(['en' => 'We develop and source homes in Greece, and stand beside you from the first viewing to completion.', 'ar' => 'نطوّر العقارات السكنية في اليونان ونوفّرها، ونرافقك من أول معاينة حتى إتمام الشراء.', 'el' => 'Αναπτύσσουμε και εντοπίζουμε κατοικίες στην Ελλάδα και είμαστε δίπλα σας από την πρώτη επίσκεψη έως την ολοκλήρωση της αγοράς.']),
                 'text' => $t(['en' => 'FECTUM Hellas is a real estate development and investment company in Greece. We develop residential properties and assist local and international clients with property sales, acquisitions and real estate investment opportunities.',
                     'ar' => 'فيكتوم هيلاس شركة تطوير واستثمار عقاري في اليونان. نطوّر العقارات السكنية ونساعد العملاء المحليين والدوليين في بيع العقارات وشرائها وفي فرص الاستثمار العقاري.',
                     'el' => 'Η FECTUM Hellas είναι εταιρεία ανάπτυξης και επένδυσης ακινήτων στην Ελλάδα. Αναπτύσσουμε κατοικίες και υποστηρίζουμε πελάτες από την Ελλάδα και το εξωτερικό σε πωλήσεις, αγορές και επενδυτικές ευκαιρίες.']),

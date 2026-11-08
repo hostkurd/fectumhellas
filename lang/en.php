@@ -297,6 +297,8 @@ return array(
     'fh.bf.heading' => 'Heading',
     'fh.bf.eyebrow' => 'Small label above the heading',
     'fh.bf.text' => 'Text',
+    'fh.bf.statement' => 'Large text',
+    'fh.bf.statement_help' => 'One or two sentences shown large, above the text.',
     'fh.bf.image' => 'Photo',
     'fh.bf.points' => 'Points',
     'fh.bf.title' => 'Title',
