@@ -20,7 +20,16 @@ use FloCMS\Admin\Table\Filters\DateRangeFilter;
 use FloCMS\Admin\Table\Filters\SelectFilter;
 use FloCMS\Admin\Table\Filters\TabsFilter;
 use FloCMS\Admin\Table\Table;
+use FloCMS\Admin\Actions\Action;
+use FloCMS\Admin\Actions\ActionContext;
+use FloCMS\Admin\Actions\BulkAction;
+use FloCMS\Admin\Actions\BulkActionContext;
+use FloCMS\Admin\Actions\DeleteAction;
+use FloCMS\Admin\Actions\DeleteBulkAction;
+use FloCMS\Admin\Actions\EditAction;
+use FloCMS\Core\Auth;
 use FloCMS\Core\Database;
+use FloCMS\Core\Session;
 use FloCMS\Support\Catalog;
 
 /**
@@ -42,6 +51,12 @@ final class InquiryResource extends Resource
     public function canCreate(): bool
     {
         return false;
+    }
+
+    /** Inquiries hold visitors' personal data: only roles with inquiries.delete (Administrators) move them to Trash. */
+    public function canDelete(object $record): bool
+    {
+        return Auth::can('inquiries.delete');
     }
 
     /** How many inquiries are still New, beside Inquiries in the sidebar (flocms-admin 0.41). */
@@ -103,7 +118,45 @@ final class InquiryResource extends Resource
                 SelectFilter::make('type')->label('fh.f.inquiry_type')->options(Catalog::inquiryTypes()),
                 DateRangeFilter::make('created_at')->label('fh.f.received'),
             ])
+            ->actions([
+                EditAction::make(),
+                Action::make('mark_contacted')->label('fh.act.mark_contacted')->icon('check')->color('success')->requiresConfirmation(false)
+                    ->visible(static fn (?object $record): bool => ($record->status ?? '') === 'new')
+                    ->authorize(fn (?object $record): bool => $record !== null && $this->canEdit($record))
+                    ->action(static fn (ActionContext $context) => $context->update(['status' => 'contacted'])),
+                Action::make('assign_to_me')->label('fh.act.assign_to_me')->icon('user')->requiresConfirmation(false)
+                    ->visible(static fn (?object $record): bool => self::me() !== null && (int) ($record->owner_id ?? 0) !== self::me())
+                    ->authorize(fn (?object $record): bool => $record !== null && self::me() !== null && $this->canEdit($record))
+                    ->action(static fn (ActionContext $context) => $context->update(['owner_id' => self::me()])),
+                DeleteAction::make(),
+            ])
+            ->bulkActions([
+                $this->statusBulk('mark_contacted', 'contacted', 'fh.act.mark_contacted', 'success'),
+                $this->statusBulk('mark_closed', 'closed', 'fh.act.mark_closed', 'default'),
+                BulkAction::make('assign_owner')->label('fh.act.assign_owner')->icon('user')
+                    ->authorize(fn (?object $record): bool => $record !== null && $this->canEdit($record))
+                    ->form(static fn (Form $form): Form => $form->schema([
+                        BelongsTo::make('owner_id')->label('fh.f.owner')->table('users', 'full_name')->required(),
+                    ]))
+                    ->action(static fn (BulkActionContext $context, array $data) => $context->updateAll(['owner_id' => (int) $data['owner_id']])),
+                DeleteBulkAction::make()->permission('inquiries.delete'),
+            ])
             ->defaultSort('created_at', 'desc');
+    }
+
+    /** A bulk action that sets one status. */
+    private function statusBulk(string $name, string $status, string $label, string $color): BulkAction
+    {
+        return BulkAction::make($name)->label($label)->color($color)
+            ->authorize(fn (?object $record): bool => $record !== null && $this->canEdit($record))
+            ->action(static fn (BulkActionContext $context) => $context->updateAll(['status' => $status]));
+    }
+
+    /** The signed-in staff member's user id. */
+    private static function me(): ?int
+    {
+        $id = (int) Session::get('user_id');
+        return $id > 0 ? $id : null;
     }
 
     /**

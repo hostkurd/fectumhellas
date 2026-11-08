@@ -161,7 +161,7 @@ return [
     // roles and permissions edited in the panel, on top of config/config.php.
     // false switches it off and the config roles apply again. Name your own
     // permissions so they get a row: 'permissions' => ['reports.export' => 'Export reports'].
-    'roles' => ['permissions' => []],
+    'roles' => ['permissions' => ['inquiries.delete' => 'fh.perm.inquiries_delete']],
 
     // Name at the top of the sidebar (SITE_NAME_ADMIN in .env; read again since flocms-admin 0.39.4)
     'brand' => \FloCMS\Core\Env::get('SITE_NAME_ADMIN', 'FECTUM Hellas'),
