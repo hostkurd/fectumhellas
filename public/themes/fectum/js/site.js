@@ -14,13 +14,13 @@
   var doc = document;
   var root = doc.documentElement;
   root.classList.add('fh-js');
-  var KEYS = { saved: 'fh-saved', compare: 'fh-compare', items: 'fh-compare-items' };
+  var KEYS = { saved: 'fh-saved', compare: 'fh-compare', items: 'fh-compare-items', savedAt: 'fh-saved-at' };
   var MAX_COMPARE = 3;
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---------- Saved and Compare (localStorage) ---------- */
   function read(key) {
-    try { var v = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(v) ? v.filter(function (n) { return Number.isInteger(n) && n > 0; }) : []; }
+    try { var v = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(v) ? v.filter(function (n) { return Number.isInteger(n) && n > 0 && n <= 999999999; }) : []; }
     catch (e) { return []; }
   }
   function write(key, list) {
@@ -48,6 +48,29 @@
       if (card) { card.classList.toggle('is-compared', on); }
     });
     renderCompareBar(compare);
+    savedWhen();
+  }
+
+  // When each property was saved (Saved page): "Saved today", "Saved 2 days ago"
+  function savedTimes() {
+    try { var v = JSON.parse(localStorage.getItem(KEYS.savedAt) || '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; } catch (e) { return {}; }
+  }
+  function savedWhen() {
+    var spans = doc.querySelectorAll('[data-fh-saved-at]');
+    if (!spans.length) { return; }
+    var times = savedTimes();
+    var lang = root.lang || 'en';
+    var rtf = null;
+    try { rtf = new Intl.RelativeTimeFormat(lang === 'ar' ? 'ar-u-nu-latn' : lang, { numeric: 'auto' }); } catch (e) { /* old browser: no date */ }
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    spans.forEach(function (el) {
+      var at = Number(times[el.getAttribute('data-fh-saved-at')]);
+      if (!rtf || !at) { el.textContent = ''; return; }
+      var day = new Date(at); day.setHours(0, 0, 0, 0);
+      var days = Math.round((day - today) / 86400000);
+      var when = Math.abs(days) < 30 ? rtf.format(days, 'day') : (Math.abs(days) < 365 ? rtf.format(Math.round(days / 30), 'month') : rtf.format(Math.round(days / 365), 'year'));
+      el.textContent = (el.getAttribute('data-fh-saved-label') || ':when').replace(':when', when);
+    });
   }
 
   // What the compare bar shows of each property (title, price, photo, address)
@@ -103,7 +126,53 @@
     var at = list.indexOf(id);
     if (at > -1) { list.splice(at, 1); } else if (!max || list.length < max) { list.push(id); }
     write(key, list);
+    if (key === KEYS.saved) {
+      var times = savedTimes();
+      if (at > -1) { delete times[String(id)]; } else { times[String(id)] = Date.now(); }
+      try { localStorage.setItem(KEYS.savedAt, JSON.stringify(times)); } catch (e) { /* ignore */ }
+    }
     refresh();
+  }
+
+  /* ---------- Compare and Saved pages: the address follows this browser's lists ---------- */
+  // Same rule as the server (Shortlist::ids): whole numbers 1 to 999999999
+  function idList(value) { return String(value || '').split(',').map(Number).filter(function (n) { return Number.isInteger(n) && n > 0 && n <= 999999999; }); }
+  function shortlistUrl(page, ids) {
+    // The page's own address with only ?ids= (commas kept readable)
+    return location.origin + location.pathname + (ids.length ? '?ids=' + ids.join(',') : '');
+  }
+  function reopen(href) {
+    if (canSwap) { navigate(href, 'replace', window.scrollY); } else { location.replace(href); }
+  }
+  var lastSync = '';
+  function syncShortlist() {
+    var page = doc.querySelector('[data-fh-shortlist]');
+    if (!page) { return; }
+    var kind = page.getAttribute('data-fh-shortlist');
+    var requested = idList(page.getAttribute('data-fh-requested'));
+    var shown = idList(page.getAttribute('data-fh-shown'));
+    var key = kind === 'saved' ? KEYS.saved : KEYS.compare;
+    // Properties no longer on the website leave this browser's list too
+    var gone = requested.filter(function (id) { return shown.indexOf(id) === -1; });
+    var list = read(key).filter(function (id, i, all) { return all.indexOf(id) === i; });
+    if (gone.length) {
+      list = list.filter(function (id) { return gone.indexOf(id) === -1; });
+      write(key, list);
+      refresh();
+    }
+    // Saved: this browser's list is the page. Compare: an address with ?ids= (a shared link) keeps its own properties.
+    var wanted = kind === 'saved' ? list.slice(0, 50) : (page.hasAttribute('data-fh-explicit') ? null : list.slice(0, MAX_COMPARE));
+    if (!wanted || wanted.join(',') === requested.join(',') || page.getAttribute('data-fh-synced') === '1') { return; }
+    // Never the same correction twice in a row (a list this browser cannot save, or one the server reads differently)
+    var target = shortlistUrl(kind, wanted);
+    var last = '';
+    try { last = sessionStorage.getItem('fh-sync') || ''; } catch (e) { last = lastSync; }
+    var stamp = last.split(' ');
+    if (stamp[0] === target && Date.now() - Number(stamp[1] || 0) < 15000) { return; }
+    lastSync = target + ' ' + Date.now();
+    try { sessionStorage.setItem('fh-sync', lastSync); } catch (e) { /* the variable keeps it for this page */ }
+    page.setAttribute('data-fh-synced', '1');
+    reopen(target);
   }
 
   /* ---------- Short messages (screen readers + a brief note on screen) ---------- */
@@ -195,6 +264,7 @@
     initMaps();
     initResultsMaps();
     initDevelopment();
+    syncShortlist();
   }
 
   var leafletMaps = [];
@@ -366,7 +436,46 @@
       return;
     }
     var save = e.target.closest('[data-fh-save]');
-    if (save) { e.preventDefault(); flip(KEYS.saved, Number(save.getAttribute('data-fh-save'))); return; }
+    if (save) {
+      e.preventDefault();
+      var savedId = Number(save.getAttribute('data-fh-save'));
+      flip(KEYS.saved, savedId);
+      // On the Saved page a property taken off the list leaves the page
+      var savedPage = doc.querySelector('[data-fh-shortlist="saved"]');
+      if (savedPage && read(KEYS.saved).indexOf(savedId) === -1) { savedPage.setAttribute('data-fh-synced', '1'); reopen(shortlistUrl('saved', read(KEYS.saved).slice(0, 50))); }
+      return;
+    }
+    var cmpRemove = e.target.closest('[data-fh-cmp-remove]');
+    if (cmpRemove) {
+      // Off the comparison, and off the compare bar's list when it is there
+      var removeId = Number(cmpRemove.getAttribute('data-fh-cmp-remove'));
+      write(KEYS.compare, read(KEYS.compare).filter(function (id) { return id !== removeId; }));
+      e.preventDefault();
+      var cmpPage = doc.querySelector('[data-fh-shortlist="compare"]');
+      if (cmpPage) { cmpPage.setAttribute('data-fh-synced', '1'); }
+      reopen(cmpRemove.href);
+      return;
+    }
+    var svCompare = e.target.closest('[data-fh-sv-compare]');
+    if (svCompare) {
+      // "Compare these": the compare bar follows (with what it shows of each property)
+      var pick = idList(svCompare.getAttribute('data-fh-sv-compare')).slice(0, MAX_COMPARE);
+      pick.forEach(function (id) { var b = doc.querySelector('[data-fh-card] [data-fh-save="' + id + '"]'); if (b) { remember(b); } });
+      write(KEYS.compare, pick);
+      // the link itself opens the Compare page
+    }
+    var toggleBtn = e.target.closest('[data-fh-toggle]');
+    if (toggleBtn) {
+      var panel = doc.getElementById(toggleBtn.getAttribute('data-fh-toggle'));
+      if (panel) {
+        var show = toggleBtn.getAttribute('aria-expanded') !== 'true';
+        toggleBtn.setAttribute('aria-expanded', show ? 'true' : 'false');
+        panel.hidden = !show;
+        var first = show && panel.querySelector('input:not([type=hidden]):not([tabindex="-1"])');
+        if (first) { first.focus(); }
+      }
+      return;
+    }
     var cmp = e.target.closest('[data-fh-compare]');
     if (cmp) {
       e.preventDefault();
@@ -392,6 +501,11 @@
     if (e.target.closest('[data-fh-to-results]')) { scrollResults = Date.now(); }
   });
   window.addEventListener('storage', refresh);
+  // Compare page: "Highlight differences"
+  doc.addEventListener('change', function (e) {
+    if (!e.target.matches || !e.target.matches('[data-fh-cmp-highlight]')) { return; }
+    doc.querySelectorAll('[data-fh-cmp-table]').forEach(function (t) { t.classList.toggle('is-hl', e.target.checked); });
+  });
 
   /* ---------- Development page: residence filter, floor plans, "Enquire about", sub navigation ---------- */
   doc.addEventListener('click', function (e) {
@@ -613,7 +727,7 @@
         finalUrl.hash = url.hash;
         var apply = function () {
           swap(next, finalUrl);
-          if (push) { history.pushState({ fh: 1, y: 0 }, '', finalUrl.href); }
+          if (push === 'replace') { history.replaceState({ fh: 1, y: scrollY || 0 }, '', finalUrl.href); } else if (push) { history.pushState({ fh: 1, y: 0 }, '', finalUrl.href); }
           focusPage(url.hash, scrollY);
         };
         if (doc.startViewTransition && !reduced) {

@@ -1,0 +1,23 @@
+@php /* "Send list to our team" (flocms-reactive component App\Components\SavedInquiry). */
+$err = static fn (string $f): string => (string) ($errors[$f] ?? '');
+$described = static fn (string $f): string => isset($errors[$f]) ? ' aria-invalid="true" aria-describedby="fh-sv-' . $f . '"' : '';
+@endphp
+@if($c->sent !== '')
+<div class="fh-sv-sent" role="status">
+    <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+    <p>{!! __('fh.sv.sent', ['reference' => '<strong class="fh-ltr">' . e($c->sent) . '</strong>']) !!}</p>
+</div>
+@else
+<form class="fh-sv-form" data-rx-submit="send" novalidate>
+    <div class="fh-hp" aria-hidden="true"><label>Website<input type="text" name="website" data-rx-bind="website" data-rx-model="defer" tabindex="-1" autocomplete="off"></label></div>
+    @if($notice !== '')<p class="fh-form-alert" role="alert">{{ $notice }}</p>
+    @elseif($errors)<p class="fh-form-alert" role="alert">{{ __('fh.e.check') }}</p>@endif
+    <div class="fh-sv-fields">
+        <label class="fh-input{{ $err('name') !== '' ? ' has-error' : '' }}"><span>{{ __('fh.f_name') }}</span><input type="text" value="{{ $c->name }}" data-rx-bind="name" data-rx-model="lazy" autocomplete="name" maxlength="190"{!! $described('name') !!}>@if($err('name') !== '')<small id="fh-sv-name">{{ $err('name') }}</small>@endif</label>
+        <label class="fh-input{{ $err('email') !== '' ? ' has-error' : '' }}"><span>{{ __('fh.f_email') }}</span><input type="email" value="{{ $c->email }}" data-rx-bind="email" data-rx-model="lazy" autocomplete="email" maxlength="190" dir="ltr"{!! $described('email') !!}>@if($err('email') !== '')<small id="fh-sv-email">{{ $err('email') }}</small>@endif</label>
+        <label class="fh-input{{ $err('phone') !== '' ? ' has-error' : '' }}"><span>{{ __('fh.f_phone') }} <em>{{ __('fh.optional') }}</em></span><input type="tel" value="{{ $c->phone }}" data-rx-bind="phone" data-rx-model="lazy" autocomplete="tel" maxlength="40" dir="ltr"{!! $described('phone') !!}>@if($err('phone') !== '')<small id="fh-sv-phone">{{ $err('phone') }}</small>@endif</label>
+        <button type="submit" class="fh-btn fh-btn-solid">{{ __('fh.sv.send_n', ['count' => $countLabel]) }}<span class="fh-spinner" data-rx-loading aria-hidden="true"></span></button>
+    </div>
+    <label class="fh-consent{{ $err('consent') !== '' ? ' has-error' : '' }}"><input type="checkbox" data-rx-bind="consent" data-rx-model="lazy"@if($c->consent) checked@endif{!! $described('consent') !!}><span>@if($privacy !== ''){!! __('fh.sv.consent_link', ['link' => '<a href="' . e($privacy) . '">' . e(__('fh.privacy_policy')) . '</a>']) !!}@else{{ __('fh.sv.consent') }}@endif @if($err('consent') !== '')<small id="fh-sv-consent">{{ $err('consent') }}</small>@endif</span></label>
+</form>
+@endif

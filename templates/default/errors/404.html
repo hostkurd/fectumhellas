@@ -1,24 +1,102 @@
-<!doctype html>
-<html class="no-js" lang="en">
+<?php
+/*
+ * Page not found (approved 404 mockup, Stage 3d), in the site's layout:
+ * search (FindController), home and properties links, help card, "Where to
+ * next". Core renders this file for every 404. If the site's helpers can't
+ * run (very early errors), the plain page at the end answers instead.
+ */
+use FloCMS\Support\Site;
+
+$fhPage = null;
+$fhLevel = ob_get_level();
+try {
+    if (!class_exists(Site::class) || !function_exists('template_partial') || !function_exists('__')) {
+        throw new RuntimeException('site helpers not loaded');
+    }
+    Site::meta(['title' => __('fh.nf.title'), 'description' => __('fh.nf.lead'), 'robots' => 'noindex, follow']);
+    $fhPhone = Site::setting('contact.phone');
+    $fhWhatsapp = Site::setting('contact.whatsapp');
+    $fhArrow = '<svg class="fh-arrow" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+    $fhTiles = [
+        [Site::url('properties') . '?search_status=for_sale', __('fh.nf.sale'), __('fh.nf.sale_lead'), '<path d="M4 21V9l8-5 8 5v12M9 21v-6h6v6"/>'],
+        [Site::url('properties') . '?search_status=for_rent', __('fh.nf.rent'), __('fh.nf.rent_lead'), '<rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 7h3M8 11h3M8 15h3M14 7h2M14 11h2M14 15h2"/>'],
+        [Site::url('developments'), __('fh.nav.developments'), __('fh.nf.dev_lead'), '<path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-4h6v4M9 12h6"/>'],
+        [Site::url('insights'), __('fh.insights_title'), __('fh.nf.insights_lead'), '<path d="M5 4h10l4 4v12H5z"/><path d="M15 4v4h4M8 12h8M8 16h6"/>'],
+    ];
+    ob_start();
+    ?>
+<main id="main" class="fh-nf">
+    <section class="fh-nf-hero">
+        <div class="fh-wrap fh-nf-grid">
+            <div class="fh-nf-text">
+                <span class="fh-eyebrow"><?= Site::e(__('fh.nf.label')) ?></span>
+                <h1 class="fh-h1"><?= Site::e(__('fh.nf.heading')) ?></h1>
+                <p class="fh-lead"><?= Site::e(__('fh.nf.lead')) ?></p>
+                <form class="fh-nf-search" role="search" method="get" action="<?= Site::e(Site::url('find')) ?>">
+                    <label><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="fh-sr"><?= Site::e(__('fh.nf.search_label')) ?></span><input type="search" name="q" maxlength="100" placeholder="<?= Site::e(__('fh.nf.search_ph')) ?>" autocomplete="off"></label>
+                    <button type="submit" class="fh-btn fh-btn-solid"><?= Site::e(__('fh.search')) ?></button>
+                </form>
+                <div class="fh-nf-links">
+                    <a class="fh-link" href="<?= Site::e(Site::url('')) ?>"><?= Site::e(__('fh.nf.home')) ?><?= $fhArrow ?></a>
+                    <a class="fh-link" href="<?= Site::e(Site::url('properties')) ?>"><?= Site::e(__('fh.browse_properties')) ?><?= $fhArrow ?></a>
+                </div>
+            </div>
+            <div class="fh-nf-art">
+                <svg class="fh-nf-num" aria-hidden="true" viewBox="0 0 520 260"><text x="260" y="210" text-anchor="middle" font-size="230" font-weight="700" letter-spacing="-12" fill="none" stroke="#C3CEEA" stroke-width="2">404</text><text x="260" y="210" text-anchor="middle" font-size="230" font-weight="700" letter-spacing="-12" fill="#2B4285" fill-opacity="0.06">404</text></svg>
+                <?php if ($fhPhone !== '' || $fhWhatsapp !== '') { ?>
+                <div class="fh-nf-help">
+                    <p class="fh-nf-help-title"><?= Site::e(__('fh.nf.help_title')) ?></p>
+                    <p><?= Site::e(__('fh.nf.help')) ?></p>
+                    <?php if ($fhPhone !== '') { ?><a href="tel:<?= Site::e(Site::tel($fhPhone)) ?>"><?= Site::e(__('fh.nf.call')) ?> <bdi class="fh-ltr"><?= Site::e($fhPhone) ?></bdi></a><?php } ?>
+                    <?php if ($fhWhatsapp !== '') { ?><a href="<?= Site::e(Site::whatsapp($fhWhatsapp)) ?>" rel="noopener"><?= Site::e(__('fh.nf.whatsapp')) ?></a><?php } ?>
+                </div>
+                <?php } ?>
+            </div>
+        </div>
+    </section>
+    <section class="fh-nf-next" aria-labelledby="fh-nf-next">
+        <div class="fh-wrap fh-nf-next-inner">
+            <h2 class="fh-h3 is-large" id="fh-nf-next"><?= Site::e(__('fh.nf.next')) ?></h2>
+            <div class="fh-nf-tiles">
+                <?php foreach ($fhTiles as [$url, $title, $lead, $icon]) { ?>
+                <a class="fh-nf-tile" href="<?= Site::e($url) ?>">
+                    <span class="fh-nf-icon"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><?= $icon ?></svg></span>
+                    <span class="fh-nf-tile-title"><?= Site::e($title) ?></span>
+                    <span class="fh-nf-tile-lead"><?= Site::e($lead) ?></span>
+                    <?= $fhArrow ?>
+                </a>
+                <?php } ?>
+            </div>
+        </div>
+    </section>
+</main>
+<?php
+    $fhContent = (string) ob_get_clean();
+    $data = ['content' => $fhContent];
+    ob_start();
+    include TEMPLATES_PATH . DIRECTORY_SEPARATOR . 'default' . DIRECTORY_SEPARATOR . 'layouts' . DIRECTORY_SEPARATOR . 'default.html';
+    $fhPage = (string) ob_get_clean();
+} catch (Throwable $fhError) {
+    while (ob_get_level() > $fhLevel) { ob_end_clean(); }
+    $fhPage = null;
+}
+if ($fhPage !== null) {
+    echo $fhPage;
+    return;
+}
+?><!doctype html>
+<html lang="en">
 <head>
-  <style>
-    body{background: #e1e5f1;font-family: Arial, Helvetica, sans-serif;direction: <?=__("lng.dir");?>;}
-    .flo-wrapper {width: 100%;height: 95svh;display: flex;align-items: center;justify-content: center;flex-direction: column;}
-    .head{font-size: 8rem;text-align: center;margin: 0;color: #97a0bb;font-family: roboto;font-weight: 700;}
-    .texts{text-align: center; color: #687393;}
-    .texts h1{margin-bottom: 0;}
-    .texts p{font-size: 1.1rem;}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Page not found · FECTUM Hellas</title>
+<style>
+body{margin:0;min-height:100svh;display:flex;align-items:center;justify-content:center;background:#F6F8FC;color:#3D4454;font-family:Manrope,system-ui,-apple-system,"Segoe UI",sans-serif;text-align:center;padding:24px}
+h1{margin:0 0 12px;font-size:40px;color:#2B4285}p{margin:0 0 24px;color:#575E6E}a{color:#2B4285;font-weight:700}
+</style>
 </head>
 <body>
-  <div class="flo-wrapper">
-    <section class="container">
-      <h1 class="head">404</h1>
-      <div class="texts">
-        <h1 class="header"><?=__('page.notfound');?></h1>
-        <p class="lead mb-7 px-md-12 px-lg-5 px-xl-7"><?=__('page.notfound.short');?></p>
-      </div>
-    </section>
-  </div>
+<main><p style="font-size:14px;letter-spacing:.14em;text-transform:uppercase">Error 404</p><h1>This page isn’t here.</h1><p>The address may be mistyped, or the page has moved.</p><a href="/">Back to home</a></main>
 </body>
 </html>
