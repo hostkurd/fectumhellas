@@ -13,7 +13,10 @@ use FloCMS\Admin\Form\Fields\Slug;
 use FloCMS\Admin\Form\Fields\Textarea;
 use FloCMS\Admin\Form\Fields\TextInput;
 use FloCMS\Admin\Form\Fields\Toggle;
+use FloCMS\Admin\Actions\DeleteAction;
 use FloCMS\Admin\Actions\DeleteBulkAction;
+use FloCMS\Admin\Actions\DuplicateAction;
+use FloCMS\Admin\Actions\EditAction;
 use FloCMS\Admin\Form\Form;
 use FloCMS\Admin\Form\Layout\Section;
 use FloCMS\Admin\Relations\RelationManager;
@@ -130,6 +133,8 @@ final class ProjectResource extends Resource
                 SelectFilter::make('publish_status')->label('fh.f.publish_status')->options(Catalog::publishStatuses()),
                 SelectFilter::make('progress')->label('fh.f.progress')->options(Catalog::projectProgress()),
             ])
+            // Duplicate (flocms-admin 0.40): a copy opens in the New form, saved as a draft
+            ->actions([EditAction::make(), DuplicateAction::make()->fill(static fn (array $state, object $source): array => ['publish_status' => 'draft'] + $state), DeleteAction::make()])
             ->bulkActions([...$this->publishBulkActions('fh.bulk.not_ready_project'), DeleteBulkAction::make()])
             ->reorderable('sort');
     }
