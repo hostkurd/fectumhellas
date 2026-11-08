@@ -180,6 +180,13 @@ return array(
     'fh.inquiry_type.service' => 'Υπηρεσία',
     'fh.inquiry_type.saved' => 'Αποθηκευμένη λίστα',
     'fh.inquiry_type.contact' => 'Σελίδα επικοινωνίας',
+    // The admin bell: a new inquiry (flocms-admin 0.41)
+    'fh.notify.inquiry' => 'Νέο αίτημα από :name',
+    'fh.notify.body_listing' => 'Ακίνητο · :about · :ref',
+    'fh.notify.body_project' => 'Έργο · :about · :ref',
+    'fh.notify.body_service' => 'Υπηρεσία · :ref',
+    'fh.notify.body_saved' => 'Αποθηκευμένη λίστα · :count ακίνητα · :ref',
+    'fh.notify.body_contact' => 'Σελίδα επικοινωνίας · :ref',
     'fh.contact.email' => 'Email',
     'fh.contact.phone' => 'Τηλέφωνο',
     'fh.contact.whatsapp' => 'WhatsApp',

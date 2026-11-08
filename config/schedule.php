@@ -15,6 +15,9 @@ return static function (Schedule $schedule): void {
     // state), log rotation, and abandoned chunked uploads in storage/uploads/.chunks.
     $schedule->defaults();
 
+    // The admin bell (flocms-admin 0.41): remove notifications older than 90 days.
+    $schedule->command('admin:notifications-purge')->dailyAt('03:30');
+
     // Your tasks, e.g.:
     // $schedule->command('reports:send')->weekdays()->dailyAt('07:30');
     // $schedule->command('api:gc', ['--database'])->dailyAt('03:15');

@@ -180,6 +180,13 @@ return array(
     'fh.inquiry_type.service' => 'Service',
     'fh.inquiry_type.saved' => 'Saved list',
     'fh.inquiry_type.contact' => 'Contact page',
+    // The admin bell: a new inquiry (flocms-admin 0.41)
+    'fh.notify.inquiry' => 'New inquiry from :name',
+    'fh.notify.body_listing' => 'Property · :about · :ref',
+    'fh.notify.body_project' => 'Development · :about · :ref',
+    'fh.notify.body_service' => 'Service · :ref',
+    'fh.notify.body_saved' => 'Saved list · :count properties · :ref',
+    'fh.notify.body_contact' => 'Contact page · :ref',
     'fh.contact.email' => 'Email',
     'fh.contact.phone' => 'Phone',
     'fh.contact.whatsapp' => 'WhatsApp',

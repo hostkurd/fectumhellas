@@ -131,6 +131,9 @@ return [
     // 'logins' => true also records sign-ins; false switches the log off.
     'activity' => ['days' => 365, 'logins' => false],
 
+    // The notification bell (flocms-admin 0.41): kept 90 days; an open panel checks every 60 seconds.
+    'notifications' => ['days' => 90, 'poll' => 60],
+
     // The Roles page (/admin/roles; permission roles.manage, Super Admin by default):
     // roles and permissions edited in the panel, on top of config/config.php.
     // false switches it off and the config roles apply again. Name your own
