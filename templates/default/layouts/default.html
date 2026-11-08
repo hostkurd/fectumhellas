@@ -18,6 +18,7 @@ $fhHome = Site::isHome();
 <?php } else { ?>
 <?= Site::head() ?>
 <?php } ?>
+<?= Site::organizationLd() ?>
 <meta name="theme-color" content="#2B4285">
 <script>document.documentElement.classList.add('fh-js')</script>
 <link rel="icon" href="<?= Site::asset('images/brand/logo-mark-blue.svg') ?>" type="image/svg+xml">
@@ -36,5 +37,7 @@ $fhHome = Site::isHome();
 <?php include template_partial('site-header'); ?>
 <?= $data['content'] ?>
 <?php include template_partial('site-footer'); ?>
+<?php /* Compare bar (site.js): on every page, so Compare on any property card (home page blocks too) shows it */ ?>
+<div class="fh-compare-bar" data-fh-compare-bar hidden></div>
 </body>
 </html>

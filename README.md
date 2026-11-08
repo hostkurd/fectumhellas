@@ -111,6 +111,10 @@ Take a cPanel backup before a deploy that runs migrations. One cPanel cron job r
 
 Kept out of Git: `.env`, `vendor/`, uploaded files (`public/uploads/`, `storage/admin-uploads/`), caches and logs. Media library files are in `public/uploads/editor/`, brochures in `public/uploads/admin/`: include both in backups.
 
+## Launch check
+
+`php flo fectum:check https://fectumhellas.gr` opens the website in English, Arabic and Greek and checks the launch list: pages and languages, property pages (title, description, canonical, hreflang, structured data) and the sitemaps, robots.txt, the 404 page, debug mode off, the admin login and its styles, and the Editor role. It only reads (nothing is written or sent), prints PASS / WARN / FAIL and exits with 1 when something failed. Add `--admin-host=https://admin.fectumhellas.gr` to check that redirect too. Run it after every deploy.
+
 ## Brand files
 
 Logos are in `public/images/brand/`:

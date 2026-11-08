@@ -253,6 +253,32 @@ final class Site
     }
 
     /** A setting from the admin, trimmed, in the current language. */
+    /**
+     * The company for search engines on every page (Stage 4, workflow plan:
+     * "the whole site carries organisation data"): schema.org RealEstateAgent
+     * from Settings (contact, company, social, share image).
+     */
+    public static function organizationLd(): string
+    {
+        $data = ['@context' => 'https://schema.org', '@type' => 'RealEstateAgent', '@id' => self::base() . '/#organization',
+            'name' => 'FECTUM Hellas', 'url' => self::url('', 'en'), 'logo' => self::absolute(self::asset('images/brand/logo-wide.svg'))];
+        if (($legal = self::setting('company.legal_name')) !== '') { $data['legalName'] = $legal; }
+        if (($slogan = self::setting('company.tagline')) !== '') { $data['slogan'] = $slogan; }
+        if (($phone = self::setting('contact.phone')) !== '') { $data['telephone'] = $phone; }
+        if (($email = self::setting('contact.email')) !== '') { $data['email'] = $email; }
+        if (($address = self::setting('contact.address')) !== '') {
+            $data['address'] = ['@type' => 'PostalAddress', 'streetAddress' => trim(preg_replace('/\s+/u', ' ', $address) ?? ''), 'addressCountry' => 'GR'];
+        }
+        if (($vat = self::setting('company.vat')) !== '') { $data['vatID'] = $vat; }
+        if (function_exists('setting') && function_exists('media') && ($image = media(setting('seo.share_image'))) !== null) { $data['image'] = self::absolute($image->url()); }
+        $same = array_values(array_filter(array_map(static fn (string $k): string => self::setting('social.' . $k), ['facebook', 'instagram', 'linkedin', 'youtube']),
+            static fn (string $u): bool => preg_match('~^https?://~i', $u) === 1));
+        if ($same !== []) { $data['sameAs'] = $same; }
+        $data['areaServed'] = ['@type' => 'Country', 'name' => 'Greece'];
+        $data['availableLanguage'] = ['English', 'Arabic', 'Greek'];
+        return '<script type="application/ld+json">' . json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) . '</script>' . "\n";
+    }
+
     public static function setting(string $key, string $fallback = ''): string
     {
         if (!function_exists('setting')) {
