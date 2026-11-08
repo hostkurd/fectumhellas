@@ -5,7 +5,10 @@ namespace App\Admin\Resources;
 
 use FloCMS\Admin\Actions\BulkAction;
 use FloCMS\Admin\Actions\BulkActionContext;
+use FloCMS\Admin\Actions\DeleteAction;
 use FloCMS\Admin\Actions\DeleteBulkAction;
+use FloCMS\Admin\Actions\DuplicateAction;
+use FloCMS\Admin\Actions\EditAction;
 use FloCMS\Admin\Form\Fields\BelongsTo;
 use FloCMS\Admin\Form\Fields\BelongsToMany;
 use FloCMS\Admin\Form\Fields\FileUpload;
@@ -145,6 +148,8 @@ final class ListingResource extends Resource
                 RelationFilter::make('project_id')->label('fh.f.project')->resource(ProjectResource::class),
                 ToggleFilter::make('featured')->label('fh.f.featured'),
             ])
+            // Duplicate (flocms-admin 0.40): a copy opens in the New form, saved as a draft
+            ->actions([EditAction::make(), DuplicateAction::make()->except(['reference', 'status'])->fill(static fn (array $state, object $source): array => ['publish_status' => 'draft'] + $state), DeleteAction::make()])
             ->bulkActions([
                 ...$this->publishBulkActions('fh.bulk.not_ready'),
                 BulkAction::make('feature')->label('fh.bulk.feature')

@@ -11,7 +11,10 @@ use FloCMS\Admin\Form\Fields\Slug;
 use FloCMS\Admin\Form\Fields\Textarea;
 use FloCMS\Admin\Form\Fields\TextInput;
 use FloCMS\Admin\Form\Fields\Toggle;
+use FloCMS\Admin\Actions\DeleteAction;
 use FloCMS\Admin\Actions\DeleteBulkAction;
+use FloCMS\Admin\Actions\DuplicateAction;
+use FloCMS\Admin\Actions\EditAction;
 use FloCMS\Admin\Form\Form;
 use FloCMS\Admin\Form\Layout\Section;
 use FloCMS\Admin\Resource;
@@ -81,6 +84,8 @@ final class ArticleResource extends Resource
                 SelectFilter::make('publish_status')->label('fh.f.publish_status')->options(Catalog::publishStatuses()),
                 SelectFilter::make('category')->label('fh.f.category')->options(Catalog::articleCategories()),
             ])
+            // Duplicate (flocms-admin 0.40): a copy opens in the New form, saved as a draft
+            ->actions([EditAction::make(), DuplicateAction::make()->except(['published_at'])->fill(static fn (array $state, object $source): array => ['publish_status' => 'draft'] + $state), DeleteAction::make()])
             ->bulkActions([...$this->publishBulkActions('fh.bulk.not_ready_article', static fn (object $r): array => empty($r->published_at) ? ['published_at' => date('Y-m-d H:i:s')] : []), DeleteBulkAction::make()])
             ->defaultSort('published_at', 'desc');
     }

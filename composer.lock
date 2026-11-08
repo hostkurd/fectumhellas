@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "05f092edc230d29dd242869693c8a62b",
+    "content-hash": "fcb0d23e53341425d563ae131bb3a821",
     "packages": [
         {
             "name": "hostkurd/flocms-admin",
-            "version": "v0.39.6",
+            "version": "v0.40.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hostkurd/flocms-admin.git",
-                "reference": "e460fc93995cfbda7f5505942fc1bf9996bf5834"
+                "reference": "a84d3a6fbf58ebd3a5287fa9e30102437e9b9d94"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hostkurd/flocms-admin/zipball/e460fc93995cfbda7f5505942fc1bf9996bf5834",
-                "reference": "e460fc93995cfbda7f5505942fc1bf9996bf5834",
+                "url": "https://api.github.com/repos/hostkurd/flocms-admin/zipball/a84d3a6fbf58ebd3a5287fa9e30102437e9b9d94",
+                "reference": "a84d3a6fbf58ebd3a5287fa9e30102437e9b9d94",
                 "shasum": ""
             },
             "require": {
@@ -63,7 +63,7 @@
                     ]
                 },
                 "branch-alias": {
-                    "dev-main": "0.39-dev"
+                    "dev-main": "0.40-dev"
                 }
             },
             "autoload": {
@@ -99,7 +99,7 @@
                 "issues": "https://github.com/hostkurd/flocms-admin/issues",
                 "source": "https://github.com/hostkurd/flocms-admin"
             },
-            "time": "2026-11-07T16:42:44+00:00"
+            "time": "2026-11-08T05:25:10+00:00"
         },
         {
             "name": "hostkurd/flocms-captcha",
