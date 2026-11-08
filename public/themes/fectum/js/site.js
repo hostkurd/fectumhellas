@@ -96,8 +96,10 @@
     try { return JSON.parse((doc.querySelector('[data-fh-t]') || {}).textContent || '{}'); } catch (e) { return {}; }
   }
   function renderCompareBar(compare) {
+    // Not on the Compare page itself (it is the comparison)
+    var onCompare = !!doc.querySelector('[data-fh-shortlist="compare"]');
     doc.querySelectorAll('[data-fh-compare-bar]').forEach(function (bar) {
-      if (!compare.length) { bar.hidden = true; bar.innerHTML = ''; return; }
+      if (!compare.length || onCompare) { bar.hidden = true; bar.innerHTML = ''; return; }
       var t = words();
       var all = items();
       var slots = '';
